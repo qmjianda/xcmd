@@ -16,7 +16,7 @@
 #define CMD_IS_ENDLINE(c) ((c == '\n') || (c == '\r'))
 #define CMD_IS_PRINT(c) ((c >= 32) && (c <= 126))
 
-int cmdGetParam(char* msg, char*delim, char* get[], int maxNum)
+int xcmd_get_param(char* msg, char*delim, char* get[], int maxNum)
 {
 	int i,ret;
 	char *ptr = NULL;
@@ -30,10 +30,7 @@ int cmdGetParam(char* msg, char*delim, char* get[], int maxNum)
 	return ret;
 }
 
-// 1234 "23 3455"
-// 12345""
-
-int cmdParamAnalysis(char* msg, char delim, char* get[], int maxNum)
+int xcmd_param_analysis(char* msg, char delim, char* get[], int maxNum)
 {
 	int ret = 0;
 	get[ret] = msg;
@@ -81,15 +78,15 @@ int cmdParamAnalysis(char* msg, char delim, char* get[], int maxNum)
 	return ret;
 }
 
-void cmdPrintStr(xcmder_t * cmder, char* str)
+void xcmd_print_str(xcmder_t * cmder, char* str)
 {
 	while(*str)
 	{
-		cmder->putchar(*str++);
+		cmder->io.put_c(*str++);
 	}
 }
 
-static uint16_t cmdBytesEncode(xcmder_t * cmder, uint8_t byte)
+static uint16_t xcmd_bytes_encode(xcmder_t * cmder, uint8_t byte)
 {
 	uint16_t ret = byte;
 	
@@ -147,22 +144,22 @@ static uint16_t cmdBytesEncode(xcmder_t * cmder, uint8_t byte)
 	return ret;
 }
 
-void cmdDelLine(xcmder_t *cmder)
+void xcmd_del_line(xcmder_t *cmder)
 {
     char (*buf)[cmder->parser.historyLen] = (char (*)[cmder->parser.historyLen])cmder->parser.buf;
 	uint16_t len = strlen(buf[cmder->parser.historyCursor]);
 	if(len)
 	{
-	    cmdPrintStr(cmder, "\r->");
+	    xcmd_print_str(cmder, "\r->");
 	    for(uint16_t i=0; i<len; i++)
 	    {
-	        cmder->putchar(' ');
+	        cmder->io.put_c(' ');
 	    }
-	    cmdPrintStr(cmder, "\r->");
+	    xcmd_print_str(cmder, "\r->");
 	}
 }
 
-void cmdInsertChar(xcmder_t *cmder, char c)
+void xcmd_insert_char(xcmder_t *cmder, char c)
 {
     char (*buf)[cmder->parser.historyLen] = (char (*)[cmder->parser.historyLen])cmder->parser.buf;
     char *line = buf[cmder->parser.historyCursor];
@@ -176,19 +173,19 @@ void cmdInsertChar(xcmder_t *cmder, char c)
 		line[cmder->parser.bytesNum] = '\0';
 		line[cmder->parser.cursor++] = c;
 
-        cmdPrintStr(cmder, "\r->");
-        cmdPrintStr(cmder, line);
-        cmdPrintStr(cmder, "\r->");
+        xcmd_print_str(cmder, "\r->");
+        xcmd_print_str(cmder, line);
+        xcmd_print_str(cmder, "\r->");
 
         /* move cursor */
         for(uint16_t i = 0; i<cmder->parser.cursor; i++)
         {
-            cmdPrintStr(cmder, "\x1B\x5B\x43");
+            xcmd_print_str(cmder, "\x1B\x5B\x43");
         }
 	}
 }
 
-void cmdDelChar(xcmder_t *cmder)
+void xcmd_del_char(xcmder_t *cmder)
 {
     char (*buf)[cmder->parser.historyLen] = (char (*)[cmder->parser.historyLen])cmder->parser.buf;
 	char *line = buf[cmder->parser.historyCursor];
@@ -201,44 +198,44 @@ void cmdDelChar(xcmder_t *cmder)
 		cmder->parser.bytesNum--;
 		cmder->parser.cursor--;
 		line[cmder->parser.bytesNum] = ' ';
-		cmdPrintStr(cmder, "\r->");
-		cmdPrintStr(cmder, line);
-		cmdPrintStr(cmder, "\r->");
+		xcmd_print_str(cmder, "\r->");
+		xcmd_print_str(cmder, line);
+		xcmd_print_str(cmder, "\r->");
 
 		/* move cursor */
 		for(uint16_t i = 0; i<cmder->parser.cursor; i++)
 		{
-		    cmdPrintStr(cmder, "\x1B\x5B\x43");
+		    xcmd_print_str(cmder, "\x1B\x5B\x43");
 		}
 
 		line[cmder->parser.bytesNum] = '\0';
 	}
 }
 
-void cmdCursorLeft(xcmder_t *cmder)
+void xcmd_cursor_left(xcmder_t *cmder)
 {
 	if(cmder->parser.cursor > 0)
 	{
 		cmder->parser.cursor--;
+        xcmd_print_str(cmder, "\x1B\x5B\x44");
 	}
-	cmdPrintStr(cmder, "\x1B\x5B\x44");
 }
 
-void cmdCursorRight(xcmder_t *cmder)
+void xcmd_cursor_right(xcmder_t *cmder)
 {
 	if(cmder->parser.cursor < cmder->parser.bytesNum)
 	{
 		cmder->parser.cursor++;
+        xcmd_print_str(cmder, "\x1B\x5B\x43");
 	}
-	cmdPrintStr(cmder, "\x1B\x5B\x43");
 }
 
-void cmdHistoryDw(xcmder_t *cmder)
+void xcmd_history_dw(xcmder_t *cmder)
 {
 	char(*buf)[cmder->parser.historyLen] = (char(*)[cmder->parser.historyLen])cmder->parser.buf;
 	while(cmder->parser.historyNum)
 	{
-		cmdDelLine(cmder);
+		xcmd_del_line(cmder);
 		cmder->parser.historyCursor++;
 		if(cmder->parser.historyCursor>=cmder->parser.historyLen)
 		{
@@ -247,7 +244,7 @@ void cmdHistoryDw(xcmder_t *cmder)
 		uint16_t len = strlen(buf[cmder->parser.historyCursor]);
 		if (len)
 		{
-			cmdPrintStr(cmder, buf[cmder->parser.historyCursor]);
+			xcmd_print_str(cmder, buf[cmder->parser.historyCursor]);
 			cmder->parser.bytesNum = len;
 			cmder->parser.cursor = len;
 			break;
@@ -255,12 +252,12 @@ void cmdHistoryDw(xcmder_t *cmder)
 	}
 }
 
-void cmdHistoryUp(xcmder_t *cmder)
+void xcmd_history_up(xcmder_t *cmder)
 {
 	char(*buf)[cmder->parser.historyLen] = (char(*)[cmder->parser.historyLen])cmder->parser.buf;
 	while(cmder->parser.historyNum)
 	{
-		cmdDelLine(cmder);
+		xcmd_del_line(cmder);
 		if (cmder->parser.historyCursor)
 		{
 			cmder->parser.historyCursor--;
@@ -272,7 +269,7 @@ void cmdHistoryUp(xcmder_t *cmder)
 		uint16_t len = strlen(buf[cmder->parser.historyCursor]);
 		if (len)
 		{
-			cmdPrintStr(cmder, buf[cmder->parser.historyCursor]);
+			xcmd_print_str(cmder, buf[cmder->parser.historyCursor]);
 			cmder->parser.bytesNum = len;
 			cmder->parser.cursor = len;
 			break;
@@ -280,7 +277,7 @@ void cmdHistoryUp(xcmder_t *cmder)
 	}
 }
 
-char* cmdLineEnd(xcmder_t *cmder)
+char* xcmd_line_end(xcmder_t *cmder)
 {
     char (*buf)[cmder->parser.historyLen] = (char (*)[cmder->parser.historyLen])cmder->parser.buf;
 	char* ret = NULL;
@@ -313,50 +310,50 @@ char* cmdLineEnd(xcmder_t *cmder)
 
 	    cmder->parser.bytesNum = 0;
 	    cmder->parser.cursor = 0;
-	    cmdPrintStr(cmder, "\r\n");
+	    xcmd_print_str(cmder, "\r\n");
 	}
 	else
 	{
-	    cmdPrintStr(cmder, "\r\n->");
+	    xcmd_print_str(cmder, "\r\n->");
 	}
 
 	return ret;
 }
 
-char* cmdParser(xcmder_t * cmder, uint8_t byte)
+char* xcmd_parser(xcmder_t * cmder, uint8_t byte)
 {
     char* ret = NULL;
 	uint16_t c = 0;
 
-    c = cmdBytesEncode(cmder, byte);
+    c = xcmd_bytes_encode(cmder, byte);
 
     if(CMD_IS_DELETE(c))
     {
-    	cmdDelChar(cmder);
+    	xcmd_del_char(cmder);
     }
     else if(CMD_IS_PRINT(c))
     {
-        cmdInsertChar(cmder, c);
+        xcmd_insert_char(cmder, c);
     }
     else if(CMD_IS_UP(c))
     {
-        cmdHistoryUp(cmder);
+        xcmd_history_up(cmder);
     }
 	else if(CMD_IS_DOWN(c))
 	{
-        cmdHistoryDw(cmder);
+        xcmd_history_dw(cmder);
 	}
 	else if(CMD_IS_RIGHT(c))
 	{
-		cmdCursorRight(cmder);
+		xcmd_cursor_right(cmder);
 	}
 	else if(CMD_IS_LEFT(c))
 	{
-		cmdCursorLeft(cmder);
+		xcmd_cursor_left(cmder);
 	}
     else if(CMD_IS_ENDLINE(c))
     {
-        ret = cmdLineEnd(cmder);
+        ret = xcmd_line_end(cmder);
     }
     fflush(stdout);
     return ret;
@@ -364,19 +361,19 @@ char* cmdParser(xcmder_t * cmder, uint8_t byte)
 
 uint8_t xcmd_exec(xcmder_t *cmder, char* str)
 {
-	int paramNum = 0;
-	char *cmdParamBuff[cmder->parser.paramLen];
+	int param_num = 0;
+	char *cmd_param_buff[cmder->parser.paramLen];
 	char temp[cmder->parser.bufLen];
 	strncpy(temp, str, cmder->parser.bufLen);
-	paramNum = cmdGetParam(temp, "., ", cmdParamBuff, cmder->parser.paramLen);
-	if(paramNum >0)
+	param_num = xcmd_get_param(temp, "., ", cmd_param_buff, cmder->parser.paramLen);
+	if(param_num >0)
 	{
-		xcmd_match(cmder, paramNum, cmdParamBuff);
+		xcmd_match(cmder, param_num, cmd_param_buff);
 	}
-	return paramNum;
+	return param_num;
 }
 
-int xcmd_register(xcmder_t *cmder, cmd_t *cmds, uint16_t number)
+int xcmd_register(xcmder_t *cmder, xcmd_t *cmds, uint16_t number)
 {
     uint16_t i=0; 
     if(cmder->cmd_list.len == 0)
@@ -388,7 +385,7 @@ int xcmd_register(xcmder_t *cmder, cmd_t *cmds, uint16_t number)
 
     while(i<number)
     {
-        cmd_t *p = cmder->cmd_list.next;
+        xcmd_t *p = cmder->cmd_list.next;
         cmder->cmd_list.next = &cmds[i];
         cmds[i].next = p;
         ++cmder->cmd_list.len;
@@ -399,7 +396,7 @@ int xcmd_register(xcmder_t *cmder, cmd_t *cmds, uint16_t number)
 
 void xcmd_print_list(xcmder_t *cmder)
 {
-    cmd_t *p = cmder->cmd_list.next;
+    xcmd_t *p = cmder->cmd_list.next;
     while(p)
     {
         printf("%-20s %s\r\n",p->name, p->help);
@@ -409,7 +406,7 @@ void xcmd_print_list(xcmder_t *cmder)
 
 void xcmd_match(xcmder_t *cmder, int argc, char*argv[])
 {
-    cmd_t *p = cmder->cmd_list.next;
+    xcmd_t *p = cmder->cmd_list.next;
     uint8_t flag = 0;
     while(p)
     {
@@ -440,20 +437,14 @@ void xcmd_match(xcmder_t *cmder, int argc, char*argv[])
     }
 }
 
-xcmder_t* xcmd_create(
-            xcmd_get_char_func_t getchar,
-             xcmd_put_char_func_t putchar,
-             uint16_t cmdLen,
-             uint16_t historyLen,
-             uint16_t paramLen
-             )
+xcmder_t *xcmd_create( int (*get_c)(uint8_t*), int (*put_c)(uint8_t), uint16_t cmdLen, uint16_t historyLen, uint16_t paramLen)
 {
     xcmder_t* cmder = (xcmder_t*)malloc(sizeof(xcmder_t));
     if(cmder == NULL)
     {
         goto create_cmder_failure;
     }
-	if(getchar && putchar)
+	if(get_c && put_c)
 	{
 		cmder->parser.buf = (char*)malloc(cmdLen*historyLen);
         cmder->parser.historyLen = historyLen;
@@ -464,13 +455,7 @@ xcmder_t* xcmd_create(
         }
 
         cmder->parser.paramLen = paramLen;
-        cmder->parser.param = (char**)malloc(sizeof(char*)*paramLen);
-		if(cmder->parser.param == NULL)
-        {
-            goto failure;
-        }
 
-		
 		cmder->parser.bytesNum = 0;
 		cmder->parser.historyNum = 0;
 		cmder->parser.cursor = 0;
@@ -478,8 +463,8 @@ xcmder_t* xcmd_create(
 		cmder->parser.ishistory = 0;
 
 		cmder->encodeCaseStu = 0;
-		cmder->getchar = getchar;
-		cmder->putchar = putchar;
+		cmder->io.get_c = get_c;
+		cmder->io.put_c = put_c;
 		cmder->_initOK = 1;
 
         cmder->cmd_list.len = 0;
@@ -492,11 +477,6 @@ xcmder_t* xcmd_create(
     return cmder;
 
 failure:
-    if(cmder->parser.param)
-    {
-        free(cmder->parser.param);
-        cmder->parser.param = NULL;
-    }
     if(cmder->parser.buf)
     {
         free(cmder->parser.buf);
@@ -515,11 +495,6 @@ void xcmd_destory(xcmder_t* cmder)
 {
     if(cmder)
     {
-        if(cmder->parser.param)
-        {
-            free(cmder->parser.param);
-            cmder->parser.param = NULL;
-        }
         if(cmder->parser.buf)
         {
             free(cmder->parser.buf);
@@ -535,16 +510,15 @@ void xcmd_task(xcmder_t* cmder)
 	char *str = NULL;
 	if(cmder && cmder->_initOK)
 	{
-		if(cmder->getchar(&c))
+		if(cmder->io.get_c(&c))
 		{
-			str = cmdParser(cmder, c);
+			str = xcmd_parser(cmder, c);
 			if(str)
 			{
 				xcmd_exec(cmder, str);
 			}
 		}
 	}
-    
 }
 
 
