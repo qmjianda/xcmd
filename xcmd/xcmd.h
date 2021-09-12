@@ -125,26 +125,142 @@ typedef struct
     uint8_t _initOK;
 } xcmder_t;
 
+/**
+ * @description: 创建默认的解释器，命令行支持最长字符64个，历史长度最长10个，最长参数支持16个
+ * @param {p_func}getchar：获取一个字符的函数
+ * @param {p_func}putchar: 发送一个字符的函数
+ * @return 返回创建的一个解释器指针
+ */
 #define  xcmd_create_default(getchar, putchar)  xcmd_create(getchar,  putchar, 64, 10, 16);
+
+/**
+ * @description: 
+ * @param {p_func}getchar：获取一个字符的函数
+ * @param {p_func}putchar: 发送一个字符的函数
+ * @param {uint16_t} cmd_len：命令行最长支持的字符数
+ * @param {uint16_t} history_len：命令行支持的最多历史数
+ * @param {uint16_t} param_len：支持解析的最多参数个数
+ * @return 返回创建的一个解释器指针
+ */
 xcmder_t *xcmd_create( int (*get_c)(uint8_t*), int (*put_c)(uint8_t), uint16_t cmd_len, uint16_t history_len, uint16_t param_len);
+
+/**
+ * @description: 删除一个解释器
+ * @param {xcmder_t*} cmder：解释器指针
+ * @return 无
+ */
 void xcmd_destory(xcmder_t* cmder);
-void xcmd_task(xcmder_t *cmder);
 
-int xcmd_register(xcmder_t *cmder, xcmd_t *cmds, uint16_t number);
-int xcmd_key_register(xcmder_t *cmder, xcmd_key_t *keys, uint16_t number);
+/**
+ * @description: 解释器的主任务
+ * @param {xcmder_t*} cmder：解释器指针
+ * @return {*}
+ */
+void xcmd_task(xcmder_t* cmder);
 
+/**
+ * @description: 注册一组指令
+ * @param {xcmder_t*} cmder：解释器指针
+ * @param {xcmd_t*} cmds：指令集
+ * @param {uint16_t} number：指令个数
+ * @return {int} 已经注册的指令的个数
+ */
+int xcmd_register(xcmder_t* cmder, xcmd_t* cmds, uint16_t number);
+
+/**
+ * @description: 
+ * @param {xcmder_t*} cmder：解释器指针
+ * @param {xcmd_key_t*} keys：快捷键集
+ * @param {uint16_t} number：快捷键的个数
+ * @return {int}：已经注册的快捷键的个数
+ */
+int xcmd_key_register(xcmder_t* cmder, xcmd_key_t* keys, uint16_t number);
+
+/**
+ * @description: 手动执行命令
+ * @param {xcmder_t} cmder：解释器指针
+ * @param {char* } str：命令
+ * @return {uint8_t}  返回参数的个数
+ */
 uint8_t xcmd_exec(xcmder_t *cmder, char *str);
+
+/**
+ * @description: 打印字符串
+ * @param {xcmder_t *} cmder：解释器指针
+ * @param {char*} str
+ * @return 无
+ */
 void xcmd_print_str(xcmder_t * cmder, char* str);
 
+/**
+ * @description: 向显示器插入一个字符
+ * @param {xcmder_t} *cmder
+ * @param {char} c
+ * @return 无
+ */
 void xcmd_display_insert_char(xcmder_t *cmder, char c);
-void xcmd_display_delete_char(xcmder_t *cmder);
-void xcmd_display_clear(xcmder_t *cmder);
-char*xcmd_display_get(xcmder_t *cmder);
 
+/**
+ * @description: 删除显示器的一个字符
+ * @param {xcmder_t} *cmder
+ * @return 无
+ */
+void xcmd_display_delete_char(xcmder_t *cmder);
+
+/**
+ * @description: 清除显示器
+ * @param {xcmder_t} *cmder
+ * @return 无
+ */
+void xcmd_display_clear(xcmder_t *cmder);
+
+/**
+ * @description: 获取显示器的内容
+ * @param {xcmder_t} *cmder
+ * @return {char*} *显示器的内容的指针
+ */
+char* xcmd_display_get(xcmder_t *cmder);
+
+/**
+ * @description: 获取历史记录的个数
+ * @param {xcmder_t} *cmder
+ * @return {uint16_t} 已经记录的历史个数
+ */
 uint16_t xcmd_history_len(xcmder_t *cmder);
+
+/**
+ * @description: 插入一条历史记录
+ * @param {xcmder_t} *cmder
+ * @param {char*} str
+ * @return 无
+ */
 void xcmd_history_insert(xcmder_t *cmder, char* str);
-char *xcmd_history_next(xcmder_t *cmder);
+
+/**
+ * @description: 获取下一条历史记录
+ * @param {xcmder_t*} cmder
+ * @return 历史命令
+ */
+char *xcmd_history_next(xcmder_t* cmder);
+
+/**
+ * @description: 获取上条历史记录
+ * @param {xcmder_t*} cmder
+ * @return 历史命令
+ */
 char *xcmd_history_prev(xcmder_t *cmder);
+
+/**
+ * @description: 获取当前历史记录
+ * @param {xcmder_t*} cmder
+ * @return 历史命令
+ */
 char *xcmd_history_current(xcmder_t *cmder);
+
+/**
+ * @description: 将历史记录指针指向头部
+ * @param {xcmder_t*} cmder
+ * @return 无
+ */
 void  xcmd_history_reset(xcmder_t *cmder);
 #endif /*XCMD_H*/
