@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "gcc - 生成和调试活动文件",
+            "name": "(gdb) 启动",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/../xcmder",
+            "program": "${workspaceFolder}/example/linux/xcmder",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
@@ -21,9 +21,7 @@
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ],
-            "preLaunchTask": "",
-            "miDebuggerPath": "/usr/bin/gdb"
+            ]
         }
     ]
 }

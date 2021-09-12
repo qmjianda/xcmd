@@ -1,5 +1,9 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include "xcmd.h"
+#include "xcmd_default_keys.h"
+#include "xcmd_default_cmds.h"
 #include<errno.h>  
 #include<sys/types.h>  
 #include<sys/socket.h>  
@@ -23,6 +27,7 @@ int getch(void)
      }
  
      ch = getchar();
+     // printf("%d\n", ch);
      if (tcsetattr(fd, TCSANOW, &tm_old) < 0) {//更改设置为最初的样子
           return -1;
      }
@@ -30,27 +35,49 @@ int getch(void)
      return ch;
 }
 
-int cmd_get_char(char *ch)
+int cmd_get_char(uint8_t *ch)
 {
     *ch = getch();
     return 1;
 }
 
-int cmd_put_char(char ch)
+int cmd_put_char(uint8_t ch)
 {
     putchar(ch);
     return 1;
 }
 
+int cmd_ctr_a(void* pv)
+{
+    printf("this is ctr+a\n");
+}
+
+int cmd_ctr_c(void* pv)
+{
+    exit(0);
+}
+
+static xcmd_key_t user_keys[] = 
+{
+    {CTR_A, cmd_ctr_a,  NULL},
+    {CTR_C, cmd_ctr_c, NULL},
+};
+
+void user_keys_init(xcmder_t *cmder)
+{
+    xcmd_key_register(cmder, user_keys, sizeof(user_keys)/sizeof(xcmd_key_t));
+}
+
 int main(void)
 {
-    printf("hello\n");
-    
     xcmder_t* cmder = xcmd_create_default(cmd_get_char, cmd_put_char);
     if(cmder)
     {
         test_cmd_init(cmder);
-        xcmd_exec(cmder, "help");
+        user_keys_init(cmder);
+        default_keys_init(cmder);
+        default_cmds_init(cmder);
+        xcmd_exec(cmder, "logo");
         while(1)
         {
             xcmd_task(cmder);

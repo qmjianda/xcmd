@@ -1,1 +1,0 @@
-OBJ += test_cmds.o  linux_main.o

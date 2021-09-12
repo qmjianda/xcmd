@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-xcmder_t *g_cmder = NULL;
+static xcmder_t *g_cmder = NULL;
 
 #define EXIT_MESSAGE() printf("press \"q\" or \"Q\" to exit!\r\n")
 #define EXIT_CHECK()                 \
@@ -22,7 +22,7 @@ xcmder_t *g_cmder = NULL;
         }                            \
     while (0);
 
-uint8_t param_check(int need, int argc, char*argv[])
+static uint8_t param_check(int need, int argc, char*argv[])
 {
     uint8_t i,ret = 0;
     if(need<(argc))
@@ -46,12 +46,7 @@ uint8_t param_check(int need, int argc, char*argv[])
     return ret;
 }
 
-void cmd_clear(int argc, char* argv[])
-{
-    printf("\033c");
-}
-
-void cmd_echo(int argc, char* argv[])
+static void cmd_echo(int argc, char* argv[])
 {
     if(param_check(1, argc, argv))
 	{
@@ -59,7 +54,7 @@ void cmd_echo(int argc, char* argv[])
 	}
 }
 
-void cmd_example(int argc, char* argv[])
+static void cmd_example(int argc, char* argv[])
 {
     uint8_t i;
     if(param_check(1, argc, argv))
@@ -88,27 +83,14 @@ void cmd_example(int argc, char* argv[])
 	}
 }
 
-void cmd_help(int argc, char* argv[])
+static xcmd_t cmds[] = 
 {
-    xcmd_print_list(g_cmder);
-}
-
-void cmd_exit(int argc, char* argv[])
-{
-    exit(0);
-}
-
-cmd_t cmds[] = 
-{
-    {"clear", cmd_clear, "clear screen", NULL},
     {"echo", cmd_echo, "echo anything", NULL},
     {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
-    {"help", cmd_help, "show this list", NULL},
-    {"exit", cmd_exit, "exit xcmder", NULL},
 };
 
 void test_cmd_init(xcmder_t *cmder)
 {
-    xcmd_register(cmder, cmds, sizeof(cmds)/sizeof(cmd_t));
+    xcmd_register(cmder, cmds, sizeof(cmds)/sizeof(xcmd_t));
     g_cmder = cmder;
 }
