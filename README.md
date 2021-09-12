@@ -117,5 +117,5 @@ void test_keys_init(xcmder_t *cmder)
 ```
 #### 效果展示
 
-
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0912/184440_c9266a41_1680380.gif "演示.gif")
 参照example
