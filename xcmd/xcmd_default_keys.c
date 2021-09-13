@@ -24,7 +24,7 @@ static int xcmd_cursor_left(void *pv)
 	if(cmder->parser.cursor > 0)
 	{
 		cmder->parser.cursor--;
-        xcmd_print_str(cmder, STR_LEFT);
+        xcmd_print(cmder, STR_LEFT);
 	}
     return 0;
 }
@@ -35,7 +35,7 @@ static int xcmd_cursor_right(void *pv)
 	if(cmder->parser.cursor < cmder->parser.byte_num)
 	{
 		cmder->parser.cursor++;
-        xcmd_print_str(cmder, STR_RIGHT);
+        xcmd_print(cmder, STR_RIGHT);
 	}
     return 0;
 }
@@ -52,7 +52,7 @@ static int xcmd_history_dw(void *pv)
         if (len)
         {
             strncpy(display_line, line, cmder->parser.line_len);
-            xcmd_print_str(cmder, line);
+            xcmd_print(cmder, line);
             cmder->parser.byte_num = len;
             cmder->parser.cursor = len;
         }
@@ -76,7 +76,7 @@ static int xcmd_history_up(void *pv)
         if (len)
         {
             strncpy(display_line, line, cmder->parser.line_len);
-            xcmd_print_str(cmder, line);
+            xcmd_print(cmder, line);
             cmder->parser.byte_num = len;
             cmder->parser.cursor = len;
         }
@@ -84,13 +84,31 @@ static int xcmd_history_up(void *pv)
     return 0;
 }
 
+static int xcmd_auto_completion(void *pv)
+{
+    
+    xcmder_t *cmder = (xcmder_t*)pv;
+    char *pdat = xcmd_display_get(cmder);
+
+    xcmd_t *p = cmder->cmd_list.next;
+    while(p)
+    {
+        printf("%-20s %s\r\n",p->name, p->help);
+        p = p->next;
+    }
+    return 0;
+}
+
+
 static xcmd_key_t default_keys[] = 
 {
-    {L_DELETE, xcmd_del_char,  NULL},
-    {LEFT, xcmd_cursor_left, NULL},
-    {RIGHT, xcmd_cursor_right, NULL},
-    {DW, xcmd_history_dw, NULL},
-    {UP, xcmd_history_up, NULL},
+    {BACKSPACE,     xcmd_del_char,          NULL},
+    {L_DELETE,      xcmd_del_char,          NULL},
+    {LEFT,          xcmd_cursor_left,       NULL},
+    {RIGHT,         xcmd_cursor_right,      NULL},
+    {DW,            xcmd_history_dw,        NULL},
+    {UP,            xcmd_history_up,        NULL},
+    {TAB,           xcmd_auto_completion,   NULL},
 };
 
 void default_keys_init(xcmder_t *cmder)

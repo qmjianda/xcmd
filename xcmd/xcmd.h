@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <stdarg.h>
 
 typedef void(*cmd_func_t)(int argv, char* argc[]);
 typedef int(*cmd_key_func_t)(void *data);
@@ -190,7 +191,8 @@ uint8_t xcmd_exec(xcmder_t *cmder, char *str);
  * @param {char*} str
  * @return 无
  */
-void xcmd_print_str(xcmder_t * cmder, char* str);
+void xcmd_print(xcmder_t * cmder, const char *fmt, ...);
+
 
 /**
  * @description: 向显示器插入一个字符

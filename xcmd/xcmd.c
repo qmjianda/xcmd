@@ -1,6 +1,7 @@
 #include "xcmd.h"
 #include "malloc.h"
 
+
 #define CMD_IS_ENDLINE(c) ((c == '\n') || (c == '\r'))
 #define CMD_IS_PRINT(c) ((c >= 32) && (c <= 126))
 
@@ -128,13 +129,13 @@ static uint32_t xcmd_bytes_encode(xcmder_t * cmder, uint8_t byte)
 static void xcmd_display_update(xcmder_t *cmder)
 {
 	char *line = xcmd_display_get(cmder);
-    xcmd_print_str(cmder, "\r->");
-    xcmd_print_str(cmder, line);
-    xcmd_print_str(cmder, "\r->");
+    xcmd_print(cmder, "\r->");
+    xcmd_print(cmder, line);
+    xcmd_print(cmder, "\r->");
     /* move cursor */
     for(uint16_t i = 0; i<cmder->parser.cursor; i++)
     {
-        xcmd_print_str(cmder, "\x1B\x5B\x43");
+        xcmd_print(cmder, "\x1B\x5B\x43");
     }
 }
 
@@ -157,12 +158,12 @@ static char* xcmd_line_end(xcmder_t *cmder)
         }
         cmder->parser.byte_num = 0;
         cmder->parser.cursor = 0;
-        xcmd_print_str(cmder, "\r\n");
+        xcmd_print(cmder, "\r\n");
         xcmd_history_reset(cmder);
 	}
 	else
 	{
-	    xcmd_print_str(cmder, "\r\n->");
+	    xcmd_print(cmder, "\r\n->");
 	}
 	return ret;
 }
@@ -191,11 +192,26 @@ static char* xcmd_parser(xcmder_t * cmder, uint8_t byte)
 }
 
 void xcmd_print_str(xcmder_t * cmder, char* str)
-{
+{    
 	while(*str)
 	{
 		cmder->io.put_c(*str++);
 	}
+    return;
+}
+
+void xcmd_print(xcmder_t * cmder, const char *fmt, ...)
+{
+    char  ucstring[256] = {0};
+    unsigned short wdatalen;
+    va_list arg;
+
+    va_start(arg, fmt);
+    wdatalen = vsprintf(ucstring, fmt, arg);
+    va_end(arg);
+
+    xcmd_print_str(cmder, ucstring);
+    return;
 }
 
 char* xcmd_display_get(xcmder_t *cmder)
@@ -210,12 +226,12 @@ void xcmd_display_clear(xcmder_t *cmder)
     uint16_t len = strlen(line);
 	if(len)
 	{
-	    xcmd_print_str(cmder, "\r->");
+	    xcmd_print(cmder, "\r->");
 	    for(uint16_t i=0; i<len; i++)
 	    {
 	        cmder->io.put_c(' ');
 	    }
-	    xcmd_print_str(cmder, "\r->");
+	    xcmd_print(cmder, "\r->");
         cmder->parser.byte_num = 0;
         cmder->parser.cursor = 0;
         line[0] = '\0';
