@@ -119,4 +119,4 @@ void test_keys_init(xcmder_t *cmder)
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0912/184914_3b4a3398_1680380.gif "演示1.gif")
 
 #### 其他
-流程图需要使用drawio来打开
+流程图需要使用drawio来打开，可以使用vscode drawio的插件来打开
