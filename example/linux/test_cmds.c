@@ -5,7 +5,8 @@
 
 static xcmder_t *g_cmder = NULL;
 
-#define EXIT_MESSAGE() printf("press \"q\" or \"Q\" to exit!\r\n")
+#define EXIT_MESSAGE() xcmd_print(g_cmder, "press \"q\" or \"Q\" to exit!\r\n")
+
 #define EXIT_CHECK()                 \
     do                               \
         (toupper(GET_CHAR()) == 'Q') \
@@ -31,16 +32,16 @@ static uint8_t param_check(int need, int argc, char*argv[])
     }
     else
     {
-        printf("err need %d but input %d:\r\n", need, argc-1);
-    	printf("input= ");
+        xcmd_print(g_cmder, "err need %d but input %d:\r\n", need, argc-1);
+    	xcmd_print(g_cmder, "input= ");
 	    for(i=0; i<argc; i++)
 	    {
 	        if(argv[i] != NULL)
 	        {
-	            printf("%s ", argv[i]);
+	            xcmd_print(g_cmder, "%s ", argv[i]);
 	        }
 	    }
-	    printf("\r\n");
+	    xcmd_print(g_cmder, "\r\n");
         ret = 0;
     }
     return ret;
@@ -50,7 +51,7 @@ static void cmd_echo(int argc, char* argv[])
 {
     if(param_check(1, argc, argv))
 	{
-    	printf("%s\r\n", argv[1]);
+    	xcmd_print(g_cmder, "%s\r\n", argv[1]);
 	}
 }
 
@@ -63,21 +64,21 @@ static void cmd_example(int argc, char* argv[])
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	printf("%s\r\n", argv[i]);
+		    	xcmd_print(g_cmder, "%s\r\n", argv[i]);
 			}
 		}
 		if(strcmp(argv[1], "int") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	printf("%d\r\n", atoi(argv[i]));
+		    	xcmd_print(g_cmder, "%d\r\n", atoi(argv[i]));
 			}
 		}
 		if(strcmp(argv[1], "float") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	printf("%f\r\n", atof(argv[i]));
+		    	xcmd_print(g_cmder, "%f\r\n", atof(argv[i]));
 			}
 		}
 	}

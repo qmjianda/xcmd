@@ -9,6 +9,9 @@
 #include<sys/socket.h>  
 #include <termio.h>
 
+static xcmder_t *g_cmder = NULL;
+
+
 extern void test_cmd_init(xcmder_t *cmder);
 
 int getch(void)
@@ -27,7 +30,7 @@ int getch(void)
      }
  
      ch = getchar();
-     // printf("%d\n", ch);
+     //xcmd_print(g_cmder, "%d\n", ch);
      if (tcsetattr(fd, TCSANOW, &tm_old) < 0) {//更改设置为最初的样子
           return -1;
      }
@@ -49,7 +52,7 @@ int cmd_put_char(uint8_t ch)
 
 int cmd_ctr_a(void* pv)
 {
-    printf("this is ctr+a\n");
+    xcmd_print(g_cmder, "this is ctr+a\n");
 }
 
 int cmd_ctr_c(void* pv)
@@ -68,19 +71,24 @@ void user_keys_init(xcmder_t *cmder)
     xcmd_key_register(cmder, user_keys, sizeof(user_keys)/sizeof(xcmd_key_t));
 }
 
+xcmder_t* user_get_cmder(void)
+{
+    return g_cmder;
+}
+
 int main(void)
 {
-    xcmder_t* cmder = xcmd_create_default(cmd_get_char, cmd_put_char);
-    if(cmder)
+    xcmder_t* g_cmder = xcmd_create_default(cmd_get_char, cmd_put_char);
+    if(g_cmder)
     {
-        test_cmd_init(cmder);
-        user_keys_init(cmder);
-        default_keys_init(cmder);
-        default_cmds_init(cmder);
-        xcmd_exec(cmder, "logo");
+        test_cmd_init(g_cmder);
+        user_keys_init(g_cmder);
+        default_keys_init(g_cmder);
+        default_cmds_init(g_cmder);
+        xcmd_exec(g_cmder, "logo");
         while(1)
         {
-            xcmd_task(cmder);
+            xcmd_task(g_cmder);
         }
     }
     return 1;
