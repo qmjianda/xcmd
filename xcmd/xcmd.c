@@ -202,12 +202,12 @@ void xcmd_print_str(xcmder_t * cmder, char* str)
 
 void xcmd_print(xcmder_t * cmder, const char *fmt, ...)
 {
-    char  ucstring[256] = {0};
+    char ucstring[256] = {0};
     unsigned short wdatalen;
     va_list arg;
 
     va_start(arg, fmt);
-    wdatalen = vsprintf(ucstring, fmt, arg);
+    wdatalen = vsnprintf(ucstring, 256, fmt, arg);
     va_end(arg);
 
     xcmd_print_str(cmder, ucstring);
