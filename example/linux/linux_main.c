@@ -52,7 +52,8 @@ int cmd_put_char(uint8_t ch)
 
 int cmd_ctr_a(void* pv)
 {
-    xcmd_print(g_cmder, "this is ctr+a\n");
+    xcmder_t * cmder = (xcmder_t *)pv;
+    xcmd_print(cmder, "this is ctr+a\n");
 }
 
 int cmd_ctr_c(void* pv)
@@ -78,7 +79,7 @@ xcmder_t* user_get_cmder(void)
 
 int main(void)
 {
-    xcmder_t* g_cmder = xcmd_create_default(cmd_get_char, cmd_put_char);
+    g_cmder = xcmd_create_default(cmd_get_char, cmd_put_char);
     if(g_cmder)
     {
         test_cmd_init(g_cmder);
