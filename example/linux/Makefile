@@ -1,7 +1,7 @@
 OBJ += xcmd.o xcmd_default_keys.o xcmd_default_cmds.o test_cmds.o  linux_main.o 
 BIN = xcmder
-VPATH := ../../xcmd
-INC += ../../xcmd
+VPATH := ../../src
+INC += ../../inc
 OBJ_WITH_BUILD_DIR:=$(addprefix build/,$(OBJ))
 
 all: mkbuilddir $(OBJ_WITH_BUILD_DIR)
