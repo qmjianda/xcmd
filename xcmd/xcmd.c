@@ -60,7 +60,16 @@ static void xcmd_key_match(xcmder_t *cmder, XCMD_KEY_T key)
     {
         if(p->key == key)
         {
-            p->func(cmder);
+            if(p->func(cmder) < 0)
+            {
+                cmder->key_list.untreated.key = key;
+                cmder->key_list.untreated.count++;
+            }
+            else
+            {
+                cmder->key_list.untreated.key = 0;
+                cmder->key_list.untreated.count = 0;
+            }
             break;
         }
         p = p->next;
@@ -476,6 +485,8 @@ xcmder_t *xcmd_create( int (*get_c)(uint8_t*), int (*put_c)(uint8_t), uint16_t c
 
         cmder->cmd_list.len = 0;
         cmder->cmd_list.next = NULL;
+        cmder->key_list.untreated.key = 0;
+        cmder->key_list.untreated.count = 0;
 	}
     else
     {

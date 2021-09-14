@@ -103,6 +103,11 @@ typedef struct
     {
         uint16_t len;
         xcmd_key_t *next;
+        struct
+        {
+            XCMD_KEY_T key;
+            uint16_t count;
+        }untreated;
         
     }key_list;
 
