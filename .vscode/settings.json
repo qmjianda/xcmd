@@ -17,7 +17,9 @@
   "C_Cpp_Runner.enableWarnings": true,
   "C_Cpp_Runner.warningsAsError": false,
   "files.associations": {
+    "*.json": "c",
     "cmath": "c",
-    "complex": "c"
+    "complex": "c",
+    "xcmd_default_keys.h": "c"
   }
 }

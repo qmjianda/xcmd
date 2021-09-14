@@ -1,4 +1,4 @@
-#include "xcmd_default_cmds.h"
+#include "../inc/xcmd_default_cmds.h"
 #include <stdlib.h>
 
 static xcmder_t *g_cmder = NULL;

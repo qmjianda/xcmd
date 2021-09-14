@@ -1,4 +1,4 @@
-#include "xcmd.h"
+#include "../inc/xcmd.h"
 #include "malloc.h"
 
 

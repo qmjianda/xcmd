@@ -1,4 +1,4 @@
-#include "xcmd_default_keys.h"
+#include "../inc/xcmd_default_keys.h"
 
 #define STR_UP     "\x1B\x5B\x41"
 #define STR_DW     "\x1B\x5B\x42"
