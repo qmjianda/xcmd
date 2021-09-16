@@ -74,6 +74,7 @@ static int xcmd_history_up(void *pv)
 
 static int xcmd_auto_completion(void *pv)
 {
+    return 0;
 }
 
 
