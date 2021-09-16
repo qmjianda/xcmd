@@ -25,14 +25,15 @@ struct
     struct 
     {
         uint16_t len;
-        xcmd_t *next;
+        xcmd_t *head;
         xcmd_t *tail;
     }cmd_list;
 
     struct
     {
         uint16_t len;
-        xcmd_key_t *next;
+        xcmd_key_t *head;
+        xcmd_key_t *tail;
     }key_list;
 
     struct
@@ -79,7 +80,7 @@ static int xcmd_get_param(char* msg, char*delim, char* get[], int max_num)
 
 static void xcmd_cmd_match(int argc, char*argv[])
 {
-    xcmd_t *p = g_xcmder.cmd_list.next;
+    xcmd_t *p = g_xcmder.cmd_list.head;
     uint8_t flag = 0;
     while(p)
     {
@@ -112,7 +113,7 @@ static void xcmd_cmd_match(int argc, char*argv[])
 
 static void xcmd_key_match(XCMD_KEY_T key)
 {
-    xcmd_key_t *p = g_xcmder.key_list.next;
+    xcmd_key_t *p = g_xcmder.key_list.head;
     uint8_t flag = 0;
     while(p)
     {
@@ -459,16 +460,17 @@ int xcmd_key_register(xcmd_key_t *keys, uint16_t number)
     uint16_t i=0; 
     if(g_xcmder.key_list.len == 0)
     {
-        g_xcmder.key_list.next = &keys[i++];
-        g_xcmder.key_list.next->next = NULL;
+        g_xcmder.key_list.head = &keys[i++];
+        g_xcmder.key_list.head->next = NULL;
+        g_xcmder.key_list.tail = g_xcmder.key_list.head;
         ++g_xcmder.key_list.len;
     }
 
     while(i<number)
     {
-        xcmd_key_t *p = g_xcmder.key_list.next;
-        g_xcmder.key_list.next = &keys[i];
-        keys[i].next = p;
+        g_xcmder.key_list.tail->next = &keys[i];
+        g_xcmder.key_list.tail = g_xcmder.key_list.tail->next;
+        keys[i].next = NULL;
         ++g_xcmder.key_list.len;
         ++i;
     }
@@ -480,16 +482,17 @@ int xcmd_cmd_register(xcmd_t *cmds, uint16_t number)
     uint16_t i=0; 
     if(g_xcmder.cmd_list.len == 0)
     {
-        g_xcmder.cmd_list.next = &cmds[i++];
-        g_xcmder.cmd_list.next->next = NULL;
+        g_xcmder.cmd_list.head = &cmds[i++];
+        g_xcmder.cmd_list.head->next = NULL;
+        g_xcmder.cmd_list.tail = g_xcmder.cmd_list.head;
         ++g_xcmder.cmd_list.len;
     }
 
     while(i<number)
     {
-        xcmd_t *p = g_xcmder.cmd_list.next;
-        g_xcmder.cmd_list.next = &cmds[i];
-        cmds[i].next = p;
+        g_xcmder.cmd_list.tail->next = &cmds[i];
+        g_xcmder.cmd_list.tail = g_xcmder.cmd_list.tail->next;
+        cmds[i].next = NULL;
         ++g_xcmder.cmd_list.len;
         ++i;
     }
@@ -498,12 +501,12 @@ int xcmd_cmd_register(xcmd_t *cmds, uint16_t number)
 
 xcmd_key_t *xcmd_keylist_get(void)
 {
-    return g_xcmder.key_list.next;
+    return g_xcmder.key_list.head;
 }
 
 xcmd_t *xcmd_cmdlist_get(void)
 {
-    return g_xcmder.cmd_list.next;
+    return g_xcmder.cmd_list.head;
 }
 
 void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
@@ -517,7 +520,7 @@ void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
         g_xcmder.parser.cursor = 0;
 		g_xcmder.parser.encode_case_stu = 0;
         g_xcmder.cmd_list.len = 0;
-        g_xcmder.cmd_list.next = NULL;
+        g_xcmder.cmd_list.head = NULL;
 
         if(g_xcmder._initOK == 0)
         {
