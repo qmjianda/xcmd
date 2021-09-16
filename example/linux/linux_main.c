@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2021-09-14 23:58:24
+ * @LastEditTime: 2021-09-16 23:20:43
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /xcmd/example/linux/linux_main.c
+ */
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -9,10 +17,8 @@
 #include<sys/socket.h>  
 #include <termio.h>
 
-static xcmder_t *g_cmder = NULL;
 
-
-extern void test_cmd_init(xcmder_t *cmder);
+extern void test_cmd_init(void);
 
 int getch(void)
 {
@@ -52,8 +58,7 @@ int cmd_put_char(uint8_t ch)
 
 int cmd_ctr_a(void* pv)
 {
-    xcmder_t * cmder = (xcmder_t *)pv;
-    xcmd_print(cmder, "this is ctr+a\n");
+    xcmd_print("this is ctr+a\n");
 }
 
 int cmd_ctr_c(void* pv)
@@ -67,30 +72,19 @@ static xcmd_key_t user_keys[] =
     {CTR_C, cmd_ctr_c, NULL},
 };
 
-void user_keys_init(xcmder_t *cmder)
+void user_keys_init(void)
 {
-    xcmd_key_register(cmder, user_keys, sizeof(user_keys)/sizeof(xcmd_key_t));
-}
-
-xcmder_t* user_get_cmder(void)
-{
-    return g_cmder;
+    xcmd_key_register(user_keys, sizeof(user_keys)/sizeof(xcmd_key_t));
 }
 
 int main(void)
 {
-    g_cmder = xcmd_create_default(cmd_get_char, cmd_put_char);
-    if(g_cmder)
+    xcmd_init(cmd_get_char, cmd_put_char);
+    test_cmd_init();
+    user_keys_init();
+    
+    while(1)
     {
-        test_cmd_init(g_cmder);
-        user_keys_init(g_cmder);
-        default_keys_init(g_cmder);
-        default_cmds_init(g_cmder);
-        xcmd_exec(g_cmder, "logo");
-        while(1)
-        {
-            xcmd_task(g_cmder);
-        }
+        xcmd_task();
     }
-    return 1;
 }

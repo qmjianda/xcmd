@@ -1,9 +1,15 @@
+/*
+ * @Author: your name
+ * @Date: 2021-09-14 23:58:24
+ * @LastEditTime: 2021-09-16 22:57:45
+ * @LastEditors: your name
+ * @Description: In User Settings Edit
+ * @FilePath: /xcmd/example/linux/test_cmds.c
+ */
 #include "xcmd.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-static xcmder_t *g_cmder = NULL;
 
 #define EXIT_MESSAGE() xcmd_print(g_cmder, "press \"q\" or \"Q\" to exit!\r\n")
 
@@ -32,16 +38,16 @@ static uint8_t param_check(int need, int argc, char*argv[])
     }
     else
     {
-        xcmd_print(g_cmder, "err need %d but input %d:\r\n", need, argc-1);
-    	xcmd_print(g_cmder, "input= ");
+        xcmd_print("err need %d but input %d:\r\n", need, argc-1);
+    	xcmd_print("input= ");
 	    for(i=0; i<argc; i++)
 	    {
 	        if(argv[i] != NULL)
 	        {
-	            xcmd_print(g_cmder, "%s ", argv[i]);
+	            xcmd_print("%s ", argv[i]);
 	        }
 	    }
-	    xcmd_print(g_cmder, "\r\n");
+	    xcmd_print("\r\n");
         ret = 0;
     }
     return ret;
@@ -51,7 +57,7 @@ static void cmd_echo(int argc, char* argv[])
 {
     if(param_check(1, argc, argv))
 	{
-    	xcmd_print(g_cmder, "%s\r\n", argv[1]);
+    	xcmd_print("%s\r\n", argv[1]);
 	}
 }
 
@@ -64,21 +70,21 @@ static void cmd_example(int argc, char* argv[])
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print(g_cmder, "%s\r\n", argv[i]);
+		    	xcmd_print("%s\r\n", argv[i]);
 			}
 		}
 		if(strcmp(argv[1], "int") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print(g_cmder, "%d\r\n", atoi(argv[i]));
+		    	xcmd_print("%d\r\n", atoi(argv[i]));
 			}
 		}
 		if(strcmp(argv[1], "float") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print(g_cmder, "%f\r\n", atof(argv[i]));
+		    	xcmd_print("%f\r\n", atof(argv[i]));
 			}
 		}
 	}
@@ -90,8 +96,7 @@ static xcmd_t cmds[] =
     {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
 };
 
-void test_cmd_init(xcmder_t *cmder)
+void test_cmd_init(void)
 {
-    xcmd_register(cmder, cmds, sizeof(cmds)/sizeof(xcmd_t));
-    g_cmder = cmder;
+    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
 }
