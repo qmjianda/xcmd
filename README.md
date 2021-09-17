@@ -22,29 +22,55 @@
     int main(void)
     {
         /*调用初始化函数的时候传入字符输入输出函数*/
-        xcmder_t* cmder = xcmd_create_default(cmd_get_char, cmd_put_char);
-        if(cmder)
+        xcmd_init(cmd_get_char, cmd_put_char);
+        while(1)
         {
-            /* 初始化默认的一些快捷键 */
-            default_keys_init(cmder);
-            /* 初始化默认的一些命令 */
-            default_cmds_init(cmder);
-            /* 手动调用显示log的命令 */
-            xcmd_exec(cmder, "logo");
-            while(1)
-            {
-                /* 主任务 */
-                xcmd_task(cmder);
-            }
+            xcmd_task();
         }
-        return 1;
     }
 ```
+```C
+/* 例如移植到Arduino平台 */
+int cmd_get_char(uint8_t *ch)
+{
+    if(Serial.available())
+    {
+        *ch =  Serial.read();
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
 
+int cmd_put_char(uint8_t ch)
+{
+    Serial.write(ch);
+    return 1;
+}
+
+void setup() {
+    Serial.begin(115200);
+    xcmd_init(cmd_get_char, cmd_put_char);
+}
+
+void loop() {
+    
+    xcmd_task();
+}
+```
+#### 配置
+配置文件位于src/xcmd_config.h
+```C
+#define XCMD_LINE_MAX_LENGTH    (32) /* 命令行支持的最大字符数 */
+#define XCMD_HISTORY_MAX_NUM    (8)  /* 支持的历史记录个数，0为不支持 */
+#define XCMD_PARAM_MAX_NUM      (4)  /* 支持输入的参数个数 */
+```
 #### 使用说明
 ##### 注册自定义命令
 ```C
-static void cmd_print(int argc, char* argv[])
+static void cmd_echo(int argc, char* argv[])
 {
     if(param_check(1, argc, argv))
 	{
@@ -83,13 +109,13 @@ static void cmd_example(int argc, char* argv[])
 
 static xcmd_t cmds[] = 
 {
-    {"print", cmd_print, "print anything", NULL},
+    {"echo", cmd_echo, "print anything", NULL},
     {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
 };
 
-void test_cmd_init(xcmder_t *cmder)
+void test_cmd_init(void)
 {
-    xcmd_register(cmder, cmds, sizeof(cmds)/sizeof(xcmd_t));
+    xcmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
 }
 ```
 ##### 注册自定义快捷键
@@ -110,9 +136,9 @@ static xcmd_key_t user_keys[] =
     {CTR_C, cmd_ctr_c, NULL},
 };
 
-void test_keys_init(xcmder_t *cmder)
+void test_keys_init(void)
 {
-    xcmd_key_register(cmder, user_keys, sizeof(user_keys)/sizeof(xcmd_key_t));
+    xcmd_key_register(user_keys, sizeof(user_keys)/sizeof(xcmd_key_t));
 }
 ```
 #### 效果展示
