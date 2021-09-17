@@ -25,11 +25,6 @@ static void cmd_help(int argc, char* argv[])
     }
 }
 
-static void cmd_exit(int argc, char* argv[])
-{
-    exit(0);
-}
-
 static void cmd_logo(int argc, char* argv[])
 {
     char *log = "\
@@ -44,7 +39,6 @@ static xcmd_t cmds[] =
 {
     {"clear", cmd_clear, "clear screen", NULL},
     {"help", cmd_help, "show this list", NULL},
-    {"exit", cmd_exit, "exit xcmder", NULL},
     {"logo", cmd_logo, "show logo", NULL},
 };
 
