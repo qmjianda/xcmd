@@ -59,6 +59,7 @@ int cmd_put_char(uint8_t ch)
 int cmd_ctr_a(void* pv)
 {
     xcmd_print("this is ctr+a\n");
+    return 0;
 }
 
 int cmd_ctr_c(void* pv)

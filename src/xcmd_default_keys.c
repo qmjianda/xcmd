@@ -7,8 +7,8 @@
  * @FilePath: /xcmd/src/xcmd_default_keys.c
  */
 #include "../inc/xcmd_default_keys.h"
-#include "xcmd_confg.h"
-#include "xcmd.h"
+#include "../inc/xcmd_confg.h"
+#include "../inc/xcmd.h"
 
 #define STR_UP     "\x1B\x5B\x41"
 #define STR_DW     "\x1B\x5B\x42"
@@ -49,7 +49,6 @@ static int xcmd_cursor_right(void *pv)
 static int xcmd_history_dw(void *pv)
 {
     char *line = xcmd_history_prev();
-    char *display_line = xcmd_display_get();
     if(line)
     {
         xcmd_display_set(line);
@@ -64,7 +63,6 @@ static int xcmd_history_dw(void *pv)
 static int xcmd_history_up(void *pv)
 {
     char *line = xcmd_history_next();
-    char *display_line = xcmd_display_get();
     if(line)
     {
         xcmd_display_set(line);
@@ -84,9 +82,11 @@ static xcmd_key_t default_keys[] =
     {L_DELETE,      xcmd_del_char,          NULL},
     {LEFT,          xcmd_cursor_left,       NULL},
     {RIGHT,         xcmd_cursor_right,      NULL},
+    {TAB,           xcmd_auto_completion,   NULL},
+#if XCMD_HISTORY_MAX_NUM
     {DW,            xcmd_history_dw,        NULL},
     {UP,            xcmd_history_up,        NULL},
-    {TAB,           xcmd_auto_completion,   NULL},
+#endif
 };
 
 void default_keys_init(void)

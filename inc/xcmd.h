@@ -9,6 +9,11 @@
 #include <math.h>
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern   "C" {
+#endif
+
+
 typedef void(*cmd_func_t)(int argv, char* argc[]);
 typedef int(*cmd_key_func_t)(void *data);
 
@@ -219,4 +224,9 @@ char *xcmd_history_current(void);
  * @return 无
  */
 void  xcmd_history_reset(void);
+
+#ifdef __cplusplus
+        }
+#endif
+
 #endif /*XCMD_H*/

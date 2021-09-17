@@ -7,8 +7,8 @@
  * @FilePath: /xcmd/src/xcmd_default_cmds.c
  */
 #include "../inc/xcmd_default_cmds.h"
+#include "../inc/xcmd.h"
 #include <stdlib.h>
-#include "xcmd.h"
 
 static void cmd_clear(int argc, char* argv[])
 {

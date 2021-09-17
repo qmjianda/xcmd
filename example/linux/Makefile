@@ -5,10 +5,10 @@ INC += ../../inc
 OBJ_WITH_BUILD_DIR:=$(addprefix build/,$(OBJ))
 
 all: mkbuilddir $(OBJ_WITH_BUILD_DIR)
-	gcc -g $(OBJ_WITH_BUILD_DIR) -o $(BIN)
+	gcc $(OBJ_WITH_BUILD_DIR) -o $(BIN) -Wl,-Map,$(BIN).map
 
 build/%.o:%.c
-	gcc -g -c -I$(INC) -o $@ $<
+	gcc -g -Wall -c -I$(INC) -o $@ $<
 
 .PHONY:mkbuilddir
 mkbuilddir:
