@@ -386,10 +386,13 @@ char *xcmd_history_next(void)
 {
     char *line = NULL;
 #if XCMD_HISTORY_MAX_NUM
-    line = g_xcmder.parser.history_list.slider->line;;
-    if(g_xcmder.parser.history_list.slider->next != g_xcmder.parser.history_list.head) 
+    if(g_xcmder.parser.history_list.len)
     {
-        g_xcmder.parser.history_list.slider = g_xcmder.parser.history_list.slider->next;
+        line = g_xcmder.parser.history_list.slider->line;;
+        if(g_xcmder.parser.history_list.slider->next != g_xcmder.parser.history_list.head) 
+        {
+            g_xcmder.parser.history_list.slider = g_xcmder.parser.history_list.slider->next;
+        }
     }
 #endif
     return line;
@@ -399,10 +402,13 @@ char *xcmd_history_prev(void)
 {
     char *line = NULL;
 #if XCMD_HISTORY_MAX_NUM
-    if(g_xcmder.parser.history_list.slider != g_xcmder.parser.history_list.head)
+    if(g_xcmder.parser.history_list.len)
     {
-        g_xcmder.parser.history_list.slider = g_xcmder.parser.history_list.slider->prev;
-        line = g_xcmder.parser.history_list.slider->line;
+        if(g_xcmder.parser.history_list.slider != g_xcmder.parser.history_list.head)
+        {
+            g_xcmder.parser.history_list.slider = g_xcmder.parser.history_list.slider->prev;
+            line = g_xcmder.parser.history_list.slider->line;
+        }
     }
 #endif
     return line;
@@ -412,9 +418,12 @@ char *xcmd_history_current(void)
 {
     char *line = NULL;
 #if XCMD_HISTORY_MAX_NUM
-    if(g_xcmder.parser.history_list.slider)
+    if(g_xcmder.parser.history_list.len)
     {
-        line = g_xcmder.parser.history_list.slider->line; 
+        if(g_xcmder.parser.history_list.slider)
+        {
+            line = g_xcmder.parser.history_list.slider->line; 
+        }
     }
 #endif
     return line;
