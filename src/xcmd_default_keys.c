@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-15 00:11:50
- * @LastEditTime: 2021-09-16 23:00:17
+ * @LastEditTime: 2021-09-17 23:18:12
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_keys.c
@@ -9,17 +9,6 @@
 #include "../inc/xcmd_default_keys.h"
 #include "../inc/xcmd_confg.h"
 #include "../inc/xcmd.h"
-
-#define STR_UP     "\x1B\x5B\x41"
-#define STR_DW     "\x1B\x5B\x42"
-#define STR_RIGHT  "\x1B\x5B\x43"
-#define STR_LEFT   "\x1B\x5B\x44"
-#define STR_END    "\x1B\x5B\x46"
-#define STR_HOME   "\x1B\x5B\x48"
-#define STR_INSERT "\x1B\x5B\x32\x7E"
-#define STR_DELETE "\x1B\x5B\x33\x7E"
-#define STR_PGUP   "\x1B\x5B\x35\x7E"
-#define STR_PGDW   "\x1B\x5B\x36\x7E"
 
 static int xcmd_del_char(void *pv)
 {
