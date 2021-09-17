@@ -92,7 +92,7 @@ static void xcmd_cmd_match(int argc, char*argv[])
                 if((strcmp(argv[1],"?") == 0) ||
                    (strcmp(argv[1],"-h") == 0))
                 {
-                    printf("%s\r\n", p->help);
+                    xcmd_print("%s\r\n", p->help);
                     break;
                 }
             }
@@ -103,11 +103,11 @@ static void xcmd_cmd_match(int argc, char*argv[])
     }
     if(flag)
     {
-        printf("\r\n");
+        xcmd_print("\r\n");
     }
     else
     {
-        printf("cmd \"%s\" does not exist\r\n", argv[0]);
+        xcmd_print("cmd \"%s\" does not exist\r\n", argv[0]);
     }
 }
 
