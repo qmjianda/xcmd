@@ -8,6 +8,7 @@
  */
 #include "../inc/xcmd_default_cmds.h"
 #include "../inc/xcmd.h"
+#include "../inc/xcmd_confg.h"
 #include <stdlib.h>
 
 static void cmd_clear(int argc, char* argv[])
@@ -33,6 +34,8 @@ static void cmd_logo(int argc, char* argv[])
  )  (( (__  )    (  )(_) )\r\n\
 (_/\\_)\\___)(_/\\/\\_)(____/\r\n ";
     xcmd_print("%s", log);
+    xcmd_print("\r\n%-10s %s %s\r\n","Build" ,__DATE__,  __TIME__);
+    xcmd_print("%-10s %s\r\n","Version", VERSION);
 }
 
 static xcmd_t cmds[] = 
