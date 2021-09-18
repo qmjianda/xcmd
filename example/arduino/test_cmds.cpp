@@ -61,6 +61,24 @@ static void cmd_echo(int argc, char* argv[])
 	}
 }
 
+static void cmd_ls(int argc, char* argv[])
+{
+    xcmd_t *p = xcmd_cmdlist_get();
+    uint8_t i = 0;
+    while(p)
+    {
+        xcmd_print("%-12s",p->name);
+        if(++i == 4)
+        {
+            xcmd_print("\r\n");
+            i = 0;
+        }
+        p = p->next;
+    }
+    xcmd_print("\r\n");
+}
+
+
 static void cmd_example(int argc, char* argv[])
 {
     uint8_t i;
@@ -93,7 +111,8 @@ static void cmd_example(int argc, char* argv[])
 static xcmd_t cmds[] = 
 {
     {"echo", cmd_echo, "echo anything", NULL},
-    {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
+    {"ls", cmd_ls, "ls", NULL},
+    {"example", cmd_example, "example [str|int|float] [val]", NULL},
 };
 
 void test_cmd_init(void)
