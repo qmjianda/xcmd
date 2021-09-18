@@ -61,11 +61,11 @@ static int xcmd_history_up(void *pv)
 
 static int xcmd_auto_completion(void *pv)
 {
-    char display_backup[XCMD_LINE_MAX_LENGTH];
     xcmd_t *match_cmd = NULL;
     uint16_t match_num = 0;
     xcmd_t *p = xcmd_cmdlist_get();
     char *display_line = xcmd_display_get();
+    char display_backup[XCMD_LINE_MAX_LENGTH];
     strncpy(display_backup, display_line, XCMD_LINE_MAX_LENGTH);
     uint16_t cursor_pos = xcmd_display_cursor_get();
     while(p)
