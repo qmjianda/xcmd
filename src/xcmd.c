@@ -303,15 +303,11 @@ char* xcmd_display_get(void)
 void xcmd_display_clear(void)
 {
     char *line = xcmd_display_get();
-    uint16_t len = strlen(line);
-	if(len)
-	{
-        xcmd_print(DL(0));
-        xcmd_print("\r%s", g_xcmder.parser.prompt);
-        g_xcmder.parser.byte_num = 0;
-        g_xcmder.parser.cursor = 0;
-        line[0] = '\0';
-	}
+    xcmd_print(DL(0));
+    xcmd_print("\r%s", g_xcmder.parser.prompt);
+    g_xcmder.parser.byte_num = 0;
+    g_xcmder.parser.cursor = 0;
+    line[0] = '\0';
 }
 
 void xcmd_display_insert_char(char c)
