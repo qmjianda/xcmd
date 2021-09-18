@@ -271,7 +271,7 @@ static void xcmd_parser(uint8_t byte)
 
 void xcmd_print(const char *fmt, ...)
 {
-    char ucstring[256] = {0};
+    char ucstring[128] = {0};
     va_list arg;
     va_start(arg, fmt);
     vsnprintf(ucstring, 256, fmt, arg);
