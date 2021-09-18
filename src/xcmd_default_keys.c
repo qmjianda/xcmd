@@ -61,6 +61,47 @@ static int xcmd_history_up(void *pv)
 
 static int xcmd_auto_completion(void *pv)
 {
+    char display_backup[XCMD_LINE_MAX_LENGTH];
+    xcmd_t *match_cmd = NULL;
+    uint16_t match_num = 0;
+    xcmd_t *p = xcmd_cmdlist_get();
+    char *display_line = xcmd_display_get();
+    strncpy(display_backup, display_line, XCMD_LINE_MAX_LENGTH);
+    uint16_t cursor_pos = xcmd_display_cursor_get();
+    while(p)
+    {
+        if(strncmp(display_line, p->name, cursor_pos) == 0)
+        {
+            if(match_num == 0)
+            {
+                match_cmd = p;
+            }
+            else if(match_num == 1)
+            {
+                xcmd_print("\r\n%-15s%-15s", match_cmd->name, p->name);
+            }
+            else
+            {
+                xcmd_print("%-15s", p->name);
+                if((match_num%4) == 0)
+                {
+                    xcmd_print("\r\n");
+                }
+            }
+            match_num++;
+        }
+        p = p->next;
+    }
+
+    if(match_num == 1)
+    {
+        xcmd_display_set(match_cmd->name);
+    }
+    else if(match_num > 1)
+    {
+        xcmd_print("\r\n");
+        xcmd_display_set(display_backup);
+    }
     return 0;
 }
 
