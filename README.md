@@ -5,6 +5,7 @@
 #### 支持的平台
 1. linux
 2. arduino
+3. stm32
 #### 测试过的串口软件
 1. SecureCRT：请设置成Xterm模式
 2. （推荐）putty
