@@ -1,3 +1,11 @@
-example/linux/build
-example/linux/xcmder
+#dir
+*build/
+*Output/
+*DebugConfig/
+*Listings/
+
+#file
+xcmder
 *.map
+*.uvoptx
+*.uvguix*

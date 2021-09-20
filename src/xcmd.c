@@ -5,31 +5,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/*光标操作符，其中0x1B是ESC，只适用于xcmd_print函数*/
-#define CUU(n)         "\x1B[%dA",n		/* 光标向上	光标向上 <n> 行 */
-#define CUD(n)         "\x1B[%dB",n		/* 光标向下	光标向下 <n> 行 */
-#define CUF(n)         "\x1B[%dC",n		/* 光标向前	光标向前（右）<n> 行 */
-#define CUB(n)         "\x1B[%dD",n		/* 光标向后	光标向后（左）<n> 行 */
-#define CNL(n)         "\x1B[%dE",n		/* 光标下一行	光标从当前位置向下 <n> 行 */
-#define CPL(n)         "\x1B[%dF",n		/* 光标当前行	光标从当前位置向上 <n> 行 */
-#define CHA(n)         "\x1B[%dG",n		/* 绝对光标水平	光标在当前行中水平移动到第 <n> 个位置 */
-#define VPA(n)         "\x1B[%dd",n		/* 绝对垂直行位置	光标在当前列中垂直移动到第 <n> 个位置 */
-#define CUP(y,x)       "\x1B[%d;%dH",y,x	/* 光标位置	*光标移动到视区中的 <x>; <y> 坐标，其中 <x> 是 <y> 行的列 */
-#define HVP(y,x)       "\x1B[%d;%df",y,x	/* 水平垂直位置	*光标移动到视区中的 <x>; <y> 坐标，其中 <x> 是 <y> 行的列 */
-
-/*光标可见性*/
-#define CU_START_BL   "\x1B[?12h"	/* ATT160	文本光标启用闪烁	开始光标闪烁 */
-#define CU_STOP_BL    "\x1B[?12l"	/* ATT160	文本光标禁用闪烁	停止闪烁光标 */
-#define CU_SHOW       "\x1B[?25h"	/* DECTCEM	文本光标启用模式显示	显示光标 */
-#define CU_HIDE       "\x1B[?25l"	/* DECTCEM	文本光标启用模式隐藏	隐藏光标 */
-
-/* 字符操作 */
-#define ICH(n)	"\x1B[%d@",n	/* 插入字符	在当前光标位置插入 <n> 个空格，这会将所有现有文本移到右侧。 向右溢出屏幕的文本会被删除。*/
-#define DCH(n)	"\x1B[%dP",n	/* 删除字符	删除当前光标位置的 <n> 个字符，这会从屏幕右边缘以空格字符移动。*/
-#define ECH(n)	"\x1B[%dX",n	/* 擦除字符	擦除当前光标位置的 <n> 个字符，方法是使用空格字符覆盖它们。*/
-#define IL(n)	"\x1B[%dL",n	/* 插入行	将 <n> 行插入光标位置的缓冲区。 光标所在的行及其下方的行将向下移动。*/
-#define DL(n)	"\x1B[%dM",n	/* 删除行	从缓冲区中删除 <n> 行，从光标所在的行开始。*/
-
 #define CMD_IS_ENDLINE(c) ((c == '\n') || (c == '\r'))
 #define CMD_IS_PRINT(c) ((c >= 32) && (c <= 126))
 
@@ -79,7 +54,7 @@ struct
         #endif
 
         char display_line[XCMD_LINE_MAX_LENGTH];  /* 显示区的缓存 */
-        char *prompt;        /* 显示区的提示 */
+        const char *prompt;        /* 显示区的提示 */
         uint16_t byte_num;   /* 当前行的字符个数 */
         uint16_t cursor;     /* 光标所在位置 */
         uint8_t  encode_case_stu;
@@ -264,7 +239,7 @@ static void xcmd_parser(uint8_t byte)
     }
     else
     {
-        xcmd_key_exec(c);
+        xcmd_key_exec((XCMD_KEY_T)c);
     }
     fflush(stdout);
 }
@@ -523,6 +498,14 @@ xcmd_key_t *xcmd_keylist_get(void)
 xcmd_t *xcmd_cmdlist_get(void)
 {
     return g_xcmder.cmd_list.head;
+}
+
+void xcmd_set_prompt(const char* prompt)
+{
+    if(prompt)
+    {
+        g_xcmder.parser.prompt = prompt;
+    }
 }
 
 void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
