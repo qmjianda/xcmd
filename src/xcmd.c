@@ -246,10 +246,10 @@ static void xcmd_parser(uint8_t byte)
 
 void xcmd_print(const char *fmt, ...)
 {
-    char ucstring[128] = {0};
+    char ucstring[XCMD_PRINT_BUF_MAX_LENGTH] = {0};
     va_list arg;
     va_start(arg, fmt);
-    vsnprintf(ucstring, 128, fmt, arg);
+    vsnprintf(ucstring, XCMD_PRINT_BUF_MAX_LENGTH, fmt, arg);
     va_end(arg);
 
     for(uint16_t i=0; ucstring[i]; i++)
