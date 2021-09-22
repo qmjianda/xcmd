@@ -1,14 +1,18 @@
-OBJ += xcmd.o xcmd_default_keys.o xcmd_default_cmds.o test_cmds.o  linux_main.o 
+OBJ += xcmd.o xcmd_default_keys.o xcmd_default_cmds.o linux_main.o test.o
 BIN = xcmder
-VPATH := ../../src
-INC += ../../inc
+VPATH := ../../src \
+		 ../../extensions/test/src
+
+INC += -I../../inc \
+	   -I../../extensions/test/inc
+
 OBJ_WITH_BUILD_DIR:=$(addprefix build/,$(OBJ))
 
 all: mkbuilddir $(OBJ_WITH_BUILD_DIR)
 	gcc $(OBJ_WITH_BUILD_DIR) -o $(BIN) -Wl,-Map,$(BIN).map
 
 build/%.o:%.c
-	gcc -g -Wall -c -I$(INC) -o $@ $<
+	gcc -g -Wall -c $(INC) -o $@ $<
 
 .PHONY:mkbuilddir
 mkbuilddir:

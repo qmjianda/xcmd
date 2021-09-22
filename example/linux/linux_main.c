@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-14 23:58:24
- * @LastEditTime: 2021-09-16 23:20:43
+ * @LastEditTime: 2021-09-22 23:13:05
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/example/linux/linux_main.c
@@ -16,9 +16,7 @@
 #include<sys/types.h>  
 #include<sys/socket.h>  
 #include <termio.h>
-
-
-extern void test_cmd_init(void);
+#include "test.h"
 
 int getch(void)
 {
@@ -56,34 +54,27 @@ int cmd_put_char(uint8_t ch)
     return 1;
 }
 
-int cmd_ctr_a(void* pv)
-{
-    xcmd_print("this is ctr+a\n");
-    return 0;
-}
-
-int cmd_ctr_c(void* pv)
+static int key_ctr_c(void* pv)
 {
     exit(0);
 }
 
-static xcmd_key_t user_keys[] = 
+static xcmd_key_t keys[] = 
 {
-    {CTR_A, cmd_ctr_a,  NULL},
-    {CTR_C, cmd_ctr_c, NULL},
+    {CTR_C, key_ctr_c, NULL},
 };
 
 void user_keys_init(void)
 {
-    xcmd_key_register(user_keys, sizeof(user_keys)/sizeof(xcmd_key_t));
+    xcmd_key_register(keys, sizeof(keys)/sizeof(xcmd_key_t));
 }
 
 int main(void)
 {
     xcmd_init(cmd_get_char, cmd_put_char);
     test_cmd_init();
+    test_keys_init();
     user_keys_init();
-    
     while(1)
     {
         xcmd_task();

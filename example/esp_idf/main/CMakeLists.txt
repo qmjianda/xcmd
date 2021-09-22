@@ -1,7 +1,8 @@
 idf_component_register(SRCS "esp_idf.c"
-                            "test_cmds.c"
+                            "../../extensions/test//src/test.c"
                             "../../../src/xcmd.c"
                             "../../../src/xcmd_default_keys.c"
                             "../../../src/xcmd_default_cmds.c"
                     INCLUDE_DIRS "." 
-                            "../../../inc/")
+                            "../../../inc/"
+                            "../../extensions/test/inc/")
