@@ -66,21 +66,21 @@ static void cmd_example(int argc, char* argv[])
     uint8_t i;
     if(param_check(1, argc, argv))
 	{
-		if(strcmp(argv[1], "str") == 0)
+		if(strcmp(argv[1], "-s") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
 		    	xcmd_print("%s\r\n", argv[i]);
 			}
 		}
-		if(strcmp(argv[1], "int") == 0)
+		if(strcmp(argv[1], "-i") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
 		    	xcmd_print("%d\r\n", atoi(argv[i]));
 			}
 		}
-		if(strcmp(argv[1], "float") == 0)
+		if(strcmp(argv[1], "-f") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
