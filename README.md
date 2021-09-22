@@ -15,7 +15,7 @@ xcmd是一款单片机命令行工具，移植十分方便，并且对flash与ra
 1. SecureCRT：请设置成Xterm模式
 2. （推荐）putty
 3. （推荐）MobaXterm
-
+4. Xshell
 #### 移植
 - 移植十分简单，只需要在初始化的时候提供字符输入输出函数即可
 ```C
