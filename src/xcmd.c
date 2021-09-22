@@ -249,7 +249,7 @@ void xcmd_print(const char *fmt, ...)
     char ucstring[128] = {0};
     va_list arg;
     va_start(arg, fmt);
-    vsnprintf(ucstring, 256, fmt, arg);
+    vsnprintf(ucstring, 128, fmt, arg);
     va_end(arg);
 
     for(uint16_t i=0; ucstring[i]; i++)
