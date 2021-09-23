@@ -159,3 +159,9 @@ void test_keys_init(void)
 
 #### 其他
 流程图需要使用drawio来打开，可以使用vscode drawio的插件来打开
+
+#### 计划
+##### 仿照linux终端添加扩展快捷键
+1. 添加ctr+left和ctr+right快捷键
+2. 添加ctr+a、ctr+e、ctr+u、xtr+k、ctr+l快捷键
+##### 添加终端颜色/字体控制扩展
