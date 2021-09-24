@@ -165,3 +165,6 @@ void test_keys_init(void)
 1. 添加ctr+left和ctr+right快捷键
 2. 添加ctr+a、ctr+e、ctr+u、xtr+k、ctr+l快捷键
 ##### 添加终端颜色/字体控制扩展
+##### 修改xcmd_get_param函数
+1. 替换strtok函数为其他可复用函数
+2. 增加对“”的支持
