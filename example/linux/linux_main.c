@@ -60,7 +60,7 @@ static int key_ctr_c(void* pv)
 
 static xcmd_key_t keys[] = 
 {
-    {CTR_C, key_ctr_c, "ctr+c"},
+    {CTR_C, key_ctr_c, "ctr+c", NULL},
 };
 
 void user_keys_init(void)

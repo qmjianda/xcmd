@@ -51,10 +51,10 @@ static void cmd_logo(int argc, char* argv[])
 
 static xcmd_t cmds[] = 
 {
-    {"clear", cmd_clear, "clear screen"},
-    {"help", cmd_help, "show this list"},
-    {"keys", cmd_keys, "show keys"},
-    {"logo", cmd_logo, "show logo"},
+    {"clear", cmd_clear, "clear screen", NULL},
+    {"help", cmd_help, "show this list", NULL},
+    {"keys", cmd_keys, "show keys", NULL},
+    {"logo", cmd_logo, "show logo", NULL},
 };
 
 void default_cmds_init(void)

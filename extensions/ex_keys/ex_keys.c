@@ -49,11 +49,11 @@ static int xcmd_ctr_l(void *pv)
 
 static xcmd_key_t ex_keys[] = 
 {
-    {CTR_A, xcmd_ctr_a, "ctr+a"},
-    {CTR_E, xcmd_ctr_e, "ctr+e"},
-    {CTR_U, xcmd_ctr_u, "ctr+u"},
-    {CTR_K, xcmd_ctr_k, "ctr+k"},
-    {CTR_L, xcmd_ctr_l, "ctr+l"},
+    {CTR_A, xcmd_ctr_a, "ctr+a", NULL},
+    {CTR_E, xcmd_ctr_e, "ctr+e", NULL},
+    {CTR_U, xcmd_ctr_u, "ctr+u", NULL},
+    {CTR_K, xcmd_ctr_k, "ctr+k", NULL},
+    {CTR_L, xcmd_ctr_l, "ctr+l", NULL},
 };
 
 

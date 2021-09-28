@@ -108,14 +108,14 @@ static int cmd_ctr_q(void* pv)
 
 static xcmd_t cmds[] = 
 {
-    {"echo", cmd_echo, "echo anything"},
-    {"history", cmd_history, "show history list"},
-    {"example", cmd_example, "example [-f|-i|-s] [val]"},
+    {"echo", cmd_echo, "echo anything", NULL},
+    {"history", cmd_history, "show history list", NULL},
+    {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
 };
 
 static xcmd_key_t keys[] = 
 {
-    {CTR_Q, cmd_ctr_q, "ctr+q"},
+    {CTR_Q, cmd_ctr_q, "ctr+q", NULL},
 };
 
 void test_cmd_init(void)
