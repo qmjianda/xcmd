@@ -16,7 +16,7 @@ extern   "C" {
 #define VERSION "1.0.0"
 
 #ifndef XCMD_LINE_MAX_LENGTH
-#define XCMD_LINE_MAX_LENGTH    (32) /* 命令行支持的最大字符数 */
+#define XCMD_LINE_MAX_LENGTH    (64) /* 命令行支持的最大字符数 */
 #endif
 
 #ifndef XCMD_PRINT_BUF_MAX_LENGTH
@@ -24,7 +24,7 @@ extern   "C" {
 #endif  
 
 #ifndef  XCMD_HISTORY_MAX_NUM
-#define XCMD_HISTORY_MAX_NUM    (0)  /* 支持的历史记录个数，0为不支持 */
+#define XCMD_HISTORY_MAX_NUM    (8)  /* 支持的历史记录个数, 这个参数对内存的影响很大，建议arduino设置为0，0为不支持 */
 #endif
 
 #ifndef XCMD_PARAM_MAX_NUM

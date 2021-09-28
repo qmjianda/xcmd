@@ -31,7 +31,8 @@ static void cmd_keys(int argc, char* argv[])
     xcmd_key_t *p = xcmd_keylist_get();
     while(p)
     {
-        xcmd_print("0x%08X  %s\r\n", p->key, p->help);
+        xcmd_print("0x%08X\t", p->key);
+        xcmd_print("%s\r\n",p->help);
         p = p->next;
     }
 }
@@ -52,7 +53,7 @@ static xcmd_t cmds[] =
 {
     {"clear", cmd_clear, "clear screen"},
     {"help", cmd_help, "show this list"},
-    {"keys", cmd_keys, "show keys", NULL},
+    {"keys", cmd_keys, "show keys"},
     {"logo", cmd_logo, "show logo"},
 };
 
