@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_MD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS\Device\ST\STM32F10x\Include;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\CMSIS\Include;..\User;..\User\port;..\..\..\..\..\inc;..\lib\inc;..\..\..\..\..\extensions\test\inc</IncludePath>
+              <IncludePath>..\Libraries\CMSIS\Device\ST\STM32F10x\Include;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\CMSIS\Include;..\User;..\User\port;..\..\..\..\..\inc;..\lib\inc;..\..\..\..\..\extensions\test</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -581,7 +581,7 @@
             <File>
               <FileName>test.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\extensions\test\src\test.c</FilePath>
+              <FilePath>..\..\..\..\..\extensions\test\test.c</FilePath>
             </File>
           </Files>
         </Group>

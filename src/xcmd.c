@@ -1,7 +1,7 @@
-#include "../inc/xcmd.h"
-#include "../inc/xcmd_confg.h"
-#include "../inc/xcmd_default_cmds.h"
-#include "../inc/xcmd_default_keys.h"
+#include "xcmd_confg.h"
+#include "xcmd.h"
+#include "xcmd_default_cmds.h"
+#include "xcmd_default_keys.h"
 #include <stdlib.h>
 #include <stdio.h>
 

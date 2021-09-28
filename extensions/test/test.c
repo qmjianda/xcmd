@@ -6,9 +6,10 @@
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/extensions/test/test.c
  */
-#include "test.h"
 #include <string.h>
 #include <stdlib.h>
+#include "xcmd.h"
+#include "test.h"
 
 #define EXIT_MESSAGE() xcmd_print(g_cmder, "press \"q\" or \"Q\" to exit!\r\n")
 

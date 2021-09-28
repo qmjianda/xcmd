@@ -6,9 +6,9 @@
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_keys.c
  */
-#include "../inc/xcmd_default_keys.h"
-#include "../inc/xcmd_confg.h"
-#include "../inc/xcmd.h"
+#include "xcmd_confg.h"
+#include "xcmd.h"
+#include "xcmd_default_keys.h"
 
 static int xcmd_del_char(void *pv)
 {

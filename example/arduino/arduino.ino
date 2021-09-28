@@ -7,9 +7,7 @@
  * @FilePath: /xcmd/example/arduino/arduino.ino
  */
 #include <Arduino.h>
-#include "inc/xcmd.h"
-#include "inc/xcmd_default_keys.h"
-#include "inc/xcmd_default_cmds.h"
+#include "xcmd.h"
 #include "test.h"
 
 int cmd_get_char(uint8_t *ch)

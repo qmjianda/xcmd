@@ -6,9 +6,9 @@
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_cmds.c
  */
-#include "../inc/xcmd_default_cmds.h"
-#include "../inc/xcmd.h"
-#include "../inc/xcmd_confg.h"
+#include "xcmd_confg.h"
+#include "xcmd_default_cmds.h"
+#include "xcmd.h"
 #include <stdlib.h>
 
 static void cmd_clear(int argc, char* argv[])

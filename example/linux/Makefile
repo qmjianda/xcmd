@@ -1,10 +1,10 @@
 OBJ += xcmd.o xcmd_default_keys.o xcmd_default_cmds.o linux_main.o test.o
 BIN = xcmder
 VPATH := ../../src \
-		 ../../extensions/test/src
+		 ../../extensions/test
 
 INC += -I../../inc \
-	   -I../../extensions/test/inc
+	   -I../../extensions/test
 
 OBJ_WITH_BUILD_DIR:=$(addprefix build/,$(OBJ))
 

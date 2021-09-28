@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "xcmd.h"
-#include "xcmd_default_keys.h"
-#include "xcmd_default_cmds.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "test.h"

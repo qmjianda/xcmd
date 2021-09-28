@@ -10,8 +10,6 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include "xcmd.h"
-
 #ifdef __cplusplus
 extern   "C" {
 #endif

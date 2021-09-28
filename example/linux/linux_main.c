@@ -9,13 +9,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "xcmd.h"
-#include "xcmd_default_keys.h"
-#include "xcmd_default_cmds.h"
-#include<errno.h>  
-#include<sys/types.h>  
-#include<sys/socket.h>  
+#include <sys/types.h>  
+#include <sys/socket.h>  
 #include <termio.h>
+#include "xcmd.h"
 #include "test.h"
 
 int getch(void)
