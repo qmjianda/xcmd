@@ -145,8 +145,8 @@ int cmd_ctr_c(void* pv)
 
 static xcmd_key_t user_keys[] = 
 {
-    {CTR_A, cmd_ctr_a,  NULL},
-    {CTR_C, cmd_ctr_c, NULL},
+    {CTR_A, cmd_ctr_a, "ctr+a", NULL},
+    {CTR_C, cmd_ctr_c, "ctr+c", NULL},
 };
 
 void test_keys_init(void)
