@@ -9,6 +9,8 @@
 #include <Arduino.h>
 #include "xcmd.h"
 #include "test.h"
+#include "ex_keys.h"
+#include "ex_cmds.h"
 
 int cmd_get_char(uint8_t *ch)
 {
@@ -34,6 +36,8 @@ void setup() {
     xcmd_init(cmd_get_char, cmd_put_char);
     test_cmd_init();
     test_keys_init();
+    ex_keys_init();
+    ex_cmds_init();
 }
 
 void loop() {

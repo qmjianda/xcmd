@@ -108,14 +108,14 @@ static int xcmd_auto_completion(void *pv)
 
 static xcmd_key_t default_keys[] = 
 {
-    {BACKSPACE,     xcmd_del_char,          NULL},
-    {L_DELETE,      xcmd_del_char,          NULL},
-    {LEFT,          xcmd_cursor_left,       NULL},
-    {RIGHT,         xcmd_cursor_right,      NULL},
-    {TAB,           xcmd_auto_completion,   NULL},
+    {BACKSPACE,     xcmd_del_char,          "backspace"},
+    {L_DELETE,      xcmd_del_char,          "left delete"},
+    {LEFT,          xcmd_cursor_left,       "left"},
+    {RIGHT,         xcmd_cursor_right,      "right"},
+    {TAB,           xcmd_auto_completion,   "tab"},
 #if XCMD_HISTORY_MAX_NUM
-    {DW,            xcmd_history_dw,        NULL},
-    {UP,            xcmd_history_up,        NULL},
+    {DW,            xcmd_history_dw,        "down"},
+    {UP,            xcmd_history_up,        "up"},
 #endif
 };
 

@@ -14,6 +14,8 @@
 #include <termio.h>
 #include "xcmd.h"
 #include "test.h"
+#include "ex_keys.h"
+#include "ex_cmds.h"
 
 int getch(void)
 {
@@ -31,7 +33,7 @@ int getch(void)
      }
  
      ch = getchar();
-     //xcmd_print(g_cmder, "%d\n", ch);
+     // xcmd_print("%d\n", ch);
      if (tcsetattr(fd, TCSANOW, &tm_old) < 0) {//更改设置为最初的样子
           return -1;
      }
@@ -58,7 +60,7 @@ static int key_ctr_c(void* pv)
 
 static xcmd_key_t keys[] = 
 {
-    {CTR_C, key_ctr_c, NULL},
+    {CTR_C, key_ctr_c, "ctr+c"},
 };
 
 void user_keys_init(void)
@@ -72,6 +74,8 @@ int main(void)
     test_cmd_init();
     test_keys_init();
     user_keys_init();
+    ex_keys_init();
+    ex_cmds_init();
     while(1)
     {
         xcmd_task();

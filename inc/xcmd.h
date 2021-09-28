@@ -29,6 +29,7 @@ typedef struct __key
 {
     XCMD_KEY_T key;
     cmd_key_func_t func;
+    char* help;
     struct __key *next;
 }xcmd_key_t;
 
@@ -108,6 +109,13 @@ void xcmd_display_insert_char(char c);
  * @return 无
  */
 void xcmd_display_delete_char(void);
+
+/**
+ * @description: 返回光标当前的字符
+ * @param {char*}cha存储返回的字符
+ * @return {uint8_t}0光标位置无字符，1有字符
+ */
+uint8_t xcmd_display_current_char(char *cha);
 
 /**
  * @description: 清除显示器

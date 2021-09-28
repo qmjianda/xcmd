@@ -26,6 +26,16 @@ static void cmd_help(int argc, char* argv[])
     }
 }
 
+static void cmd_keys(int argc, char* argv[])
+{
+    xcmd_key_t *p = xcmd_keylist_get();
+    while(p)
+    {
+        xcmd_print("0x%08X  %s\r\n", p->key, p->help);
+        p = p->next;
+    }
+}
+
 static void cmd_logo(int argc, char* argv[])
 {
     char *log = "\
@@ -40,9 +50,10 @@ static void cmd_logo(int argc, char* argv[])
 
 static xcmd_t cmds[] = 
 {
-    {"clear", cmd_clear, "clear screen", NULL},
-    {"help", cmd_help, "show this list", NULL},
-    {"logo", cmd_logo, "show logo", NULL},
+    {"clear", cmd_clear, "clear screen"},
+    {"help", cmd_help, "show this list"},
+    {"keys", cmd_keys, "show keys", NULL},
+    {"logo", cmd_logo, "show logo"},
 };
 
 void default_cmds_init(void)

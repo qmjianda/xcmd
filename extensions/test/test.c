@@ -100,22 +100,22 @@ static void cmd_history(int argc, char* argv[])
     }while(len--);
 }
 
-static int cmd_ctr_a(void* pv)
+static int cmd_ctr_q(void* pv)
 {
-    xcmd_print("this is ctr+a\n");
+    xcmd_print("this is ctr+q\n");
     return 0;
 }
 
 static xcmd_t cmds[] = 
 {
-    {"echo", cmd_echo, "echo anything", NULL},
-    {"history", cmd_history, "show history list", NULL},
-    {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
+    {"echo", cmd_echo, "echo anything"},
+    {"history", cmd_history, "show history list"},
+    {"example", cmd_example, "example [-f|-i|-s] [val]"},
 };
 
 static xcmd_key_t keys[] = 
 {
-    {CTR_A, cmd_ctr_a,  NULL},
+    {CTR_Q, cmd_ctr_q, "ctr+q"},
 };
 
 void test_cmd_init(void)

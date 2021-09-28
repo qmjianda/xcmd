@@ -320,13 +320,25 @@ void xcmd_display_delete_char(void)
 	}
 }
 
+uint8_t xcmd_display_current_char(char *cha)
+{
+    if(g_xcmder.parser.cursor < g_xcmder.parser.byte_num)
+    {
+        char *line = xcmd_display_get();
+        *cha = line[g_xcmder.parser.cursor];
+        return 1;
+    }
+    return 0;
+}
+
 void xcmd_display_cursor_set(uint16_t pos)
 {
-    if(pos <= g_xcmder.parser.byte_num)
+    if(pos > g_xcmder.parser.byte_num)
     {
-        g_xcmder.parser.cursor = pos;
-        xcmd_print(CHA(g_xcmder.parser.cursor+3));
+        pos = g_xcmder.parser.byte_num;
     }
+    g_xcmder.parser.cursor = pos;
+    xcmd_print(CHA(g_xcmder.parser.cursor+3));
 }
 
 uint16_t xcmd_display_cursor_get(void)
