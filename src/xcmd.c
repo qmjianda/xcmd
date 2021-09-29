@@ -64,15 +64,95 @@ struct
     uint8_t _initOK;
 } g_xcmder;
 
+static char *xcmd_strpbrk(char*s, const char *delim)  //返回s1中第一个满足条件的字符的指针, 并且保留""号内的源格式
+{
+    uint8_t flag = 0;
+    for(uint16_t i=0; s[i]; i++)
+    {
+        for(uint16_t j=0; delim[j]; j++)
+        {
+            if(0 == flag)
+            {
+                if(s[i] == '\"')
+                {
+                    for(uint16_t k=i; s[k]; k++)
+                    {
+                        s[k] = s[k+1];
+                    }
+                    flag = 1;
+                    continue;
+                }
+            }
+            
+            if(flag)
+            {
+                if(s[i] == '\"')
+                {
+                    for(uint16_t k=i; s[k]; k++)
+                    {
+                        s[k] = s[k+1];
+                    }
+                    flag = 0;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            if(s[i] == delim[j])
+            {
+                return &s[i];
+            }
+        }
+    }
+    return NULL;
+}
+
+/* 字符串切割函数，使用:   
+        char s[] = "-abc-=-def";   
+        char *sp;   
+        x = strtok_r(s, "-", &sp);      // x = "abc", sp = "=-def"   
+        x = strtok_r(NULL, "-=", &sp);  // x = "def", sp = NULL   
+        x = strtok_r(NULL, "=", &sp);   // x = NULL   
+                // s = "abc/0-def/0"   
+*/     
+static char *xcmd_strtok(char *s, const char *delim, char **save_ptr) 
+{     
+    char *token;     
+     
+    if (s == NULL) s = *save_ptr;     
+     
+    /* Scan leading delimiters.  */     
+    s += strspn(s, delim);   // 返回字符串中第一个不在指定字符串中出现的字符下标，去掉了以空字符开头的
+                                        // 字串的情况
+    if (*s == '\0')      
+        return NULL;     
+    
+    /* Find the end of the token.  */     
+    token = s;     
+    s = xcmd_strpbrk(token, delim);  //   返回s1中第一个满足条件的字符的指针
+    if (s == NULL)     
+        /* This token finishes the string.  */     
+        *save_ptr = strchr(token, '\0');     
+    else {     
+        /* Terminate the token and make *SAVE_PTR point past it.  */     
+        *s = '\0';     
+        *save_ptr = s + 1;     
+    }
+    return token;     
+}  
+
 static int xcmd_get_param(char* msg, char*delim, char* get[], int max_num)
 {
 	int i,ret;
 	char *ptr = NULL;
-	ptr = strtok(msg, delim);
+    char *sp = NULL;
+	ptr = xcmd_strtok(msg, delim, &sp);
 	for(i=0; ptr!=NULL &&i<max_num; i++)
 	{
 		get[i] = ptr;
-		ptr = strtok(NULL, delim);
+		ptr = xcmd_strtok(NULL, delim, &sp);
 	}
 	ret = i;
 	return ret;
