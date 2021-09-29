@@ -4,6 +4,7 @@
 #include "xcmd_default_keys.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define CMD_IS_ENDLINE(c) ((c == '\n') || (c == '\r'))
 #define CMD_IS_PRINT(c) ((c >= 32) && (c <= 126))
@@ -346,7 +347,8 @@ void xcmd_display_write(const char* buf, uint16_t len)
     {
         len = XCMD_LINE_MAX_LENGTH;
     }
-    strncpy(g_xcmder.parser.display_line, buf, len);
+    memcpy(g_xcmder.parser.display_line, buf, len);
+    g_xcmder.parser.display_line[len] = '\0';
     xcmd_print(g_xcmder.parser.display_line);
     g_xcmder.parser.byte_num = len;
     g_xcmder.parser.cursor = len;
