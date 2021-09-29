@@ -53,7 +53,7 @@ struct
         }history_list;
         #endif
 
-        char display_line[XCMD_LINE_MAX_LENGTH];  /* 显示区的缓存 */
+        char display_line[XCMD_LINE_MAX_LENGTH+1];  /* 显示区的缓存 */
         const char *prompt;        /* 显示区的提示 */
         uint16_t byte_num;   /* 当前行的字符个数 */
         uint16_t cursor;     /* 光标所在位置 */
@@ -339,15 +339,25 @@ void xcmd_print(const char *fmt, ...)
     return;
 }
 
-void xcmd_display_set(const char *msg)
+void xcmd_display_write(const char* buf, uint16_t len)
 {
     xcmd_display_clear();
-    uint16_t len = strlen(msg);
-    strncpy(g_xcmder.parser.display_line, msg, XCMD_LINE_MAX_LENGTH);
+    if(len > XCMD_LINE_MAX_LENGTH)
+    {
+        len = XCMD_LINE_MAX_LENGTH;
+    }
+    strncpy(g_xcmder.parser.display_line, buf, len);
     xcmd_print(g_xcmder.parser.display_line);
     g_xcmder.parser.byte_num = len;
     g_xcmder.parser.cursor = len;
 }
+
+void xcmd_display_print(const char *msg)
+{
+    xcmd_display_write(msg, strlen(msg));
+}
+
+
 
 char* xcmd_display_get(void)
 {

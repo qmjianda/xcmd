@@ -136,7 +136,8 @@ char* xcmd_display_get(void);
  * @param {char*} 要现实的内容
  * @return 无
  */
-void xcmd_display_set(const char *msg);
+void xcmd_display_print(const char *msg);
+void xcmd_display_write(const char* buf, uint16_t len);
 
 /**
  * @description: 光标操作函数
