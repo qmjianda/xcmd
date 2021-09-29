@@ -9,13 +9,12 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <sys/types.h>  
-#include <sys/socket.h>  
-#include <termio.h>
+#include "xcmd_platform.h"
 #include "xcmd.h"
 #include "test.h"
 #include "ex_keys.h"
 #include "ex_cmds.h"
+#include "socket_cmds.h"
 
 int getch(void)
 {
@@ -76,6 +75,7 @@ int main(void)
     user_keys_init();
     ex_keys_init();
     ex_cmds_init();
+    socket_cmds_init();
     while(1)
     {
         xcmd_task();
