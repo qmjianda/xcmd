@@ -292,7 +292,7 @@ static char* xcmd_line_end(void)
 #endif
         g_xcmder.parser.byte_num = 0;
         g_xcmder.parser.cursor = 0;
-        xcmd_history_reset();
+        xcmd_history_slider_reset();
 	}
 	return ret;
 }
@@ -529,7 +529,7 @@ uint16_t xcmd_history_len(void)
 #endif
 }
 
-void xcmd_history_reset(void)
+void xcmd_history_slider_reset(void)
 {
 #if XCMD_HISTORY_MAX_NUM
     g_xcmder.parser.history_list.slider = g_xcmder.parser.history_list.head;

@@ -194,7 +194,7 @@ char *xcmd_history_current(void);
  * @param {*}
  * @return 无
  */
-void  xcmd_history_reset(void);
+void  xcmd_history_slider_reset(void);
 
 #ifdef __cplusplus
         }

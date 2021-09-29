@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-22 22:33:17
- * @LastEditTime: 2021-09-22 23:17:02
+ * @LastEditTime: 2021-09-29 22:35:29
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/extensions/test/test.c
@@ -93,11 +93,24 @@ static void cmd_example(int argc, char* argv[])
 static void cmd_history(int argc, char* argv[])
 {
     uint16_t len = xcmd_history_len();
-    xcmd_history_reset();
+
     do
     {
-        xcmd_print("%s\r\n", xcmd_history_next());
+        xcmd_history_next();
     }while(len--);
+
+    while(1)
+    {
+        char *line = xcmd_history_prev();
+        if(line)
+        {
+            xcmd_print("%s\r\n", line);
+        }
+        else
+        {
+            break;
+        }
+    }
 }
 
 static int cmd_ctr_q(void* pv)
