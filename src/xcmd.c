@@ -530,7 +530,7 @@ uint8_t xcmd_exec(char* str)
 	char *cmd_param_buff[XCMD_PARAM_MAX_NUM];
 	char temp[XCMD_LINE_MAX_LENGTH];
 	strncpy(temp, str, XCMD_LINE_MAX_LENGTH);
-	param_num = xcmd_get_param(temp, "., ", cmd_param_buff, XCMD_PARAM_MAX_NUM);
+	param_num = xcmd_get_param(temp, " ", cmd_param_buff, XCMD_PARAM_MAX_NUM);
 	if(param_num >0)
 	{
 		xcmd_cmd_match(param_num, cmd_param_buff);
