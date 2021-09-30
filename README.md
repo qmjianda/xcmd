@@ -168,3 +168,12 @@ void test_keys_init(void)
 ##### 修改xcmd_get_param函数(已完成)
 1. 替换strtok函数为其他可复用函数
 2. 增加对“”的支持
+##### 增加socket相关扩展
+1. tcp client/service
+2. udp client/service
+3. udp 广播
+4. udp 组播
+
+##### 增加操作系统支持
+1. linux (demo only for linux example)
+2. FreeRTOS (demo only for esp32)
