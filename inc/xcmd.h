@@ -150,7 +150,8 @@ char* xcmd_display_get(void);
  * @param {char*} 要现实的内容
  * @return 无
  */
-void xcmd_display_set(const char *msg);
+void xcmd_display_print(const char *msg);
+void xcmd_display_write(const char* buf, uint16_t len);
 
 /**
  * @description: 光标操作函数
@@ -207,7 +208,7 @@ char *xcmd_history_current(void);
  * @param {*}
  * @return 无
  */
-void  xcmd_history_reset(void);
+void  xcmd_history_slider_reset(void);
 
 #ifdef __cplusplus
         }

@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-15 00:11:50
- * @LastEditTime: 2021-09-17 23:18:12
+ * @LastEditTime: 2021-09-29 22:00:26
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_keys.c
@@ -9,6 +9,19 @@
 #include "xcmd_confg.h"
 #include "xcmd.h"
 #include "xcmd_default_keys.h"
+
+static int xcmd_str_match(const char* str1, const char* str2)
+{
+    int i=0;
+    for(i=0; str1[i] && str2[i]; i++)
+    {
+        if(str1[i] != str2[i])
+        {
+            break;
+        }
+    }
+    return i;
+}
 
 static int xcmd_del_char(void *pv)
 {
@@ -40,7 +53,7 @@ static int xcmd_history_dw(void *pv)
     char *line = xcmd_history_prev();
     if(line)
     {
-        xcmd_display_set(line);
+        xcmd_display_print(line);
     }
     else
     {
@@ -54,19 +67,18 @@ static int xcmd_history_up(void *pv)
     char *line = xcmd_history_next();
     if(line)
     {
-        xcmd_display_set(line);
+        xcmd_display_print(line);
     }
     return 0;
 }
 
 static int xcmd_auto_completion(void *pv)
 {
-    xcmd_t *match_cmd = NULL;
+    xcmd_t *match_cmd_first = NULL;
     uint16_t match_num = 0;
+    uint16_t match_subscript_min = 0;
     xcmd_t *p = xcmd_cmdlist_get();
     char *display_line = xcmd_display_get();
-    char display_backup[XCMD_LINE_MAX_LENGTH];
-    strncpy(display_backup, display_line, XCMD_LINE_MAX_LENGTH);
     uint16_t cursor_pos = xcmd_display_cursor_get();
     while(p)
     {
@@ -74,11 +86,12 @@ static int xcmd_auto_completion(void *pv)
         {
             if(match_num == 0)
             {
-                match_cmd = p;
+                match_cmd_first = p;
+                match_subscript_min = strlen(p->name);
             }
             else if(match_num == 1)
             {
-                xcmd_print("\r\n%-15s%-15s", match_cmd->name, p->name);
+                xcmd_print("\r\n%-15s%-15s", match_cmd_first->name, p->name);
             }
             else
             {
@@ -88,6 +101,11 @@ static int xcmd_auto_completion(void *pv)
                     xcmd_print("\r\n");
                 }
             }
+            uint16_t subscript = xcmd_str_match(match_cmd_first->name, p->name);
+            if( subscript < match_subscript_min)
+            {
+                match_subscript_min = subscript;
+            }
             match_num++;
         }
         p = p->next;
@@ -95,16 +113,15 @@ static int xcmd_auto_completion(void *pv)
 
     if(match_num == 1)
     {
-        xcmd_display_set(match_cmd->name);
+        xcmd_display_print(match_cmd_first->name);
     }
     else if(match_num > 1)
     {
         xcmd_print("\r\n");
-        xcmd_display_set(display_backup);
+        xcmd_display_write(match_cmd_first->name, match_subscript_min);
     }
     return 0;
 }
-
 
 static xcmd_key_t default_keys[] = 
 {

@@ -1,9 +1,12 @@
 # xcmd
 
+#### 效果展示
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0922/220957_66faa768_1680380.gif "演示1.gif")
+
 #### 介绍
 xcmd是一款单片机命令行工具，移植十分方便，并且对flash与ram占用很小，旨在为单片机提供一个能够快速搭建且占用资源很小的命令行工具，可以大大加快单片机程序调试工作，它有一下几个优点。
 1. **移植十分简单**
-2. **资源占用很少，最小约8K rom以及800多Byte ram**
+2. **资源占用约8K rom 1K ram**
 1. **支持历史记录** 
 2. **支持命令自动补全**
 3. **支持注册快捷键** 
@@ -154,9 +157,6 @@ void test_keys_init(void)
     xcmd_key_register(user_keys, sizeof(user_keys)/sizeof(xcmd_key_t));
 }
 ```
-#### 效果展示
-![输入图片说明](https://images.gitee.com/uploads/images/2021/0922/220957_66faa768_1680380.gif "演示1.gif")
-
 #### 其他
 流程图需要使用drawio来打开，可以使用vscode drawio的插件来打开
 
@@ -168,3 +168,12 @@ void test_keys_init(void)
 ##### 修改xcmd_get_param函数(已完成)
 1. 替换strtok函数为其他可复用函数
 2. 增加对“”的支持
+##### 增加socket相关扩展
+1. tcp client/service
+2. udp client/service
+3. udp 广播
+4. udp 组播
+
+##### 增加操作系统支持
+1. linux (demo only for linux example)
+2. FreeRTOS (demo only for esp32)

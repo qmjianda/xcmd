@@ -40,6 +40,10 @@ static void xcmd_udp_client(int argc ,char**argv)
         }
         close(udp);
     }
+    else
+    {
+        xcmd_print("Usage: udp_client ip port msg");
+    }
 }
 
 void xcmd_udp_service(int argc, char** argv)
