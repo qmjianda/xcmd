@@ -82,6 +82,20 @@ xcmd_t *xcmd_cmdlist_get(void);
 xcmd_key_t *xcmd_keylist_get(void);
 
 /**
+ * @description: 删除已经注册的cmd
+ * @param {char*} cmd：cmd集
+ * @return {int}：0：success； !0：failed
+ */
+int xcmd_unregister_cmd(char *cmd);
+
+/**
+ * @description:删除已经注册的key
+ * @param {char*} key：key集
+ * @return {int}：0：success； !0：failed
+ */
+int xcmd_unregister_key(char *key);
+
+/**
  * @description: 手动执行命令
  * @param {char* } str：命令
  * @return {uint8_t}  返回参数的个数

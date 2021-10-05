@@ -100,6 +100,39 @@ static void cmd_history(int argc, char* argv[])
     }while(len--);
 }
 
+static void cmd_delete_cmd(int argc, char* argv[])
+{
+    int res = 0;
+    if (argc == 2)
+    {
+        res = xcmd_unregister_cmd(argv[1]);
+        if (res)
+        {
+            goto error;
+        }
+    }
+    return;
+error:
+    xcmd_print("Too many parameters are entered or there is no command\r\n");
+    return;
+}
+
+static void cmd_delete_key(int argc, char* argv[])
+{
+    int res = 0;
+    if (argc == 2)
+    {
+        res = xcmd_unregister_key(argv[1]);
+        if (res)
+        {
+            goto error;
+        }
+    }
+error:
+    xcmd_print("Too many parameters are entered or there is no command\r\n");
+}
+
+
 static int cmd_ctr_q(void* pv)
 {
     xcmd_print("this is ctr+q\n");
@@ -111,6 +144,8 @@ static xcmd_t cmds[] =
     {"echo", cmd_echo, "echo anything", NULL},
     {"history", cmd_history, "show history list", NULL},
     {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
+    {"delcmd",  cmd_delete_cmd, "delete cmd [val]", NULL},
+    {"delkey",  cmd_delete_key, "delete key [val]", NULL},
 };
 
 static xcmd_key_t keys[] = 

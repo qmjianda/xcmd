@@ -592,6 +592,40 @@ xcmd_t *xcmd_cmdlist_get(void)
     return g_xcmder.cmd_list.head;
 }
 
+int xcmd_unregister_cmd(char *cmd)
+{
+    xcmd_t *p = xcmd_cmdlist_get();
+    xcmd_t *bk = p;
+    while(p)
+    {
+        if(strcmp(cmd, p->name) == 0)
+        {
+            bk->next = p->next;
+            return 0;
+        }
+        bk = p;
+        p = p->next;
+    }
+    return -1;
+}
+
+int xcmd_unregister_key(char *key)
+{
+    xcmd_t *p = xcmd_cmdlist_get();
+    xcmd_t *bk = p;
+    while(p)
+    {
+        if(strcmp(key, p->name) == 0)
+        {
+            bk->next = p->next;
+            return 0;
+        }
+        bk = p;
+        p = p->next;
+    }
+    return -1;
+}
+
 void xcmd_set_prompt(const char* prompt)
 {
     if(prompt)
