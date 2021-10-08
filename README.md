@@ -162,7 +162,7 @@ void test_keys_init(void)
 
 #### 计划
 ##### 仿照linux终端添加扩展快捷键
-1. 添加ctr+left和ctr+right快捷键（暂时放弃）
+1. 添加ctr+left和ctr+right快捷键（已完成）
 2. 添加ctr+a、ctr+e、ctr+u、xtr+k、ctr+l快捷键(已完成)
 ##### 添加终端颜色/字体控制扩展
 ##### 修改xcmd_get_param函数(已完成)
@@ -170,7 +170,7 @@ void test_keys_init(void)
 2. 增加对“”的支持
 ##### 增加socket相关扩展
 1. tcp client/service
-2. udp client/service
+2. udp client/service（已完成）
 3. udp 广播
 4. udp 组播
 
