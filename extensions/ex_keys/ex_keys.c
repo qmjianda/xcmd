@@ -1,6 +1,9 @@
 #include "xcmd.h"
 #include "ex_keys.h"
 
+#define IS_ALPHA(c) ( (c>='A' && c<='Z') || (c>='a' && c<='z') )
+#define IS_NUMBER(c)    (c>='0' && c<='9')
+
 static int xcmd_ctr_a(void *pv)
 {
     /* 移动光标到头 */
@@ -48,6 +51,54 @@ static int xcmd_ctr_l(void *pv)
     return 0;
 }
 
+static int xcmd_ctr_left(void *pv)
+{
+    char *line = xcmd_display_get();
+    uint16_t pos = xcmd_display_cursor_get();
+    while(pos)
+    {
+        pos--;
+        if(IS_ALPHA(line[pos]) || IS_NUMBER(line[pos]))
+        {
+            break;
+        }
+    }
+
+    while(pos)
+    {
+        if( !IS_ALPHA(line[pos-1]) && !IS_NUMBER(line[pos-1]) )
+        {
+            break;
+        }
+        pos--;
+    }
+    xcmd_display_cursor_set(pos);
+    return 0;
+}
+
+static int xcmd_ctr_right(void *pv)
+{
+    char *line = xcmd_display_get();
+    uint16_t pos = xcmd_display_cursor_get();
+    while(line[pos++])
+    {
+        if(IS_ALPHA(line[pos]) || IS_NUMBER(line[pos]))
+        {
+            break;
+        }
+    }
+
+    while(line[pos++])
+    {
+        if( !IS_ALPHA(line[pos]) && !IS_NUMBER(line[pos]) )
+        {
+            break;
+        }
+    }
+    xcmd_display_cursor_set(pos);
+    return 0;
+}
+
 static xcmd_key_t ex_keys[] = 
 {
     {KEY_CTR_A, xcmd_ctr_a, "ctr+a", NULL},
@@ -55,6 +106,8 @@ static xcmd_key_t ex_keys[] =
     {KEY_CTR_U, xcmd_ctr_u, "ctr+u", NULL},
     {KEY_CTR_K, xcmd_ctr_k, "ctr+k", NULL},
     {KEY_CTR_L, xcmd_ctr_l, "ctr+l", NULL},
+    {KEY_CTR_LEFT, xcmd_ctr_left, "ctr+lelf", NULL},
+    {KEY_CTR_RIGHT, xcmd_ctr_right, "ctr+right", NULL},
 };
 
 
