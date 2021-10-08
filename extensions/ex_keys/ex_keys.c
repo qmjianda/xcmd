@@ -44,6 +44,7 @@ static int xcmd_ctr_k(void *pv)
 
 static int xcmd_ctr_l(void *pv)
 {
+    xcmd_exec("clear");
     return 0;
 }
 
