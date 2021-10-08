@@ -27,7 +27,7 @@ typedef struct __cmd
 
 typedef struct __key
 {
-    XCMD_KEY_T key;
+    char* key;
     cmd_key_func_t func;
     char* help;
     struct __key *next;
@@ -154,6 +154,13 @@ void xcmd_display_print(const char *msg);
 void xcmd_display_write(const char* buf, uint16_t len);
 
 /**
+ * @description: 
+ * @param {*}
+ * @return {*}
+ */
+char* xcmd_display_line_end(void);
+
+/**
  * @description: 光标操作函数
  * @param {*} 
  * @return {*}
@@ -167,6 +174,14 @@ uint16_t xcmd_display_cursor_get(void);
  * @return {*}
  */
 void xcmd_set_prompt(const char* prompt);
+const char* xcmd_get_prompt(void);
+
+/**
+ * @description: 注册解释器接收函数的钩子函数
+ * @param {func_p} 钩子函数，返回0则接收到的数据会返回给解释器，返回1则不会
+ * @return {*} 无
+ */
+void xcmd_register_rcv_hook_func(uint8_t(*func_p)(char*));
 
 /**
  * @description: 获取历史记录的个数

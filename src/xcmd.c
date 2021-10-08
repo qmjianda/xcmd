@@ -7,6 +7,9 @@
 #include <string.h>
 
 #define CMD_IS_ENDLINE(c) ((c == '\n') || (c == '\r'))
+#define CMD_IS_END_KEY(c) ( ((c >= 'A') && (c <= 'D')) || ((c >= 'P') && (c <= 'S')) || \
+                            (c == '~') || (c == 'H') || (c == 'F'))
+
 #define CMD_IS_PRINT(c) ((c >= 32) && (c <= 126))
 
 typedef struct __history
@@ -59,11 +62,14 @@ struct
         uint16_t byte_num;   /* 当前行的字符个数 */
         uint16_t cursor;     /* 光标所在位置 */
         uint8_t  encode_case_stu;
+        char  encode_buf[7];
+        uint8_t  encode_count;
         uint32_t key_val;
         uint16_t param_len;
+        uint8_t (*recv_hook_func)(char*); /* 解释器接收钩子函数，返回0则接收到的数据会返回给解释器，返回1则不会 */
     }parser;
     uint8_t _initOK;
-} g_xcmder;
+} g_xcmder = {0};
 
 static char *xcmd_strpbrk(char*s, const char *delim)  //返回s1中第一个满足条件的字符的指针, 并且保留""号内的源格式
 {
@@ -192,12 +198,12 @@ static void xcmd_cmd_match(int argc, char*argv[])
     }
 }
 
-static void xcmd_key_match(XCMD_KEY_T key)
+static void xcmd_key_match(char* key)
 {
     xcmd_key_t *p = g_xcmder.key_list.head;
     while(p)
     {
-        if(p->key == key)
+        if(strcmp(key, p->key) == 0)
         {
             p->func(&g_xcmder);
             break;
@@ -206,72 +212,56 @@ static void xcmd_key_match(XCMD_KEY_T key)
     }
 }
 
-static void xcmd_key_exec(XCMD_KEY_T key)
+static void xcmd_key_exec(char* key)
 {
     xcmd_key_match(key);
 }
 
-
-static uint32_t xcmd_bytes_encode(uint8_t byte)
+static uint8_t xcmd_rcv_encode(uint8_t byte)
 {
-	uint32_t ret = byte;
-	
-	switch(g_xcmder.parser.encode_case_stu)
-	{
-	case 0:
-		if(byte==0x1B) //1~2
-		{
-		    g_xcmder.parser.encode_case_stu = 1;
-			g_xcmder.parser.key_val = byte;
-		    ret = 0;
-		}
-		break;
-	case 1:
-		if(byte==0x5B)
-		{
-		    g_xcmder.parser.encode_case_stu++;
-			g_xcmder.parser.key_val |= (uint32_t)byte<<8;
-		    ret = 0;
-		}
-		else
-		{
-		    g_xcmder.parser.encode_case_stu = 0;
-		}
-		break;
-	case 2:
-	    if(byte >= 0x41)
-	    {
-	        g_xcmder.parser.encode_case_stu = 0;
-			g_xcmder.parser.key_val |= (uint32_t)byte<<16;
-			ret = g_xcmder.parser.key_val;
-	    }
-		else
-		{
-			g_xcmder.parser.encode_case_stu++;
-			g_xcmder.parser.key_val |= (uint32_t)byte<<16;
-			ret = 0;
-		}
-		break;
-	case 3:
-		if(byte == 0x7E)
-		{
-			g_xcmder.parser.encode_case_stu = 0;
-			g_xcmder.parser.key_val |= (uint32_t)byte<<24;
-			ret = g_xcmder.parser.key_val;
-		}
-		else
-		{
-			g_xcmder.parser.encode_case_stu = 0;
-		}
-		break;
-	default:
-		break;
-	}
+    uint8_t ret = 0;
 
-	return ret;
+    switch (g_xcmder.parser.encode_case_stu)
+    {
+    case 0:
+        g_xcmder.parser.encode_count = 0;
+        if (byte == 0x1B) //ESC
+        {
+            g_xcmder.parser.encode_case_stu = 1;
+            g_xcmder.parser.key_val = byte;
+        }
+        else
+        {
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count] = '\0';
+            ret = 1;
+        }
+        break;
+    case 1:
+        if (CMD_IS_END_KEY(byte))
+        {
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count] = '\0';
+            ret = g_xcmder.parser.encode_count;
+            g_xcmder.parser.encode_case_stu = 0;
+        }
+        else
+        {
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
+            if (g_xcmder.parser.encode_count >= 6)
+            {
+                g_xcmder.parser.encode_case_stu = 0;
+                ret = 0;
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    return ret;
 }
 
-static char* xcmd_line_end(void)
+char* xcmd_display_line_end(void)
 {
 	char* ret = g_xcmder.parser.display_line;
 	if(g_xcmder.parser.byte_num)
@@ -299,30 +289,28 @@ static char* xcmd_line_end(void)
 
 static void xcmd_parser(uint8_t byte)
 {
-	uint32_t c = 0;
+	uint32_t num = 0;
 
-    c = xcmd_bytes_encode(byte);
+    num = xcmd_rcv_encode(byte);
 
-    if(CMD_IS_PRINT(c))
+    if(num > 0)
     {
-        xcmd_display_insert_char(c);
-    }
-    else if(CMD_IS_ENDLINE(c))
-    {
-        char *cmd = xcmd_line_end();
-        xcmd_print("\n\r");
-        if(cmd[0])
+        if(num == 1)
         {
-            xcmd_exec(cmd);
-            cmd[0] = '\0';
+            if( !(g_xcmder.parser.recv_hook_func && g_xcmder.parser.recv_hook_func(g_xcmder.parser.encode_buf)) )
+            {
+                if(CMD_IS_PRINT(g_xcmder.parser.encode_buf[0]))
+                {
+                    xcmd_display_insert_char(g_xcmder.parser.encode_buf[0]);
+                    return;
+                }
+                else
+                {
+                    xcmd_key_exec(g_xcmder.parser.encode_buf);
+                }
+            }
         }
-        xcmd_print("%s", g_xcmder.parser.prompt);
     }
-    else
-    {
-        xcmd_key_exec((XCMD_KEY_T)c);
-    }
-    fflush(stdout);
 }
 
 void xcmd_print(const char *fmt, ...)
@@ -644,6 +632,16 @@ void xcmd_set_prompt(const char* prompt)
     {
         g_xcmder.parser.prompt = prompt;
     }
+}
+
+const char* xcmd_get_prompt(void)
+{
+    return g_xcmder.parser.prompt;
+}
+
+void xcmd_register_rcv_hook_func(uint8_t(*func_p)(char*))
+{
+    g_xcmder.parser.recv_hook_func = func_p;
 }
 
 void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))

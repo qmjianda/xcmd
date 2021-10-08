@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-14 23:58:24
- * @LastEditTime: 2021-09-22 23:13:05
+ * @LastEditTime: 2021-10-08 21:51:36
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/example/linux/linux_main.c
@@ -15,6 +15,7 @@
 #include "ex_keys.h"
 #include "ex_cmds.h"
 #include "socket_cmds.h"
+
 
 int getch(void)
 {
@@ -59,7 +60,7 @@ static int key_ctr_c(void* pv)
 
 static xcmd_key_t keys[] = 
 {
-    {CTR_C, key_ctr_c, "ctr+c", NULL},
+    {KEY_CTR_C, key_ctr_c, "ctr+c", NULL},
 };
 
 void user_keys_init(void)

@@ -29,6 +29,19 @@ static int xcmd_del_char(void *pv)
     return 0;
 }
 
+static int xcmd_enter(void *pv)
+{
+    char *cmd = xcmd_display_line_end();
+    xcmd_print("\n\r");
+    if(cmd[0])
+    {
+        xcmd_exec(cmd);
+        cmd[0] = '\0';
+    }
+    xcmd_print("%s", xcmd_get_prompt());
+    return 0;
+}
+
 static int xcmd_cursor_left(void *pv)
 {
     uint16_t pos = xcmd_display_cursor_get();
@@ -125,14 +138,15 @@ static int xcmd_auto_completion(void *pv)
 
 static xcmd_key_t default_keys[] = 
 {
-    {BACKSPACE,     xcmd_del_char,          "backspace", NULL},
-    {L_DELETE,      xcmd_del_char,          "left delete", NULL},
-    {LEFT,          xcmd_cursor_left,       "left", NULL},
-    {RIGHT,         xcmd_cursor_right,      "right", NULL},
-    {TAB,           xcmd_auto_completion,   "tab", NULL},
+    {KEY_CTR_M,     xcmd_enter,             "enter", NULL},
+    {KEY_CTR_H,     xcmd_del_char,          "backspace", NULL},
+    {KEY_BACKSPACE, xcmd_del_char,          "delete", NULL},
+    {KEY_LEFT,      xcmd_cursor_left,       "left", NULL},
+    {KEY_RIGHT,     xcmd_cursor_right,      "right", NULL},
+    {KEY_TAB,       xcmd_auto_completion,   "tab", NULL},
 #if XCMD_HISTORY_MAX_NUM
-    {DW,            xcmd_history_dw,        "down", NULL},
-    {UP,            xcmd_history_up,        "up", NULL},
+    {KEY_DW,        xcmd_history_dw,        "down", NULL},
+    {KEY_UP,        xcmd_history_up,        "up", NULL},
 #endif
 };
 
