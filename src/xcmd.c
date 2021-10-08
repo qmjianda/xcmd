@@ -593,13 +593,25 @@ xcmd_t *xcmd_cmdlist_get(void)
 
 int xcmd_unregister_cmd(char *cmd)
 {
-    xcmd_t *p = xcmd_cmdlist_get();
+    xcmd_t *p = g_xcmder.cmd_list.head;
     xcmd_t *bk = p;
     while(p)
     {
         if(strcmp(cmd, p->name) == 0)
         {
-            bk->next = p->next;
+            if(g_xcmder.cmd_list.len == 1)
+            {
+                g_xcmder.cmd_list.head = g_xcmder.cmd_list.tail = NULL;
+            }
+            else
+            {
+                bk->next = p->next;
+                if(p->next == NULL)
+                {
+                    g_xcmder.cmd_list.tail = bk;
+                }
+            }
+            g_xcmder.cmd_list.len--;
             return 0;
         }
         bk = p;
@@ -610,13 +622,25 @@ int xcmd_unregister_cmd(char *cmd)
 
 int xcmd_unregister_key(char *key)
 {
-    xcmd_t *p = xcmd_cmdlist_get();
-    xcmd_t *bk = p;
+    xcmd_key_t *p = g_xcmder.key_list.head;
+    xcmd_key_t *bk = p;
     while(p)
     {
-        if(strcmp(key, p->name) == 0)
+        if(strcmp(key, p->key) == 0)
         {
-            bk->next = p->next;
+            if(g_xcmder.key_list.len == 1)
+            {
+                g_xcmder.key_list.head = g_xcmder.key_list.tail = NULL;
+            }
+            else
+            {
+                bk->next = p->next;
+                if(p->next == NULL)
+                {
+                    g_xcmder.key_list.tail = bk;
+                }
+            }
+            g_xcmder.key_list.len--;
             return 0;
         }
         bk = p;
@@ -662,6 +686,7 @@ void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
             default_cmds_init();
             default_keys_init();
             xcmd_exec("logo");
+            xcmd_unregister_cmd("logo");
         }
         g_xcmder._initOK = 1;
 	}
