@@ -227,6 +227,7 @@ static uint8_t xcmd_rcv_encode(uint8_t byte)
         g_xcmder.parser.encode_count = 0;
         if (byte == 0x1B) //ESC
         {
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
             g_xcmder.parser.encode_case_stu = 1;
             g_xcmder.parser.key_val = byte;
         }
@@ -234,6 +235,7 @@ static uint8_t xcmd_rcv_encode(uint8_t byte)
         {
             g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
             g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count] = '\0';
+            g_xcmder.parser.encode_count = 0;
             ret = 1;
         }
         break;
@@ -295,19 +297,16 @@ static void xcmd_parser(uint8_t byte)
 
     if(num > 0)
     {
-        if(num == 1)
+        if( !(g_xcmder.parser.recv_hook_func && g_xcmder.parser.recv_hook_func(g_xcmder.parser.encode_buf)) )
         {
-            if( !(g_xcmder.parser.recv_hook_func && g_xcmder.parser.recv_hook_func(g_xcmder.parser.encode_buf)) )
+            if(CMD_IS_PRINT(g_xcmder.parser.encode_buf[0]))
             {
-                if(CMD_IS_PRINT(g_xcmder.parser.encode_buf[0]))
-                {
-                    xcmd_display_insert_char(g_xcmder.parser.encode_buf[0]);
-                    return;
-                }
-                else
-                {
-                    xcmd_key_exec(g_xcmder.parser.encode_buf);
-                }
+                xcmd_display_insert_char(g_xcmder.parser.encode_buf[0]);
+                return;
+            }
+            else
+            {
+                xcmd_key_exec(g_xcmder.parser.encode_buf);
             }
         }
     }
