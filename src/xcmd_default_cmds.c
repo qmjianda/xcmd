@@ -11,12 +11,13 @@
 #include "xcmd.h"
 #include <stdlib.h>
 
-static void cmd_clear(int argc, char* argv[])
+static int cmd_clear(int argc, char* argv[])
 {
     xcmd_print("\033c");
+    return 0;
 }
 
-static void cmd_help(int argc, char* argv[])
+static int cmd_help(int argc, char* argv[])
 {
     xcmd_t *p = xcmd_cmdlist_get();
     while(p)
@@ -24,9 +25,10 @@ static void cmd_help(int argc, char* argv[])
         xcmd_print("%-20s %s\r\n",p->name, p->help);
         p = p->next;
     }
+    return 0;
 }
 
-static void cmd_keys(int argc, char* argv[])
+static int cmd_keys(int argc, char* argv[])
 {
     xcmd_key_t *p = xcmd_keylist_get();
     while(p)
@@ -35,9 +37,10 @@ static void cmd_keys(int argc, char* argv[])
         xcmd_print("%s\r\n",p->help);
         p = p->next;
     }
+    return 0;
 }
 
-static void cmd_logo(int argc, char* argv[])
+static int cmd_logo(int argc, char* argv[])
 {
     char *log = "\
  _  _  ___  __  __  ____  \r\n\
@@ -47,6 +50,7 @@ static void cmd_logo(int argc, char* argv[])
     xcmd_print("%s", log);
     xcmd_print("\r\n%-10s %s %s\r\n","Build" ,__DATE__,  __TIME__);
     xcmd_print("%-10s %s\r\n","Version", VERSION);
+    return 0;
 }
 
 static xcmd_t cmds[] = 

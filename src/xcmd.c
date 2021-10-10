@@ -164,10 +164,11 @@ static int xcmd_get_param(char* msg, char*delim, char* get[], int max_num)
 	return ret;
 }
 
-static void xcmd_cmd_match(int argc, char*argv[])
+static int xcmd_cmd_match(int argc, char*argv[])
 {
     xcmd_t *p = g_xcmder.cmd_list.head;
     uint8_t flag = 0;
+    int ret = -1;
     while(p)
     {
         if(strcmp(p->name, argv[0]) == 0)
@@ -182,7 +183,7 @@ static void xcmd_cmd_match(int argc, char*argv[])
                     break;
                 }
             }
-            p->func(argc, argv);
+            ret = p->func(argc, argv);
             break;
         }
         p = p->next;
@@ -195,6 +196,7 @@ static void xcmd_cmd_match(int argc, char*argv[])
     {
         xcmd_print("cmd \"%s\" does not exist\r\n", argv[0]);
     }
+    return ret;
 }
 
 static void xcmd_key_match(char* key)
@@ -522,7 +524,7 @@ void xcmd_history_slider_reset(void)
 #endif
 }
 
-uint8_t xcmd_exec(char* str)
+int xcmd_exec(char* str)
 {
 	int param_num = 0;
 	char *cmd_param_buff[XCMD_PARAM_MAX_NUM];
@@ -531,9 +533,9 @@ uint8_t xcmd_exec(char* str)
 	param_num = xcmd_get_param(temp, " ", cmd_param_buff, XCMD_PARAM_MAX_NUM);
 	if(param_num >0)
 	{
-		xcmd_cmd_match(param_num, cmd_param_buff);
+		return xcmd_cmd_match(param_num, cmd_param_buff);
 	}
-	return param_num;
+	return -1;
 }
 
 int xcmd_key_register(xcmd_key_t *keys, uint16_t number)

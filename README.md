@@ -86,15 +86,16 @@ void loop() {
 #### 使用说明
 ##### 注册自定义命令
 ```C
-static void cmd_echo(int argc, char* argv[])
+static int cmd_echo(int argc, char* argv[])
 {
     if(param_check(1, argc, argv))
 	{
     	printf("%s\r\n", argv[1]);
 	}
+    return 0;
 }
 
-static void cmd_example(int argc, char* argv[])
+static int cmd_example(int argc, char* argv[])
 {
     uint8_t i;
     if(param_check(1, argc, argv))
@@ -121,6 +122,7 @@ static void cmd_example(int argc, char* argv[])
 			}
 		}
 	}
+    return 0;
 }
 
 static xcmd_t cmds[] = 

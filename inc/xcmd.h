@@ -14,7 +14,7 @@
 extern   "C" {
 #endif
 
-typedef void(*cmd_func_t)(int argv, char* argc[]);
+typedef int(*cmd_func_t)(int argv, char* argc[]);
 typedef int(*cmd_key_func_t)(void *data);
 
 typedef struct __cmd
@@ -98,9 +98,9 @@ int xcmd_unregister_key(char *key);
 /**
  * @description: 手动执行命令
  * @param {char* } str：命令
- * @return {uint8_t}  返回参数的个数
+ * @return {uint8_t}  返回执行结果
  */
-uint8_t xcmd_exec(char *str);
+int xcmd_exec(char *str);
 
 /**
  * @description: 打印字符串

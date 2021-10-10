@@ -53,15 +53,16 @@ static uint8_t param_check(int need, int argc, char*argv[])
     return ret;
 }
 
-static void cmd_echo(int argc, char* argv[])
+static int cmd_echo(int argc, char* argv[])
 {
     if(param_check(1, argc, argv))
 	{
     	xcmd_print("%s\r\n", argv[1]);
 	}
+    return 0;
 }
 
-static void cmd_example(int argc, char* argv[])
+static int cmd_example(int argc, char* argv[])
 {
     uint8_t i;
     if(param_check(1, argc, argv))
@@ -88,9 +89,10 @@ static void cmd_example(int argc, char* argv[])
 			}
 		}
 	}
+    return 0;
 }
 
-static void cmd_history(int argc, char* argv[])
+static int cmd_history(int argc, char* argv[])
 {
     uint16_t len = xcmd_history_len();
 
@@ -111,9 +113,10 @@ static void cmd_history(int argc, char* argv[])
             break;
         }
     }
+    return 0;
 }
 
-static void cmd_delete_cmd(int argc, char* argv[])
+static int cmd_delete_cmd(int argc, char* argv[])
 {
     int res = 0;
     if (argc == 2)
@@ -124,13 +127,13 @@ static void cmd_delete_cmd(int argc, char* argv[])
             goto error;
         }
     }
-    return;
+    return 0;
 error:
     xcmd_print("Too many parameters are entered or there is no command\r\n");
-    return;
+    return -1;
 }
 
-static void cmd_delete_key(int argc, char* argv[])
+static int cmd_delete_key(int argc, char* argv[])
 {
     int res = 0;
     if (argc == 2)
@@ -141,8 +144,10 @@ static void cmd_delete_key(int argc, char* argv[])
             goto error;
         }
     }
+    return 0;
 error:
     xcmd_print("Too many parameters are entered or there is no command\r\n");
+    return -1;
 }
 
 
@@ -152,7 +157,7 @@ static int cmd_ctr_q(void* pv)
     return 0;
 }
 
-static void cmd_print_color(int argc, char* argv[])
+static int cmd_print_color(int argc, char* argv[])
 {
     xcmd_print(TX_DEF      "txt_color = DEF    \r\n"   TX_DEF);
     xcmd_print(TX_RED      "txt_color = RED    \r\n"   TX_DEF);
@@ -170,7 +175,7 @@ static void cmd_print_color(int argc, char* argv[])
     xcmd_print(BK_YELLOW    "background_color = BK_YELLOW" BK_DEF "\r\n");
     xcmd_print(BK_BLUE      "background_color = BK_BLUE"   BK_DEF "\r\n");
     xcmd_print(BK_WHITE     "background_color = BK_WHITE"  BK_DEF "\r\n");
-
+    return 0;
 }
 
 static xcmd_t cmds[] = 

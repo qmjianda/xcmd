@@ -1,7 +1,7 @@
 #include "ex_cmds.h"
 #include "xcmd.h"
 
-static void cmd_run(int argc, char* argv[])
+static int cmd_run(int argc, char* argv[])
 {
     if(argc >= 2)
     {
@@ -11,6 +11,7 @@ static void cmd_run(int argc, char* argv[])
     {
         xcmd_print("usage: run \"cmd\"\n");
     }
+    return 0;
 }
 
 static xcmd_t cmds[] = 
