@@ -152,6 +152,27 @@ static int cmd_ctr_q(void* pv)
     return 0;
 }
 
+static void cmd_print_color(int argc, char* argv[])
+{
+    xcmd_print(TX_DEF      "txt_color = DEF    \r\n"   TX_DEF);
+    xcmd_print(TX_RED      "txt_color = RED    \r\n"   TX_DEF);
+    xcmd_print(TX_BLACK    "txt_color = BLACK  \r\n"   TX_DEF);
+    xcmd_print(TX_GREEN    "txt_color = GREEN  \r\n"   TX_DEF);
+    xcmd_print(TX_YELLOW   "txt_color = YELLOW \r\n"   TX_DEF);
+    xcmd_print(TX_BLUE     "txt_color = BLUE   \r\n"   TX_DEF);
+    xcmd_print(TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
+    xcmd_print(TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
+
+    xcmd_print(BK_DEF       "background_color = BK_DEF"    BK_DEF "\r\n");
+    xcmd_print(BK_BLACK     "background_color = BK_BLACK"  BK_DEF "\r\n");
+    xcmd_print(BK_RED       "background_color = BK_RED"    BK_DEF "\r\n");
+    xcmd_print(BK_GREEN     "background_color = BK_GREEN"  BK_DEF "\r\n");
+    xcmd_print(BK_YELLOW    "background_color = BK_YELLOW" BK_DEF "\r\n");
+    xcmd_print(BK_BLUE      "background_color = BK_BLUE"   BK_DEF "\r\n");
+    xcmd_print(BK_WHITE     "background_color = BK_WHITE"  BK_DEF "\r\n");
+
+}
+
 static xcmd_t cmds[] = 
 {
     {"echo", cmd_echo, "echo [msg]", NULL},
@@ -159,6 +180,7 @@ static xcmd_t cmds[] =
     {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
     {"delcmd",  cmd_delete_cmd, "delete cmd [val]", NULL},
     {"delkey",  cmd_delete_key, "delete key [val]", NULL},
+    {"color",   cmd_print_color, "printf color text", NULL},
 };
 
 static xcmd_key_t keys[] = 

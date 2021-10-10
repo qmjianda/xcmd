@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define CMD_IS_ENDLINE(c) ((c == '\n') || (c == '\r'))
 #define CMD_IS_END_KEY(c) ( ((c >= 'A') && (c <= 'D')) || ((c >= 'P') && (c <= 'S')) || \
                             (c == '~') || (c == 'H') || (c == 'F'))
 

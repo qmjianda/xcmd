@@ -96,6 +96,24 @@ extern   "C" {
 #define IL(n)       "\x1B[%dL",n	/* 插入行	将 <n> 行插入光标位置的缓冲区。 光标所在的行及其下方的行将向下移动。*/
 #define DL(n)       "\x1B[%dM",n	/* 删除行	从缓冲区中删除 <n> 行，从光标所在的行开始。*/
 
+/* 打印字体颜色设置 */
+#define TX_DEF          "\x1b[0m"
+#define TX_BLACK        "\x1b[30m"
+#define TX_RED          "\x1b[31m"
+#define TX_GREEN        "\x1b[32m"
+#define TX_YELLOW       "\x1b[33m"
+#define TX_BLUE         "\x1b[34m"
+#define TX_WHITE        "\x1b[37m"
+
+/* 打印背景颜色设置 */
+#define BK_DEF          "\x1b[0m"
+#define BK_BLACK        "\x1b[40m"
+#define BK_RED          "\x1b[41m"
+#define BK_GREEN        "\x1b[42m"
+#define BK_YELLOW       "\x1b[43m"
+#define BK_BLUE         "\x1b[44m"
+#define BK_WHITE        "\x1b[47m"
+
 #ifdef __cplusplus
         }
 #endif
