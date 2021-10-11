@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-17 23:03:06
- * @LastEditTime: 2021-10-08 21:52:29
+ * @LastEditTime: 2021-10-11 21:40:01
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/inc/xcmd_confg.h
@@ -35,6 +35,14 @@ extern   "C" {
 #undef XCMD_PRINT_BUF_MAX_LENGTH
 #define XCMD_PRINT_BUF_MAX_LENGTH   (XCMD_LINE_MAX_LENGTH+32) /* xcmd_print缓存 */
 #endif 
+
+#ifndef XCMD_DEFAULT_PROMPT
+#define XCMD_DEFAULT_PROMPT     ("->")
+#endif
+
+#ifndef XCMD_DEFAULT_PROMPT_CLOLR
+#define XCMD_DEFAULT_PROMPT_CLOLR   TX_GREEN
+#endif
 
 #ifdef __cplusplus
         }

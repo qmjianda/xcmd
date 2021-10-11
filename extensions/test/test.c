@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-22 22:33:17
- * @LastEditTime: 2021-09-29 22:35:29
+ * @LastEditTime: 2021-10-11 13:41:50
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/extensions/test/test.c
@@ -51,15 +51,6 @@ static uint8_t param_check(int need, int argc, char*argv[])
         ret = 0;
     }
     return ret;
-}
-
-static int cmd_echo(int argc, char* argv[])
-{
-    if(param_check(1, argc, argv))
-	{
-    	xcmd_print("%s\r\n", argv[1]);
-	}
-    return 0;
 }
 
 static int cmd_example(int argc, char* argv[])
@@ -180,7 +171,6 @@ static int cmd_print_color(int argc, char* argv[])
 
 static xcmd_t cmds[] = 
 {
-    {"echo", cmd_echo, "echo [msg]", NULL},
     {"history", cmd_history, "show history list", NULL},
     {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
     {"delcmd",  cmd_delete_cmd, "delete cmd [val]", NULL},

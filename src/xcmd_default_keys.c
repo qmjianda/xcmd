@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-15 00:11:50
- * @LastEditTime: 2021-09-29 22:00:26
+ * @LastEditTime: 2021-10-11 21:38:26
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_keys.c
@@ -38,7 +38,12 @@ static int xcmd_enter(void *pv)
         xcmd_exec(cmd);
         cmd[0] = '\0';
     }
-    xcmd_print("%s", xcmd_get_prompt());
+#ifndef XCMD_DEFAULT_PROMPT_CLOLR
+        xcmd_print("%s", xcmd_get_prompt());
+#else
+        xcmd_print(XCMD_DEFAULT_PROMPT_CLOLR "%s" TX_DEF, xcmd_get_prompt());
+#endif
+    
     return 0;
 }
 
@@ -61,6 +66,7 @@ static int xcmd_cursor_right(void *pv)
     return 0;
 }
 
+#if XCMD_HISTORY_MAX_NUM
 static int xcmd_history_dw(void *pv)
 {
     char *line = xcmd_history_prev();
@@ -84,6 +90,7 @@ static int xcmd_history_up(void *pv)
     }
     return 0;
 }
+#endif
 
 static int xcmd_auto_completion(void *pv)
 {

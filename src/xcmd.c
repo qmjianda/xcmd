@@ -359,7 +359,11 @@ void xcmd_display_clear(void)
 {
     char *line = xcmd_display_get();
     xcmd_print(DL(0));
-    xcmd_print("\r%s", g_xcmder.parser.prompt);
+#ifndef XCMD_DEFAULT_PROMPT_CLOLR
+    xcmd_print("%s", xcmd_get_prompt());
+#else
+    xcmd_print(XCMD_DEFAULT_PROMPT_CLOLR "%s" TX_DEF, xcmd_get_prompt());
+#endif
     g_xcmder.parser.byte_num = 0;
     g_xcmder.parser.cursor = 0;
     line[0] = '\0';
@@ -418,7 +422,7 @@ void xcmd_display_cursor_set(uint16_t pos)
         pos = g_xcmder.parser.byte_num;
     }
     g_xcmder.parser.cursor = pos;
-    xcmd_print(CHA(g_xcmder.parser.cursor+3));
+    xcmd_print(CHA(g_xcmder.parser.cursor+strlen(g_xcmder.parser.prompt)+1));
 }
 
 uint16_t xcmd_display_cursor_get(void)
@@ -675,7 +679,7 @@ void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
         g_xcmder.io.get_c = get_c;
 		g_xcmder.io.put_c = put_c;
 
-        g_xcmder.parser.prompt = "->";
+        g_xcmder.parser.prompt = XCMD_DEFAULT_PROMPT;
         g_xcmder.parser.byte_num = 0;
         g_xcmder.parser.cursor = 0;
 		g_xcmder.parser.encode_case_stu = 0;
