@@ -179,3 +179,6 @@ void test_keys_init(void)
 ##### 增加操作系统支持
 1. linux (demo only for linux example)
 2. FreeRTOS (demo only for esp32)
+
+##### 增加文件系统相关指令
+1. linux（已完成）
