@@ -14,8 +14,8 @@
 extern   "C" {
 #endif
 
-typedef int(*cmd_func_t)(int argv, char* argc[]);
-typedef int(*cmd_key_func_t)(void *data);
+typedef int(*cmd_func_t)(int, char**);
+typedef int(*cmd_key_func_t)(void *);
 
 typedef struct __cmd
 {
@@ -108,7 +108,7 @@ int xcmd_exec(char *str);
  * @return 无
  */
 void xcmd_print(const char *fmt, ...);
-
+void xcmd_put_str(const char *str);
 
 /**
  * @description: 向显示器插入一个字符
@@ -150,7 +150,7 @@ char* xcmd_display_get(void);
  * @param {char*} 要现实的内容
  * @return 无
  */
-void xcmd_display_print(const char *msg);
+void xcmd_display_print(const char *fmt, ...);
 void xcmd_display_write(const char* buf, uint16_t len);
 
 /**

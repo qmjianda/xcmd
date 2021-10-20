@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-15 00:11:50
- * @LastEditTime: 2021-10-11 21:38:26
+ * @LastEditTime: 2021-10-12 14:58:23
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_keys.c
@@ -133,7 +133,7 @@ static int xcmd_auto_completion(void *pv)
 
     if(match_num == 1)
     {
-        xcmd_display_print(match_cmd_first->name);
+        xcmd_display_print("%s ", match_cmd_first->name);
     }
     else if(match_num > 1)
     {
@@ -146,6 +146,7 @@ static int xcmd_auto_completion(void *pv)
 static xcmd_key_t default_keys[] = 
 {
     {KEY_CTR_M,     xcmd_enter,             "enter", NULL},
+    {KEY_CTR_J,     xcmd_enter,             "enter", NULL},
     {KEY_CTR_H,     xcmd_del_char,          "backspace", NULL},
     {KEY_BACKSPACE, xcmd_del_char,          "delete", NULL},
     {KEY_LEFT,      xcmd_cursor_left,       "left", NULL},

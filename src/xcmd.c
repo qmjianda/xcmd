@@ -206,8 +206,10 @@ static void xcmd_key_match(char* key)
     {
         if(strcmp(key, p->key) == 0)
         {
-            p->func(&g_xcmder);
-            break;
+            if(p->func(&g_xcmder) == 0)
+            {
+                break;
+            }
         }
         p = p->next;
     }
@@ -313,6 +315,14 @@ static void xcmd_parser(uint8_t byte)
     }
 }
 
+void xcmd_put_str(const char *str)
+{
+    for(uint16_t i=0; str[i]; i++)
+	{
+		g_xcmder.io.put_c(str[i]);
+	};
+}
+
 void xcmd_print(const char *fmt, ...)
 {
     char ucstring[XCMD_PRINT_BUF_MAX_LENGTH] = {0};
@@ -320,12 +330,7 @@ void xcmd_print(const char *fmt, ...)
     va_start(arg, fmt);
     vsnprintf(ucstring, XCMD_PRINT_BUF_MAX_LENGTH, fmt, arg);
     va_end(arg);
-
-    for(uint16_t i=0; ucstring[i]; i++)
-	{
-		g_xcmder.io.put_c(ucstring[i]);
-	};
-    return;
+    xcmd_put_str(ucstring);
 }
 
 void xcmd_display_write(const char* buf, uint16_t len)
@@ -337,17 +342,20 @@ void xcmd_display_write(const char* buf, uint16_t len)
     }
     memcpy(g_xcmder.parser.display_line, buf, len);
     g_xcmder.parser.display_line[len] = '\0';
-    xcmd_print(g_xcmder.parser.display_line);
+    xcmd_put_str(g_xcmder.parser.display_line);
     g_xcmder.parser.byte_num = len;
     g_xcmder.parser.cursor = len;
 }
 
-void xcmd_display_print(const char *msg)
+void xcmd_display_print(const char *fmt, ...)
 {
-    xcmd_display_write(msg, strlen(msg));
+    char ucstring[XCMD_PRINT_BUF_MAX_LENGTH] = {0};
+    va_list arg;
+    va_start(arg, fmt);
+    vsnprintf(ucstring, XCMD_PRINT_BUF_MAX_LENGTH, fmt, arg);
+    va_end(arg);
+    xcmd_display_write(ucstring, strlen(ucstring));
 }
-
-
 
 char* xcmd_display_get(void)
 {
@@ -358,11 +366,13 @@ char* xcmd_display_get(void)
 void xcmd_display_clear(void)
 {
     char *line = xcmd_display_get();
-    xcmd_print(DL(0));
+    xcmd_put_str("\x1B[0M");
 #ifndef XCMD_DEFAULT_PROMPT_CLOLR
-    xcmd_print("%s", xcmd_get_prompt());
+    xcmd_put_str(xcmd_get_prompt());
 #else
-    xcmd_print(XCMD_DEFAULT_PROMPT_CLOLR "%s" TX_DEF, xcmd_get_prompt());
+    xcmd_put_str(XCMD_DEFAULT_PROMPT_CLOLR);
+    xcmd_put_str(xcmd_get_prompt());
+    xcmd_put_str(TX_DEF);
 #endif
     g_xcmder.parser.byte_num = 0;
     g_xcmder.parser.cursor = 0;
