@@ -146,6 +146,7 @@ static int xcmd_auto_completion(void *pv)
 static xcmd_key_t default_keys[] = 
 {
     {KEY_CTR_M,     xcmd_enter,             "enter", NULL},
+    {KEY_CTR_J,     xcmd_enter,             "enter", NULL},
     {KEY_CTR_H,     xcmd_del_char,          "backspace", NULL},
     {KEY_BACKSPACE, xcmd_del_char,          "delete", NULL},
     {KEY_LEFT,      xcmd_cursor_left,       "left", NULL},
