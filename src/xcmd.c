@@ -266,7 +266,7 @@ static uint8_t xcmd_rcv_encode(uint8_t byte)
     return ret;
 }
 
-char* xcmd_display_line_end(void)
+char* xcmd_end_of_input(void)
 {
 	char* ret = g_xcmder.parser.display_line;
 	if(g_xcmder.parser.byte_num)
@@ -335,16 +335,14 @@ void xcmd_print(const char *fmt, ...)
 
 void xcmd_display_write(const char* buf, uint16_t len)
 {
-    xcmd_display_clear();
     if(len > XCMD_LINE_MAX_LENGTH)
     {
         len = XCMD_LINE_MAX_LENGTH;
     }
-    memcpy(g_xcmder.parser.display_line, buf, len);
-    g_xcmder.parser.display_line[len] = '\0';
-    xcmd_put_str(g_xcmder.parser.display_line);
-    g_xcmder.parser.byte_num = len;
-    g_xcmder.parser.cursor = len;
+    for(uint16_t i=0; i<len; i++)
+    {
+        xcmd_display_insert_char(buf[i]);
+    }
 }
 
 void xcmd_display_print(const char *fmt, ...)
