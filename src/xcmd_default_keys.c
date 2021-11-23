@@ -31,8 +31,13 @@ static int xcmd_del_char(void *pv)
 
 static int xcmd_enter(void *pv)
 {
+<<<<<<< HEAD
     char *cmd = xcmd_end_of_input();
     xcmd_print("\n\r");
+=======
+    char *cmd = xcmd_display_line_end();
+    xcmd_print("   \n\r");
+>>>>>>> f787c2a92747d874c5d64eff373c82e048b2876a
     if(cmd[0])
     {
         xcmd_exec(cmd);

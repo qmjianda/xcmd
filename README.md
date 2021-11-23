@@ -19,6 +19,12 @@ xcmd是一款单片机命令行工具，移植十分方便，并且对flash与ra
 2. （推荐）putty
 3. （推荐）MobaXterm
 4. Xshell
+#### 支持的扩展功能
+1. 类linux风格的快捷键：ctr+left、ctr+right、ctr+a、ctr+e、ctr+u、ctr+k、ctr+l快捷键
+2. 支持字体、背景颜色显示
+3. 支持类linux的文件操作（Fatfs文件系统）：ls、cd、rm、df、mv、mkdir、touch、read、write
+4. 支持基于socket的udp server、udp client测试程序
+5. 
 #### 移植
 - 移植十分简单，只需要在初始化的时候提供字符输入输出函数即可
 ```C
@@ -163,22 +169,11 @@ void test_keys_init(void)
 流程图需要使用drawio来打开，可以使用vscode drawio的插件来打开
 
 #### 计划
-##### 仿照linux终端添加扩展快捷键
-1. 添加ctr+left和ctr+right快捷键（已完成）
-2. 添加ctr+a、ctr+e、ctr+u、ctr+k、ctr+l快捷键(已完成)
-##### 添加终端颜色/字体控制扩展（已完成）
-##### 修改xcmd_get_param函数(已完成)
-1. 替换strtok函数为其他可复用函数
-2. 增加对“”的支持
 ##### 增加socket相关扩展
 1. tcp client/service
-2. udp client/service（已完成）
-3. udp 广播
-4. udp 组播
+2. udp 广播
+3. udp 组播
 
 ##### 增加操作系统支持
 1. linux (demo only for linux example)
 2. FreeRTOS (demo only for esp32)
-
-##### 增加文件系统相关指令
-1. linux（已完成）
