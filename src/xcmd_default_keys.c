@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-15 00:11:50
- * @LastEditTime: 2021-10-11 21:38:26
+ * @LastEditTime: 2021-10-27 09:16:27
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_keys.c
@@ -31,8 +31,8 @@ static int xcmd_del_char(void *pv)
 
 static int xcmd_enter(void *pv)
 {
-    char *cmd = xcmd_display_line_end();
-    xcmd_print("   \n\r");
+    char *cmd = xcmd_end_of_input();
+    xcmd_print("\n\r");
     if(cmd[0])
     {
         xcmd_exec(cmd);
@@ -70,13 +70,11 @@ static int xcmd_cursor_right(void *pv)
 static int xcmd_history_dw(void *pv)
 {
     char *line = xcmd_history_prev();
+    xcmd_display_clear();
     if(line)
     {
+
         xcmd_display_print(line);
-    }
-    else
-    {
-        xcmd_display_clear();
     }
     return 0;
 }
@@ -86,6 +84,7 @@ static int xcmd_history_up(void *pv)
     char *line = xcmd_history_next();
     if(line)
     {
+        xcmd_display_clear();
         xcmd_display_print(line);
     }
     return 0;
@@ -133,11 +132,13 @@ static int xcmd_auto_completion(void *pv)
 
     if(match_num == 1)
     {
-        xcmd_display_print(match_cmd_first->name);
+        xcmd_display_clear();
+        xcmd_display_print("%s", match_cmd_first->name);
     }
     else if(match_num > 1)
     {
         xcmd_print("\r\n");
+        xcmd_display_clear();
         xcmd_display_write(match_cmd_first->name, match_subscript_min);
     }
     return 0;

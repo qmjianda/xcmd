@@ -14,8 +14,8 @@
 extern   "C" {
 #endif
 
-typedef int(*cmd_func_t)(int argv, char* argc[]);
-typedef int(*cmd_key_func_t)(void *data);
+typedef int(*cmd_func_t)(int, char**);
+typedef int(*cmd_key_func_t)(void *);
 
 typedef struct __cmd
 {
@@ -35,7 +35,7 @@ typedef struct __key
 
 
 /**
- * @description: 接时期初始化
+ * @description: 解释器初始化
  * @param {func*} get_c：获取一个字符的函数
  * @param {func*} put_c：发送一个字符的函数
  * @return {*}
@@ -67,17 +67,17 @@ int xcmd_key_register(xcmd_key_t* keys, uint16_t number);
 
 /**
  * @description: 获取命令列表，可以通过next指针可以遍历所有指令
- * @param {xcmd_key_t*} keys：快捷键集
- * @param {uint16_t} number：快捷键的个数
- * @return {int}：已经注册的快捷键的个数
+ * @param {*} 
+ * @param {} 
+ * @return {xcmd_t *}：指令链表表头
  */
 xcmd_t *xcmd_cmdlist_get(void);
 
 /**
- * @description: 获取案件列表，可以通过next指针可以遍历所有案件
- * @param {xcmd_key_t*} keys：快捷键集
- * @param {uint16_t} number：快捷键的个数
- * @return {int}：已经注册的快捷键的个数
+ * @description: 获取按键列表，可以通过next指针可以遍历所有按键
+ * @param {*} 
+ * @param {} 
+ * @return {xcmd_key_t *}：快捷键链表表头
  */
 xcmd_key_t *xcmd_keylist_get(void);
 
@@ -104,11 +104,9 @@ int xcmd_exec(char *str);
 
 /**
  * @description: 打印字符串
- * @param {char*} str
- * @return 无
  */
 void xcmd_print(const char *fmt, ...);
-
+void xcmd_put_str(const char *str);
 
 /**
  * @description: 向显示器插入一个字符
@@ -150,15 +148,8 @@ char* xcmd_display_get(void);
  * @param {char*} 要现实的内容
  * @return 无
  */
-void xcmd_display_print(const char *msg);
+void xcmd_display_print(const char *fmt, ...);
 void xcmd_display_write(const char* buf, uint16_t len);
-
-/**
- * @description: 
- * @param {*}
- * @return {*}
- */
-char* xcmd_display_line_end(void);
 
 /**
  * @description: 光标操作函数
@@ -224,6 +215,13 @@ char *xcmd_history_current(void);
  * @return 无
  */
 void  xcmd_history_slider_reset(void);
+
+/**
+ * @description: 结束输入
+ * @param {*}
+ * @return {*}
+ */
+char* xcmd_end_of_input(void);
 
 #ifdef __cplusplus
         }
