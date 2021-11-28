@@ -154,6 +154,7 @@ int main(void)
     ex_cmds_init();
     socket_cmds_init();
     fs_cmds_init();
+    linux_cmd_init();
     while (1)
     {
         xcmd_task();

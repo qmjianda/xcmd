@@ -3,6 +3,7 @@ BIN = xcmder
 OBJ += xcmd.o \
 	   xcmd_default_keys.o \
 	   xcmd_default_cmds.o \
+	   xcmd_platform.o \
 	   linux_main.o \
 	   test.o \
 	   ex_keys.o \

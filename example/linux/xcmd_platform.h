@@ -7,4 +7,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+void linux_cmd_init(void);
+
 #endif 
