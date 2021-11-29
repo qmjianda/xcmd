@@ -10,3 +10,4 @@ xcmder
 *.map
 *.uvoptx
 *.uvguix*
+*fatfs.img
