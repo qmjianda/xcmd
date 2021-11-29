@@ -364,13 +364,11 @@ char* xcmd_display_get(void)
 void xcmd_display_clear(void)
 {
     char *line = xcmd_display_get();
-    xcmd_put_str("\x1B[0M");
+    xcmd_print(DL(0));
 #ifndef XCMD_DEFAULT_PROMPT_CLOLR
     xcmd_put_str(xcmd_get_prompt());
 #else
-    xcmd_put_str(XCMD_DEFAULT_PROMPT_CLOLR);
-    xcmd_put_str(xcmd_get_prompt());
-    xcmd_put_str(TX_DEF);
+    xcmd_print(XCMD_DEFAULT_PROMPT_CLOLR "%s" TX_DEF, xcmd_get_prompt());
 #endif
     g_xcmder.parser.byte_num = 0;
     g_xcmder.parser.cursor = 0;

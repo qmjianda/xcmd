@@ -73,7 +73,6 @@ static int xcmd_history_dw(void *pv)
     xcmd_display_clear();
     if(line)
     {
-
         xcmd_display_print(line);
     }
     return 0;
