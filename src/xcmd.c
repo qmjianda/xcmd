@@ -1,11 +1,14 @@
-#include "../inc/xcmd.h"
-#include "../inc/xcmd_confg.h"
-#include "../inc/xcmd_default_cmds.h"
-#include "../inc/xcmd_default_keys.h"
+#include "xcmd_confg.h"
+#include "xcmd.h"
+#include "xcmd_default_cmds.h"
+#include "xcmd_default_keys.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-#define CMD_IS_ENDLINE(c) ((c == '\n') || (c == '\r'))
+#define CMD_IS_END_KEY(c) ( ((c >= 'A') && (c <= 'D')) || ((c >= 'P') && (c <= 'S')) || \
+                            (c == '~') || (c == 'H') || (c == 'F'))
+
 #define CMD_IS_PRINT(c) ((c >= 32) && (c <= 126))
 
 typedef struct __history
@@ -53,35 +56,119 @@ struct
         }history_list;
         #endif
 
-        char display_line[XCMD_LINE_MAX_LENGTH];  /* 显示区的缓存 */
+        char display_line[XCMD_LINE_MAX_LENGTH+1];  /* 显示区的缓存 */
         const char *prompt;        /* 显示区的提示 */
         uint16_t byte_num;   /* 当前行的字符个数 */
         uint16_t cursor;     /* 光标所在位置 */
         uint8_t  encode_case_stu;
+        char  encode_buf[7];
+        uint8_t  encode_count;
         uint32_t key_val;
         uint16_t param_len;
+        uint8_t (*recv_hook_func)(char*); /* 解释器接收钩子函数，返回0则接收到的数据会返回给解释器，返回1则不会 */
     }parser;
     uint8_t _initOK;
-} g_xcmder;
+} g_xcmder = {0};
+
+static char *xcmd_strpbrk(char*s, const char *delim)  //返回s1中第一个满足条件的字符的指针, 并且保留""号内的源格式
+{
+    uint8_t flag = 0;
+    for(uint16_t i=0; s[i]; i++)
+    {
+        for(uint16_t j=0; delim[j]; j++)
+        {
+            if(0 == flag)
+            {
+                if(s[i] == '\"')
+                {
+                    for(uint16_t k=i; s[k]; k++)
+                    {
+                        s[k] = s[k+1];
+                    }
+                    flag = 1;
+                    continue;
+                }
+            }
+            
+            if(flag)
+            {
+                if(s[i] == '\"')
+                {
+                    for(uint16_t k=i; s[k]; k++)
+                    {
+                        s[k] = s[k+1];
+                    }
+                    flag = 0;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            if(s[i] == delim[j])
+            {
+                return &s[i];
+            }
+        }
+    }
+    return NULL;
+}
+
+/* 字符串切割函数，使用:   
+        char s[] = "-abc-=-def";   
+        char *sp;   
+        x = strtok_r(s, "-", &sp);      // x = "abc", sp = "=-def"   
+        x = strtok_r(NULL, "-=", &sp);  // x = "def", sp = NULL   
+        x = strtok_r(NULL, "=", &sp);   // x = NULL   
+                // s = "abc/0-def/0"   
+*/     
+static char *xcmd_strtok(char *s, const char *delim, char **save_ptr) 
+{     
+    char *token;     
+     
+    if (s == NULL) s = *save_ptr;     
+     
+    /* Scan leading delimiters.  */     
+    s += strspn(s, delim);   // 返回字符串中第一个不在指定字符串中出现的字符下标，去掉了以空字符开头的
+                                        // 字串的情况
+    if (*s == '\0')      
+        return NULL;     
+    
+    /* Find the end of the token.  */     
+    token = s;     
+    s = xcmd_strpbrk(token, delim);  //   返回s1中第一个满足条件的字符的指针
+    if (s == NULL)     
+        /* This token finishes the string.  */     
+        *save_ptr = strchr(token, '\0');     
+    else {     
+        /* Terminate the token and make *SAVE_PTR point past it.  */     
+        *s = '\0';     
+        *save_ptr = s + 1;     
+    }
+    return token;     
+}  
 
 static int xcmd_get_param(char* msg, char*delim, char* get[], int max_num)
 {
 	int i,ret;
 	char *ptr = NULL;
-	ptr = strtok(msg, delim);
+    char *sp = NULL;
+	ptr = xcmd_strtok(msg, delim, &sp);
 	for(i=0; ptr!=NULL &&i<max_num; i++)
 	{
 		get[i] = ptr;
-		ptr = strtok(NULL, delim);
+		ptr = xcmd_strtok(NULL, delim, &sp);
 	}
 	ret = i;
 	return ret;
 }
 
-static void xcmd_cmd_match(int argc, char*argv[])
+static int xcmd_cmd_match(int argc, char*argv[])
 {
     xcmd_t *p = g_xcmder.cmd_list.head;
     uint8_t flag = 0;
+    int ret = -1;
     while(p)
     {
         if(strcmp(p->name, argv[0]) == 0)
@@ -96,7 +183,7 @@ static void xcmd_cmd_match(int argc, char*argv[])
                     break;
                 }
             }
-            p->func(argc, argv);
+            ret = p->func(argc, argv);
             break;
         }
         p = p->next;
@@ -109,88 +196,77 @@ static void xcmd_cmd_match(int argc, char*argv[])
     {
         xcmd_print("cmd \"%s\" does not exist\r\n", argv[0]);
     }
+    return ret;
 }
 
-static void xcmd_key_match(XCMD_KEY_T key)
+static void xcmd_key_match(char* key)
 {
     xcmd_key_t *p = g_xcmder.key_list.head;
     while(p)
     {
-        if(p->key == key)
+        if(strcmp(key, p->key) == 0)
         {
-            p->func(&g_xcmder);
-            break;
+            if(p->func(&g_xcmder) == 0)
+            {
+                break;
+            }
         }
         p = p->next;
     }
 }
 
-static void xcmd_key_exec(XCMD_KEY_T key)
+static void xcmd_key_exec(char* key)
 {
     xcmd_key_match(key);
 }
 
-
-static uint32_t xcmd_bytes_encode(uint8_t byte)
+static uint8_t xcmd_rcv_encode(uint8_t byte)
 {
-	uint32_t ret = byte;
-	
-	switch(g_xcmder.parser.encode_case_stu)
-	{
-	case 0:
-		if(byte==0x1B) //1~2
-		{
-		    g_xcmder.parser.encode_case_stu = 1;
-			g_xcmder.parser.key_val = byte;
-		    ret = 0;
-		}
-		break;
-	case 1:
-		if(byte==0x5B)
-		{
-		    g_xcmder.parser.encode_case_stu++;
-			g_xcmder.parser.key_val |= (uint32_t)byte<<8;
-		    ret = 0;
-		}
-		else
-		{
-		    g_xcmder.parser.encode_case_stu = 0;
-		}
-		break;
-	case 2:
-	    if(byte >= 0x41)
-	    {
-	        g_xcmder.parser.encode_case_stu = 0;
-			g_xcmder.parser.key_val |= (uint32_t)byte<<16;
-			ret = g_xcmder.parser.key_val;
-	    }
-		else
-		{
-			g_xcmder.parser.encode_case_stu++;
-			g_xcmder.parser.key_val |= (uint32_t)byte<<16;
-			ret = 0;
-		}
-		break;
-	case 3:
-		if(byte == 0x7E)
-		{
-			g_xcmder.parser.encode_case_stu = 0;
-			g_xcmder.parser.key_val |= (uint32_t)byte<<24;
-			ret = g_xcmder.parser.key_val;
-		}
-		else
-		{
-			g_xcmder.parser.encode_case_stu = 0;
-		}
-		break;
-	default:
-		break;
-	}
+    uint8_t ret = 0;
 
-	return ret;
+    switch (g_xcmder.parser.encode_case_stu)
+    {
+    case 0:
+        g_xcmder.parser.encode_count = 0;
+        if (byte == 0x1B) //ESC
+        {
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
+            g_xcmder.parser.encode_case_stu = 1;
+            g_xcmder.parser.key_val = byte;
+        }
+        else
+        {
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count] = '\0';
+            g_xcmder.parser.encode_count = 0;
+            ret = 1;
+        }
+        break;
+    case 1:
+        if (CMD_IS_END_KEY(byte))
+        {
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count] = '\0';
+            ret = g_xcmder.parser.encode_count;
+            g_xcmder.parser.encode_case_stu = 0;
+        }
+        else
+        {
+            g_xcmder.parser.encode_buf[g_xcmder.parser.encode_count++] = byte;
+            if (g_xcmder.parser.encode_count >= 6)
+            {
+                g_xcmder.parser.encode_case_stu = 0;
+                ret = 0;
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    return ret;
 }
 
-static char* xcmd_line_end(void)
+char* xcmd_end_of_input(void)
 {
 	char* ret = g_xcmder.parser.display_line;
 	if(g_xcmder.parser.byte_num)
@@ -211,62 +287,72 @@ static char* xcmd_line_end(void)
 #endif
         g_xcmder.parser.byte_num = 0;
         g_xcmder.parser.cursor = 0;
-        xcmd_history_reset();
+        xcmd_history_slider_reset();
 	}
 	return ret;
 }
 
 static void xcmd_parser(uint8_t byte)
 {
-	uint32_t c = 0;
+	uint32_t num = 0;
 
-    c = xcmd_bytes_encode(byte);
+    num = xcmd_rcv_encode(byte);
 
-    if(CMD_IS_PRINT(c))
+    if(num > 0)
     {
-        xcmd_display_insert_char(c);
-    }
-    else if(CMD_IS_ENDLINE(c))
-    {
-        char *cmd = xcmd_line_end();
-        xcmd_print("\n\r");
-        if(cmd[0])
+        if( !(g_xcmder.parser.recv_hook_func && g_xcmder.parser.recv_hook_func(g_xcmder.parser.encode_buf)) )
         {
-            xcmd_exec(cmd);
-            cmd[0] = '\0';
+            if(CMD_IS_PRINT(g_xcmder.parser.encode_buf[0]))
+            {
+                xcmd_display_insert_char(g_xcmder.parser.encode_buf[0]);
+                return;
+            }
+            else
+            {
+                xcmd_key_exec(g_xcmder.parser.encode_buf);
+            }
         }
-        xcmd_print("%s", g_xcmder.parser.prompt);
     }
-    else
-    {
-        xcmd_key_exec((XCMD_KEY_T)c);
-    }
-    fflush(stdout);
+}
+
+void xcmd_put_str(const char *str)
+{
+    for(uint16_t i=0; str[i]; i++)
+	{
+		g_xcmder.io.put_c(str[i]);
+	};
 }
 
 void xcmd_print(const char *fmt, ...)
 {
-    char ucstring[128] = {0};
+    char ucstring[XCMD_PRINT_BUF_MAX_LENGTH] = {0};
     va_list arg;
     va_start(arg, fmt);
-    vsnprintf(ucstring, 256, fmt, arg);
+    vsnprintf(ucstring, XCMD_PRINT_BUF_MAX_LENGTH, fmt, arg);
     va_end(arg);
-
-    for(uint16_t i=0; ucstring[i]; i++)
-	{
-		g_xcmder.io.put_c(ucstring[i]);
-	};
-    return;
+    xcmd_put_str(ucstring);
 }
 
-void xcmd_display_set(const char *msg)
+void xcmd_display_write(const char* buf, uint16_t len)
 {
-    xcmd_display_clear();
-    uint16_t len = strlen(msg);
-    strncpy(g_xcmder.parser.display_line, msg, XCMD_LINE_MAX_LENGTH);
-    xcmd_print(g_xcmder.parser.display_line);
-    g_xcmder.parser.byte_num = len;
-    g_xcmder.parser.cursor = len;
+    if(len > XCMD_LINE_MAX_LENGTH)
+    {
+        len = XCMD_LINE_MAX_LENGTH;
+    }
+    for(uint16_t i=0; i<len; i++)
+    {
+        xcmd_display_insert_char(buf[i]);
+    }
+}
+
+void xcmd_display_print(const char *fmt, ...)
+{
+    char ucstring[XCMD_PRINT_BUF_MAX_LENGTH] = {0};
+    va_list arg;
+    va_start(arg, fmt);
+    vsnprintf(ucstring, XCMD_PRINT_BUF_MAX_LENGTH, fmt, arg);
+    va_end(arg);
+    xcmd_display_write(ucstring, strlen(ucstring));
 }
 
 char* xcmd_display_get(void)
@@ -279,7 +365,11 @@ void xcmd_display_clear(void)
 {
     char *line = xcmd_display_get();
     xcmd_print(DL(0));
-    xcmd_print("\r%s", g_xcmder.parser.prompt);
+#ifndef XCMD_DEFAULT_PROMPT_CLOLR
+    xcmd_put_str(xcmd_get_prompt());
+#else
+    xcmd_print(XCMD_DEFAULT_PROMPT_CLOLR "%s" TX_DEF, xcmd_get_prompt());
+#endif
     g_xcmder.parser.byte_num = 0;
     g_xcmder.parser.cursor = 0;
     line[0] = '\0';
@@ -320,13 +410,25 @@ void xcmd_display_delete_char(void)
 	}
 }
 
+uint8_t xcmd_display_current_char(char *cha)
+{
+    if(g_xcmder.parser.cursor < g_xcmder.parser.byte_num)
+    {
+        char *line = xcmd_display_get();
+        *cha = line[g_xcmder.parser.cursor];
+        return 1;
+    }
+    return 0;
+}
+
 void xcmd_display_cursor_set(uint16_t pos)
 {
-    if(pos <= g_xcmder.parser.byte_num)
+    if(pos > g_xcmder.parser.byte_num)
     {
-        g_xcmder.parser.cursor = pos;
-        xcmd_print(CHA(g_xcmder.parser.cursor+3));
+        pos = g_xcmder.parser.byte_num;
     }
+    g_xcmder.parser.cursor = pos;
+    xcmd_print(CHA(g_xcmder.parser.cursor+strlen(g_xcmder.parser.prompt)+1));
 }
 
 uint16_t xcmd_display_cursor_get(void)
@@ -425,25 +527,25 @@ uint16_t xcmd_history_len(void)
 #endif
 }
 
-void xcmd_history_reset(void)
+void xcmd_history_slider_reset(void)
 {
 #if XCMD_HISTORY_MAX_NUM
     g_xcmder.parser.history_list.slider = g_xcmder.parser.history_list.head;
 #endif
 }
 
-uint8_t xcmd_exec(char* str)
+int xcmd_exec(char* str)
 {
 	int param_num = 0;
 	char *cmd_param_buff[XCMD_PARAM_MAX_NUM];
 	char temp[XCMD_LINE_MAX_LENGTH];
 	strncpy(temp, str, XCMD_LINE_MAX_LENGTH);
-	param_num = xcmd_get_param(temp, "., ", cmd_param_buff, XCMD_PARAM_MAX_NUM);
+	param_num = xcmd_get_param(temp, " ", cmd_param_buff, XCMD_PARAM_MAX_NUM);
 	if(param_num >0)
 	{
-		xcmd_cmd_match(param_num, cmd_param_buff);
+		return xcmd_cmd_match(param_num, cmd_param_buff);
 	}
-	return param_num;
+	return -1;
 }
 
 int xcmd_key_register(xcmd_key_t *keys, uint16_t number)
@@ -500,12 +602,80 @@ xcmd_t *xcmd_cmdlist_get(void)
     return g_xcmder.cmd_list.head;
 }
 
+int xcmd_unregister_cmd(char *cmd)
+{
+    xcmd_t *p = g_xcmder.cmd_list.head;
+    xcmd_t *bk = p;
+    while(p)
+    {
+        if(strcmp(cmd, p->name) == 0)
+        {
+            if(g_xcmder.cmd_list.len == 1)
+            {
+                g_xcmder.cmd_list.head = g_xcmder.cmd_list.tail = NULL;
+            }
+            else
+            {
+                bk->next = p->next;
+                if(p->next == NULL)
+                {
+                    g_xcmder.cmd_list.tail = bk;
+                }
+            }
+            g_xcmder.cmd_list.len--;
+            return 0;
+        }
+        bk = p;
+        p = p->next;
+    }
+    return -1;
+}
+
+int xcmd_unregister_key(char *key)
+{
+    xcmd_key_t *p = g_xcmder.key_list.head;
+    xcmd_key_t *bk = p;
+    while(p)
+    {
+        if(strcmp(key, p->key) == 0)
+        {
+            if(g_xcmder.key_list.len == 1)
+            {
+                g_xcmder.key_list.head = g_xcmder.key_list.tail = NULL;
+            }
+            else
+            {
+                bk->next = p->next;
+                if(p->next == NULL)
+                {
+                    g_xcmder.key_list.tail = bk;
+                }
+            }
+            g_xcmder.key_list.len--;
+            return 0;
+        }
+        bk = p;
+        p = p->next;
+    }
+    return -1;
+}
+
 void xcmd_set_prompt(const char* prompt)
 {
     if(prompt)
     {
         g_xcmder.parser.prompt = prompt;
     }
+}
+
+const char* xcmd_get_prompt(void)
+{
+    return g_xcmder.parser.prompt;
+}
+
+void xcmd_register_rcv_hook_func(uint8_t(*func_p)(char*))
+{
+    g_xcmder.parser.recv_hook_func = func_p;
 }
 
 void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
@@ -515,7 +685,7 @@ void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
         g_xcmder.io.get_c = get_c;
 		g_xcmder.io.put_c = put_c;
 
-        g_xcmder.parser.prompt = "->";
+        g_xcmder.parser.prompt = XCMD_DEFAULT_PROMPT;
         g_xcmder.parser.byte_num = 0;
         g_xcmder.parser.cursor = 0;
 		g_xcmder.parser.encode_case_stu = 0;
@@ -527,6 +697,7 @@ void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
             default_cmds_init();
             default_keys_init();
             xcmd_exec("logo");
+            xcmd_unregister_cmd("logo");
         }
         g_xcmder._initOK = 1;
 	}

@@ -1,18 +1,49 @@
 /*
  * @Author: your name
  * @Date: 2021-09-15 00:11:50
- * @LastEditTime: 2021-09-17 23:18:12
+ * @LastEditTime: 2021-10-27 09:16:27
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_keys.c
  */
-#include "../inc/xcmd_default_keys.h"
-#include "../inc/xcmd_confg.h"
-#include "../inc/xcmd.h"
+#include "xcmd_confg.h"
+#include "xcmd.h"
+#include "xcmd_default_keys.h"
+
+static int xcmd_str_match(const char* str1, const char* str2)
+{
+    int i=0;
+    for(i=0; str1[i] && str2[i]; i++)
+    {
+        if(str1[i] != str2[i])
+        {
+            break;
+        }
+    }
+    return i;
+}
 
 static int xcmd_del_char(void *pv)
 {
 	xcmd_display_delete_char();
+    return 0;
+}
+
+static int xcmd_enter(void *pv)
+{
+    char *cmd = xcmd_end_of_input();
+    xcmd_print("\n\r");
+    if(cmd[0])
+    {
+        xcmd_exec(cmd);
+        cmd[0] = '\0';
+    }
+#ifndef XCMD_DEFAULT_PROMPT_CLOLR
+        xcmd_print("%s", xcmd_get_prompt());
+#else
+        xcmd_print(XCMD_DEFAULT_PROMPT_CLOLR "%s" TX_DEF, xcmd_get_prompt());
+#endif
+    
     return 0;
 }
 
@@ -35,16 +66,14 @@ static int xcmd_cursor_right(void *pv)
     return 0;
 }
 
+#if XCMD_HISTORY_MAX_NUM
 static int xcmd_history_dw(void *pv)
 {
     char *line = xcmd_history_prev();
+    xcmd_display_clear();
     if(line)
     {
-        xcmd_display_set(line);
-    }
-    else
-    {
-        xcmd_display_clear();
+        xcmd_display_print(line);
     }
     return 0;
 }
@@ -54,19 +83,20 @@ static int xcmd_history_up(void *pv)
     char *line = xcmd_history_next();
     if(line)
     {
-        xcmd_display_set(line);
+        xcmd_display_clear();
+        xcmd_display_print(line);
     }
     return 0;
 }
+#endif
 
 static int xcmd_auto_completion(void *pv)
 {
-    xcmd_t *match_cmd = NULL;
+    xcmd_t *match_cmd_first = NULL;
     uint16_t match_num = 0;
+    uint16_t match_subscript_min = 0;
     xcmd_t *p = xcmd_cmdlist_get();
     char *display_line = xcmd_display_get();
-    char display_backup[XCMD_LINE_MAX_LENGTH];
-    strncpy(display_backup, display_line, XCMD_LINE_MAX_LENGTH);
     uint16_t cursor_pos = xcmd_display_cursor_get();
     while(p)
     {
@@ -74,11 +104,12 @@ static int xcmd_auto_completion(void *pv)
         {
             if(match_num == 0)
             {
-                match_cmd = p;
+                match_cmd_first = p;
+                match_subscript_min = strlen(p->name);
             }
             else if(match_num == 1)
             {
-                xcmd_print("\r\n%-15s%-15s", match_cmd->name, p->name);
+                xcmd_print("\r\n%-15s%-15s", match_cmd_first->name, p->name);
             }
             else
             {
@@ -88,6 +119,11 @@ static int xcmd_auto_completion(void *pv)
                     xcmd_print("\r\n");
                 }
             }
+            uint16_t subscript = xcmd_str_match(match_cmd_first->name, p->name);
+            if( subscript < match_subscript_min)
+            {
+                match_subscript_min = subscript;
+            }
             match_num++;
         }
         p = p->next;
@@ -95,27 +131,30 @@ static int xcmd_auto_completion(void *pv)
 
     if(match_num == 1)
     {
-        xcmd_display_set(match_cmd->name);
+        xcmd_display_clear();
+        xcmd_display_print("%s", match_cmd_first->name);
     }
     else if(match_num > 1)
     {
         xcmd_print("\r\n");
-        xcmd_display_set(display_backup);
+        xcmd_display_clear();
+        xcmd_display_write(match_cmd_first->name, match_subscript_min);
     }
     return 0;
 }
 
-
 static xcmd_key_t default_keys[] = 
 {
-    {BACKSPACE,     xcmd_del_char,          NULL},
-    {L_DELETE,      xcmd_del_char,          NULL},
-    {LEFT,          xcmd_cursor_left,       NULL},
-    {RIGHT,         xcmd_cursor_right,      NULL},
-    {TAB,           xcmd_auto_completion,   NULL},
+    {KEY_CTR_M,     xcmd_enter,             "enter", NULL},
+    {KEY_CTR_J,     xcmd_enter,             "enter", NULL},
+    {KEY_CTR_H,     xcmd_del_char,          "backspace", NULL},
+    {KEY_BACKSPACE, xcmd_del_char,          "delete", NULL},
+    {KEY_LEFT,      xcmd_cursor_left,       "left", NULL},
+    {KEY_RIGHT,     xcmd_cursor_right,      "right", NULL},
+    {KEY_TAB,       xcmd_auto_completion,   "tab", NULL},
 #if XCMD_HISTORY_MAX_NUM
-    {DW,            xcmd_history_dw,        NULL},
-    {UP,            xcmd_history_up,        NULL},
+    {KEY_DW,        xcmd_history_dw,        "down", NULL},
+    {KEY_UP,        xcmd_history_up,        "up", NULL},
 #endif
 };
 

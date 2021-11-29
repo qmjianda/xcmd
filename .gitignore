@@ -3,9 +3,11 @@
 *Output/
 *DebugConfig/
 *Listings/
+*OBJ/
 
 #file
 xcmder
 *.map
 *.uvoptx
 *.uvguix*
+*fatfs.img

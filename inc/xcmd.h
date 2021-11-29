@@ -14,8 +14,8 @@
 extern   "C" {
 #endif
 
-typedef void(*cmd_func_t)(int argv, char* argc[]);
-typedef int(*cmd_key_func_t)(void *data);
+typedef int(*cmd_func_t)(int, char**);
+typedef int(*cmd_key_func_t)(void *);
 
 typedef struct __cmd
 {
@@ -27,14 +27,15 @@ typedef struct __cmd
 
 typedef struct __key
 {
-    XCMD_KEY_T key;
+    char* key;
     cmd_key_func_t func;
+    char* help;
     struct __key *next;
 }xcmd_key_t;
 
 
 /**
- * @description: 接时期初始化
+ * @description: 解释器初始化
  * @param {func*} get_c：获取一个字符的函数
  * @param {func*} put_c：发送一个字符的函数
  * @return {*}
@@ -66,34 +67,46 @@ int xcmd_key_register(xcmd_key_t* keys, uint16_t number);
 
 /**
  * @description: 获取命令列表，可以通过next指针可以遍历所有指令
- * @param {xcmd_key_t*} keys：快捷键集
- * @param {uint16_t} number：快捷键的个数
- * @return {int}：已经注册的快捷键的个数
+ * @param {*} 
+ * @param {} 
+ * @return {xcmd_t *}：指令链表表头
  */
 xcmd_t *xcmd_cmdlist_get(void);
 
 /**
- * @description: 获取案件列表，可以通过next指针可以遍历所有案件
- * @param {xcmd_key_t*} keys：快捷键集
- * @param {uint16_t} number：快捷键的个数
- * @return {int}：已经注册的快捷键的个数
+ * @description: 获取按键列表，可以通过next指针可以遍历所有按键
+ * @param {*} 
+ * @param {} 
+ * @return {xcmd_key_t *}：快捷键链表表头
  */
 xcmd_key_t *xcmd_keylist_get(void);
 
 /**
+ * @description: 删除已经注册的cmd
+ * @param {char*} cmd：cmd集
+ * @return {int}：0：success； !0：failed
+ */
+int xcmd_unregister_cmd(char *cmd);
+
+/**
+ * @description:删除已经注册的key
+ * @param {char*} key：key集
+ * @return {int}：0：success； !0：failed
+ */
+int xcmd_unregister_key(char *key);
+
+/**
  * @description: 手动执行命令
  * @param {char* } str：命令
- * @return {uint8_t}  返回参数的个数
+ * @return {uint8_t}  返回执行结果
  */
-uint8_t xcmd_exec(char *str);
+int xcmd_exec(char *str);
 
 /**
  * @description: 打印字符串
- * @param {char*} str
- * @return 无
  */
 void xcmd_print(const char *fmt, ...);
-
+void xcmd_put_str(const char *str);
 
 /**
  * @description: 向显示器插入一个字符
@@ -108,6 +121,13 @@ void xcmd_display_insert_char(char c);
  * @return 无
  */
 void xcmd_display_delete_char(void);
+
+/**
+ * @description: 返回光标当前的字符
+ * @param {char*}cha存储返回的字符
+ * @return {uint8_t}0光标位置无字符，1有字符
+ */
+uint8_t xcmd_display_current_char(char *cha);
 
 /**
  * @description: 清除显示器
@@ -128,7 +148,8 @@ char* xcmd_display_get(void);
  * @param {char*} 要现实的内容
  * @return 无
  */
-void xcmd_display_set(const char *msg);
+void xcmd_display_print(const char *fmt, ...);
+void xcmd_display_write(const char* buf, uint16_t len);
 
 /**
  * @description: 光标操作函数
@@ -144,6 +165,14 @@ uint16_t xcmd_display_cursor_get(void);
  * @return {*}
  */
 void xcmd_set_prompt(const char* prompt);
+const char* xcmd_get_prompt(void);
+
+/**
+ * @description: 注册解释器接收函数的钩子函数
+ * @param {func_p} 钩子函数，返回0则接收到的数据会返回给解释器，返回1则不会
+ * @return {*} 无
+ */
+void xcmd_register_rcv_hook_func(uint8_t(*func_p)(char*));
 
 /**
  * @description: 获取历史记录的个数
@@ -185,7 +214,14 @@ char *xcmd_history_current(void);
  * @param {*}
  * @return 无
  */
-void  xcmd_history_reset(void);
+void  xcmd_history_slider_reset(void);
+
+/**
+ * @description: 结束输入
+ * @param {*}
+ * @return {*}
+ */
+char* xcmd_end_of_input(void);
 
 #ifdef __cplusplus
         }

@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F427_437xx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\FWLIB\CORE;..\FWLIB\inc;..\System\debug;..\System\delay;..\System\sys;..\System\debug;..\user;..\user\bsp\inc;..\user\bsp;..\..\..\..\..\inc</IncludePath>
+              <IncludePath>..\FWLIB\CORE;..\FWLIB\inc;..\System\debug;..\System\delay;..\System\sys;..\System\debug;..\user;..\user\bsp\inc;..\user\bsp;..\..\..\..\..\inc;..\..\..\..\..\extensions\test</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -642,11 +642,6 @@
               <FileType>5</FileType>
               <FilePath>..\user\config.h</FilePath>
             </File>
-            <File>
-              <FileName>test_cmds.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\user\test_cmds.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -666,6 +661,16 @@
               <FileName>xcmd_default_keys.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\xcmd_default_keys.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>extensions</GroupName>
+          <Files>
+            <File>
+              <FileName>test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\extensions\test\test.c</FilePath>
             </File>
           </Files>
         </Group>
