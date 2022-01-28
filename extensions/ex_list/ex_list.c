@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "xcmd_platform.h"
 #include "xcmd.h"
 #include "list.h"
 struct student
@@ -13,22 +12,21 @@ struct student
 
 static int list_test(int argc, char* argv[])
 {
-     struct student *p;
-    struct student *q;
+    struct student *p;
     struct student stu1;
     struct student stu2;  
     struct list_head *pos;
-    //Á´±íµÄ³õÊ¼»¯
+    //é“¾è¡¨çš„åˆå§‹åŒ–
     INIT_LIST_HEAD(&stu1.stu_list);
     INIT_LIST_HEAD(&stu2.stu_list);
-    //Í·²å·¨´´½¨stu stu1Á´±í
+    //å¤´æ’æ³•åˆ›å»ºstu stu1é“¾è¡¨
      for (int i = 0;i < 6;i++) {
          p = (struct student *)malloc(sizeof(struct student));
          p->ID=i;
          p->math = i+80;
-         //Í·²å·¨
+         //å¤´æ’æ³•
          list_add(&p->stu_list,&stu1.stu_list);
-         //Î²²å·¨
+         //å°¾æ’æ³•
          //list_add_tail(&p->list,&stu.list);
      }
      
@@ -37,14 +35,14 @@ static int list_test(int argc, char* argv[])
         printf("ID = %d,math = %d\n",((struct student*)pos)->ID,((struct student*)pos)->math);
     }
     
-    //Î²²å·¨´´½¨stu stu1Á´±í
+    //å°¾æ’æ³•åˆ›å»ºstu stu1é“¾è¡¨
      for (int i = 0;i < 6;i++) {
          p = (struct student *)malloc(sizeof(struct student));
          p->ID=i;
          p->math = i+80;
-         //Í·²å·¨
+         //å¤´æ’æ³•
          //list_add(&p->stu_list,&stu1.stu_list);
-         //Î²²å·¨
+         //å°¾æ’æ³•
          list_add_tail(&p->stu_list,&stu2.stu_list);
      }
      
@@ -59,25 +57,24 @@ static int list_test(int argc, char* argv[])
 static int list_note_del(int argc, char* argv[])
 {
     struct student *p;
-    struct student *q;
     struct student stu1;
     struct student stu2;  
     struct list_head *pos1;
-    //×¢ÒâÕâÀïµÄpos2£¬ºóÃæ»á½âÊÍÎªÊ²Ã´¶¨ÒåÎª
+    //æ³¨æ„è¿™é‡Œçš„pos2ï¼Œåé¢ä¼šè§£é‡Šä¸ºä»€ä¹ˆå®šä¹‰ä¸º
     struct student *pos2;
     //stu = (struct student*)malloc(sizeof(struct student));
-    //Á´±íµÄ³õÊ¼»¯
+    //é“¾è¡¨çš„åˆå§‹åŒ–
     INIT_LIST_HEAD(&stu1.stu_list);
     INIT_LIST_HEAD(&stu2.stu_list);
     LIST_HEAD(stu);
-    //Í·²å·¨´´½¨stu stu1Á´±í
+    //å¤´æ’æ³•åˆ›å»ºstu stu1é“¾è¡¨
      for (int i = 0;i < 6;i++) {
          p = (struct student *)malloc(sizeof(struct student));
          p->ID=i;
          p->math = i+80;
-         //Í·²å·¨
+         //å¤´æ’æ³•
          list_add(&p->stu_list,&stu1.stu_list);
-         //Î²²å·¨
+         //å°¾æ’æ³•
          //list_add_tail(&p->list,&stu.list);
      }
      
@@ -86,7 +83,7 @@ static int list_note_del(int argc, char* argv[])
         printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
     
-    //É¾³ı
+    //åˆ é™¤
     list_for_each_entry(pos2,&stu1.stu_list,stu_list) {
         if (pos2->ID == 4) {
             list_del(&pos2->stu_list);
@@ -104,25 +101,24 @@ static int list_note_del(int argc, char* argv[])
 static int list_note_rep(int argc, char* argv[])
 {
     struct student *p;
-    struct student *q;
     struct student stu1;
     struct student stu2;  
     struct list_head *pos1;
     struct student *pos2;
     struct student new_obj={.ID=100,.math=100}; 
     //stu = (struct student*)malloc(sizeof(struct student));
-    //Á´±íµÄ³õÊ¼»¯
+    //é“¾è¡¨çš„åˆå§‹åŒ–
     INIT_LIST_HEAD(&stu1.stu_list);
     INIT_LIST_HEAD(&stu2.stu_list);
     LIST_HEAD(stu);
-    //Í·²å·¨´´½¨stu stu1Á´±í
+    //å¤´æ’æ³•åˆ›å»ºstu stu1é“¾è¡¨
      for (int i = 0;i < 6;i++) {
          p = (struct student *)malloc(sizeof(struct student));
          p->ID=i;
          p->math = i+80;
-         //Í·²å·¨
+         //å¤´æ’æ³•
          list_add(&p->stu_list,&stu1.stu_list);
-         //Î²²å·¨
+         //å°¾æ’æ³•
          //list_add_tail(&p->list,&stu.list);
      }
     printf("list_add: \r\n");
@@ -130,7 +126,7 @@ static int list_note_rep(int argc, char* argv[])
         printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
  
-    //Ìæ»»
+    //æ›¿æ¢
     list_for_each_entry(pos2,&stu1.stu_list,stu_list) {
         if (pos2->ID == 4) {
             list_replace(&pos2->stu_list,&new_obj.stu_list);
@@ -147,26 +143,24 @@ static int list_note_rep(int argc, char* argv[])
 
 static int list_note_del_insert(int argc, char* argv[])
 {
-     struct student *p;
-    struct student *q;
+    struct student *p;
     struct student stu1;
     struct student stu2;  
     struct list_head *pos1;
     struct student *pos2;
-    struct student new_obj={.ID=100,.math=100}; 
     //stu = (struct student*)malloc(sizeof(struct student));
-    //Á´±íµÄ³õÊ¼»¯
+    //é“¾è¡¨çš„åˆå§‹åŒ–
     INIT_LIST_HEAD(&stu1.stu_list);
     INIT_LIST_HEAD(&stu2.stu_list);
     LIST_HEAD(stu);
-    //Í·²å·¨´´½¨stu stu1Á´±í
+    //å¤´æ’æ³•åˆ›å»ºstu stu1é“¾è¡¨
      for (int i = 0;i < 6;i++) {
          p = (struct student *)malloc(sizeof(struct student));
          p->ID=i;
          p->math = i+80;
-         //Í·²å·¨
+         //å¤´æ’æ³•
          list_add(&p->stu_list,&stu1.stu_list);
-         //Î²²å·¨
+         //å°¾æ’æ³•
          //list_add_tail(&p->list,&stu.list);
      }
     printf("list_add: \r\n");
@@ -174,7 +168,7 @@ static int list_note_del_insert(int argc, char* argv[])
         printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
  
-    //ÒÆÎ»Ìæ»»
+    //ç§»ä½æ›¿æ¢
     list_for_each_entry(pos2,&stu1.stu_list,stu_list) {
         if (pos2->ID == 0) {
             list_move(&pos2->stu_list,&stu1.stu_list);
@@ -190,40 +184,38 @@ static int list_note_del_insert(int argc, char* argv[])
 
 static int List_to_merge(int argc, char* argv[])
 {
-     struct student *p;
+    struct student *p;
     struct student *q;
     struct student stu1;
     struct student stu2;  
     struct list_head *pos1;
-    struct student *pos2;
-    struct student new_obj={.ID=100,.math=100}; 
     //stu = (struct student*)malloc(sizeof(struct student));
-    //Á´±íµÄ³õÊ¼»¯
+    //é“¾è¡¨çš„åˆå§‹åŒ–
     INIT_LIST_HEAD(&stu1.stu_list);
     INIT_LIST_HEAD(&stu2.stu_list);
     LIST_HEAD(stu);
-    //Í·²å·¨´´½¨stu1 listÁ´±í
+    //å¤´æ’æ³•åˆ›å»ºstu1 listé“¾è¡¨
      for (int i = 0;i < 6;i++) {
          p = (struct student *)malloc(sizeof(struct student));
          p->ID=i;
          p->math = i+80;
-         //Í·²å·¨
+         //å¤´æ’æ³•
          list_add(&p->stu_list,&stu1.stu_list);
-         //Î²²å·¨
+         //å°¾æ’æ³•
          //list_add_tail(&p->list,&stu.list);
      }
     printf("stu1: \r\n");
     list_for_each(pos1, &stu1.stu_list) {
         printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
-    //Í·²å·¨´´½¨stu2 list Á´±í
+    //å¤´æ’æ³•åˆ›å»ºstu2 list é“¾è¡¨
      for (int i = 0;i < 3;i++) {
          q = (struct student *)malloc(sizeof(struct student));
          q->ID=i;
          q->math = i+80;
-         //Í·²å·¨
+         //å¤´æ’æ³•
          list_add(&q->stu_list,&stu2.stu_list);
-         //Î²²å·¨
+         //å°¾æ’æ³•
          //list_add_tail(&p->list,&stu.list);
      }
     printf("stu2: \r\n");
@@ -231,7 +223,7 @@ static int List_to_merge(int argc, char* argv[])
         printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
 
-    //ºÏ²¢
+    //åˆå¹¶
     list_splice(&stu1.stu_list,&stu2.stu_list);
     printf("list_splice\r\n");
     list_for_each(pos1, &stu2.stu_list) {
@@ -245,25 +237,22 @@ static int List_to_merge(int argc, char* argv[])
 static int List_traverse(int argc, char* argv[])
 {
     struct student *p;
-    struct student *q;
     struct student stu1;
     struct student stu2;  
     struct list_head *pos1;
-    struct student *pos2;
-    struct student new_obj={.ID=100,.math=100}; 
     //stu = (struct student*)malloc(sizeof(struct student));
-    //Á´±íµÄ³õÊ¼»¯
+    //é“¾è¡¨çš„åˆå§‹åŒ–
     INIT_LIST_HEAD(&stu1.stu_list);
     INIT_LIST_HEAD(&stu2.stu_list);
     LIST_HEAD(stu);
-    //Í·²å·¨´´½¨stu stu1Á´±í
+    //å¤´æ’æ³•åˆ›å»ºstu stu1é“¾è¡¨
      for (int i = 0;i < 6;i++) {
          p = (struct student *)malloc(sizeof(struct student));
          p->ID=i;
          p->math = i+80;
-         //Í·²å·¨
+         //å¤´æ’æ³•
          list_add(&p->stu_list,&stu1.stu_list);
-         //Î²²å·¨
+         //å°¾æ’æ³•
          //list_add_tail(&p->list,&stu.list);
      }
     printf("stu1: \r\n");
@@ -281,16 +270,16 @@ static int List_traverse(int argc, char* argv[])
 
 static xcmd_t cmds[] = 
 {
-    {"list",   list_test, "list test demo", NULL},          //Á´±íÔö¼Ó½Úµã
-    {"list1",   list_note_del, "list note del demo", NULL},     //Á´±íÉ¾³ı½Úµã
-    {"list2",   list_note_rep, "list note replace demo", NULL}, //Á´±íÌæ»»½Úµã
-    {"list3",   list_note_del_insert, "list note del and insert demo", NULL},   //Á´±íÉ¾³ı²¢²åÈë½Úµã
-    {"list4",   List_to_merge, "List to merge", NULL},      //Á´±íµÄºÏ²¢
-    {"list5",   List_traverse, "List to merge", NULL},      //Á´±íµÄ±éÀú
+    {"list",   list_test, "list test demo", NULL},          //é“¾è¡¨å¢åŠ èŠ‚ç‚¹
+    {"list1",   list_note_del, "list note del demo", NULL},     //é“¾è¡¨åˆ é™¤èŠ‚ç‚¹
+    {"list2",   list_note_rep, "list note replace demo", NULL}, //é“¾è¡¨æ›¿æ¢èŠ‚ç‚¹
+    {"list3",   list_note_del_insert, "list note del and insert demo", NULL},   //é“¾è¡¨åˆ é™¤å¹¶æ’å…¥èŠ‚ç‚¹
+    {"list4",   List_to_merge, "List to merge", NULL},      //é“¾è¡¨çš„åˆå¹¶
+    {"list5",   List_traverse, "List to merge", NULL},      //é“¾è¡¨çš„éå†
 };
 
 
-void linux_cmd_init(void)
+void ex_list_init(void)
 {
     xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
 }
