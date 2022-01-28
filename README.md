@@ -174,6 +174,8 @@ void test_keys_init(void)
 2. udp 广播
 3. udp 组播
 
+##### 简化命令和历史记录相关的链表
+
 ##### 增加操作系统支持
 1. linux (demo only for linux example)
 2. FreeRTOS (demo only for esp32)
