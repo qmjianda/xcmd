@@ -3,10 +3,10 @@ BIN = xcmder
 OBJ += xcmd.o \
 	   xcmd_default_keys.o \
 	   xcmd_default_cmds.o \
-	   xcmd_platform.o \
 	   linux_main.o \
 	   test.o \
 	   ex_keys.o \
+	   ex_list.o \
 	   ex_cmds.o \
 	   socket_cmds.o \
 	   diskio.o \
@@ -18,6 +18,7 @@ OBJ += xcmd.o \
 VPATH := ../../src \
 		 ../../extensions/test \
 		 ../../extensions/ex_keys \
+		 ../../extensions/ex_list \
 		 ../../extensions/ex_cmds \
 		 ../../extensions/net_cmds \
 		 ./FatFs/source \
@@ -27,6 +28,7 @@ INC += -I./ \
 	   -I../../inc \
 	   -I../../extensions/test \
 	   -I../../extensions/ex_keys \
+	   -I../../extensions/ex_list \
 	   -I../../extensions/ex_cmds \
 	   -I../../extensions/net_cmds \
 	   -IFatFs/source \

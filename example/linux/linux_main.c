@@ -14,6 +14,7 @@
 #include "test.h"
 #include "ex_keys.h"
 #include "ex_cmds.h"
+#include "ex_list.h"
 #include "fs_cmds.h"
 #include "socket_cmds.h"
 #include "ff.h"
@@ -154,7 +155,7 @@ int main(void)
     ex_cmds_init();
     socket_cmds_init();
     fs_cmds_init();
-    linux_cmd_init();
+    ex_list_init();
     while (1)
     {
         xcmd_task();
