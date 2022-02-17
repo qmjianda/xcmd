@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-20 19:59:05
- * @LastEditTime: 2021-09-20 20:07:50
+ * @LastEditTime: 2022-02-17 22:41:13
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/inc/xcmd_define.h
@@ -94,7 +94,7 @@ extern   "C" {
 #define DCH(n)      "\x1B[%dP",n	/* 删除字符	删除当前光标位置的 <n> 个字符，这会从屏幕右边缘以空格字符移动。*/
 #define ECH(n)      "\x1B[%dX",n	/* 擦除字符	擦除当前光标位置的 <n> 个字符，方法是使用空格字符覆盖它们。*/
 #define IL(n)       "\x1B[%dL",n	/* 插入行	将 <n> 行插入光标位置的缓冲区。 光标所在的行及其下方的行将向下移动。*/
-#define DL(n)       "\x1B[%dM\r",n	/* 删除行	从缓冲区中删除 <n> 行，从光标所在的行开始。*/
+#define DL(n)       "\x1B[%dM",n	/* 删除行	从缓冲区中删除 <n> 行，从光标所在的行开始。*/
 
 /* 打印字体颜色设置 */
 #define TX_DEF          "\x1b[0m"

@@ -296,7 +296,7 @@ static void xcmd_parser(uint8_t byte)
 
     if(num > 0)
     {
-        if( !(g_xcmder.parser.recv_hook_func && g_xcmder.parser.recv_hook_func(g_xcmder.parser.encode_buf)) )
+        if( !(g_xcmder.parser.recv_hook_func && !g_xcmder.parser.recv_hook_func(g_xcmder.parser.encode_buf)) )
         {
             if(CMD_IS_PRINT(g_xcmder.parser.encode_buf[0]))
             {
