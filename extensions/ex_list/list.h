@@ -6,15 +6,15 @@
 #define LIST_POISON1  NULL
 #define LIST_POISON2  NULL
 
-//¼ÆËãmemberÔÚtypeÖĞµÄÎ»ÖÃ
+//è®¡ç®—memberåœ¨typeä¸­çš„ä½ç½®
 #define offsetof(type, member)  (size_t)(&((type*)0)->member)
 
-//¸ù¾İmemberµÄµØÖ·»ñÈ¡typeµÄÆğÊ¼µØÖ·
+//æ ¹æ®memberçš„åœ°å€è·å–typeçš„èµ·å§‹åœ°å€
 #define container_of(ptr, type, member) ({          \
         const typeof(((type *)0)->member)*__mptr = (ptr);    \
     (type *)((char *)__mptr - offsetof(type, member)); })
 
-//Á´±í½á¹¹
+//é“¾è¡¨ç»“æ„
 struct list_head
 {
     struct list_head *prev;
@@ -53,7 +53,7 @@ extern void __list_add(struct list_head *new,
          struct list_head *next);
 #endif
 
-//´ÓÍ·²¿Ìí¼Ó
+//ä»å¤´éƒ¨æ·»åŠ 
 /**
     * list_add - add a new entry
     * @new: new entry to be added
@@ -71,7 +71,7 @@ static inline void list_add(struct list_head *new, struct list_head *head)
 extern void list_add(struct list_head *new, struct list_head *head);
 #endif
 
-//´ÓÎ²²¿Ìí¼Ó
+//ä»å°¾éƒ¨æ·»åŠ 
 static inline void list_add_tail(struct list_head *new, struct list_head *head)
 {
     __list_add(new, head->prev, head);
