@@ -139,7 +139,7 @@ static xcmd_t cmds[] =
 
 void test_cmd_init(void)
 {
-    xcmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
+    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
 }
 ```
 ##### 注册自定义快捷键
