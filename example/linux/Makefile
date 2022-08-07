@@ -40,7 +40,7 @@ all: mkbuilddir $(OBJ_WITH_BUILD_DIR)
 	gcc $(OBJ_WITH_BUILD_DIR) -o $(BIN) -Wl,-Map,$(BIN).map
 
 build/%.o:%.c
-	gcc -g -Wall -c $(INC) -o $@ $<
+	gcc -g -O0 -Wall -c $(INC) -o $@ $<
 
 .PHONY:mkbuilddir
 mkbuilddir:
@@ -48,6 +48,6 @@ mkbuilddir:
 
 .PHONY:clean 
 clean:
-	rm -rf build xcmder
+	rm -rf build xcmder fatfs.img xcmder.map
 
 

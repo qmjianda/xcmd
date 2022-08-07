@@ -1,4 +1,3 @@
-#include "xcmd_confg.h"
 #include "xcmd.h"
 #include "xcmd_default_cmds.h"
 #include "xcmd_default_keys.h"
@@ -28,12 +27,12 @@ struct
 
     struct 
     {
-        xcmd_t *head;
+        xcmd_t head;
     }cmd_list;
 
     struct
     {
-        xcmd_key_t *head;
+        xcmd_key_t head;
     }key_list;
 
     struct
@@ -162,10 +161,10 @@ static int xcmd_get_param(char* msg, char*delim, char* get[], int max_num)
 
 static int xcmd_cmd_match(int argc, char*argv[])
 {
-    xcmd_t *p = g_xcmder.cmd_list.head;
     uint8_t flag = 0;
     int ret = -1;
-    while(p)
+    xcmd_t *p = NULL;
+    XCMD_CMD_FOR_EACH(p)
     {
         if(strcmp(p->name, argv[0]) == 0)
         {
@@ -182,7 +181,6 @@ static int xcmd_cmd_match(int argc, char*argv[])
             ret = p->func(argc, argv);
             break;
         }
-        p = p->next;
     }
     if(flag)
     {
@@ -197,8 +195,8 @@ static int xcmd_cmd_match(int argc, char*argv[])
 
 static void xcmd_key_match(char* key)
 {
-    xcmd_key_t *p = g_xcmder.key_list.head;
-    while(p)
+    xcmd_key_t *p = NULL;
+    XCMD_KEY_FOR_EACH(p)
     {
         if(strcmp(key, p->key) == 0)
         {
@@ -207,7 +205,6 @@ static void xcmd_key_match(char* key)
                 break;
             }
         }
-        p = p->next;
     }
 }
 
@@ -546,48 +543,57 @@ int xcmd_exec(char* str)
 
 int xcmd_key_register(xcmd_key_t *keys, uint16_t number)
 {
+#ifndef ENABLE_XCMD_EXPORT
     uint16_t i=0; 
     xcmd_key_t * temp;
 
     while(i<number)
     {
-        temp = g_xcmder.key_list.head;
-        g_xcmder.key_list.head = &keys[i];
+        temp = g_xcmder.key_list.head.next;
+        g_xcmder.key_list.head.next = &keys[i];
         keys[i].next = temp;
         ++i;
     }
+#endif
     return 0;
 }
 
 int xcmd_cmd_register(xcmd_t *cmds, uint16_t number)
 {
+#ifndef ENABLE_XCMD_EXPORT
     xcmd_t * temp;
     uint16_t i = 0;
     while(i<number)
     {
-        temp = g_xcmder.cmd_list.head;
-        g_xcmder.cmd_list.head = &cmds[i];
+        temp = g_xcmder.cmd_list.head.next;
+        g_xcmder.cmd_list.head.next = &cmds[i];
         cmds[i].next = temp;
         ++i;
     }
+#endif
     return 0;
 }
 
 xcmd_key_t *xcmd_keylist_get(void)
 {
-    return g_xcmder.key_list.head;
+#ifndef ENABLE_XCMD_EXPORT
+    return g_xcmder.key_list.head.next;
+#endif
 }
 
 xcmd_t *xcmd_cmdlist_get(void)
 {
-    return g_xcmder.cmd_list.head;
+#ifndef ENABLE_XCMD_EXPORT
+    return g_xcmder.cmd_list.head.next;
+#endif
 }
 
 int xcmd_unregister_cmd(char *cmd)
 {
-    xcmd_t *p = g_xcmder.cmd_list.head;
-    xcmd_t *bk = p;
-    while(p)
+#ifndef ENABLE_XCMD_EXPORT
+    xcmd_t *bk = &g_xcmder.cmd_list.head;
+    xcmd_t *p = NULL;
+    XCMD_CMD_FOR_EACH(p)
     {
         if(strcmp(cmd, p->name) == 0)
         {
@@ -595,16 +601,17 @@ int xcmd_unregister_cmd(char *cmd)
             return 0;
         }
         bk = p;
-        p = p->next;
     }
+#endif
     return -1;
 }
 
 int xcmd_unregister_key(char *key)
 {
-    xcmd_key_t *p = g_xcmder.key_list.head;
-    xcmd_key_t *bk = p;
-    while(p)
+#ifndef ENABLE_XCMD_EXPORT
+    xcmd_key_t *bk = &g_xcmder.key_list.head;
+    xcmd_key_t *p = NULL;
+    XCMD_KEY_FOR_EACH(p)
     {
         if(strcmp(key, p->key) == 0)
         {
@@ -612,8 +619,8 @@ int xcmd_unregister_key(char *key)
             return 0;
         }
         bk = p;
-        p = p->next;
     }
+#endif
     return -1;
 }
 
@@ -646,7 +653,9 @@ void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
         g_xcmder.parser.byte_num = 0;
         g_xcmder.parser.cursor = 0;
 		g_xcmder.parser.encode_case_stu = 0;
-        g_xcmder.cmd_list.head = NULL;
+#ifndef ENABLE_XCMD_EXPORT
+        g_xcmder.cmd_list.head.next = NULL;
+#endif
 
         if(g_xcmder._initOK == 0)
         {

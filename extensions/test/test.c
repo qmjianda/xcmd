@@ -169,18 +169,26 @@ static int cmd_print_color(int argc, char* argv[])
     return 0;
 }
 
+XCMD_EXPORT_CMD(history, cmd_history, "show history list")
+XCMD_EXPORT_CMD(example, cmd_example, "example [-f|-i|-s] [val]")
+XCMD_EXPORT_CMD(color,   cmd_print_color, "printf color text")
+
 static xcmd_t cmds[] = 
 {
+#ifndef ENABLE_XCMD_EXPORT
     {"history", cmd_history, "show history list", NULL},
     {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
     {"delcmd",  cmd_delete_cmd, "delete cmd [val]", NULL},
     {"delkey",  cmd_delete_key, "delete key [val]", NULL},
     {"color",   cmd_print_color, "printf color text", NULL},
+#endif
 };
 
 static xcmd_key_t keys[] = 
 {
+#ifndef ENABLE_XCMD_EXPORT
     {KEY_CTR_Q, cmd_ctr_q, "ctr+q", NULL},
+#endif
 };
 
 void test_cmd_init(void)

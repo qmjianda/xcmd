@@ -4,16 +4,18 @@
  * @LastEditTime: 2021-10-11 21:40:01
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
- * @FilePath: /xcmd/inc/xcmd_confg.h
+ * @FilePath: /xcmd/inc/xcmd_default_confg.h
  */
-#ifndef XCMD_CONFG_H
-#define XCMD_CONFG_H
+#ifndef XCMD_DEFAULT_CONFG_H
+#define XCMD_DEFAULT_CONFG_H
 
 #ifdef __cplusplus
 extern   "C" {
 #endif
 
-#define VERSION "1.0.0"
+#include "xcmd_confg.h"
+
+#define VERSION "1.1.0"
 
 #ifndef XCMD_LINE_MAX_LENGTH
 #define XCMD_LINE_MAX_LENGTH    (64) /* 命令行支持的最大字符数 */
@@ -37,15 +39,19 @@ extern   "C" {
 #endif 
 
 #ifndef XCMD_DEFAULT_PROMPT
-#define XCMD_DEFAULT_PROMPT     ("->")
+#define XCMD_DEFAULT_PROMPT     "->" /*提示符*/
 #endif
 
 #ifndef XCMD_DEFAULT_PROMPT_CLOLR
-#define XCMD_DEFAULT_PROMPT_CLOLR   TX_GREEN
+#define XCMD_DEFAULT_PROMPT_CLOLR   TX_GREEN /*提示符颜色*/
+#endif
+
+#ifndef ENABLE_XCMD_EXPORT
+//#define ENABLE_XCMD_EXPORT /*使能XCMD_EXPORT_CMD和XCMD_EXPORT_KEY*/
 #endif
 
 #ifdef __cplusplus
         }
 #endif
 
-#endif /* XCMD_CONFG_H */
+#endif /* XCMD_DEFAULT_CONFG_H */
