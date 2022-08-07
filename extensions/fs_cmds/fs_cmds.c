@@ -437,18 +437,33 @@ static int cmd_write(int argc, char *argv[])
     return 0;
 }
 
+ 
+
+XCMD_EXPORT_CMD(ls,  cmd_ls, HELP_LS)
+XCMD_EXPORT_CMD(df,  cmd_df, HELP_DF)
+XCMD_EXPORT_CMD(cd,  cmd_cd, HELP_CD)
+XCMD_EXPORT_CMD(read,  cmd_read, HELP_READ)
+XCMD_EXPORT_CMD(rm,  cmd_rm, HELP_RM)
+XCMD_EXPORT_CMD(mv,  cmd_mv, HELP_MV)
+XCMD_EXPORT_CMD(sync,  cmd_sync, HELP_SYNC)
+XCMD_EXPORT_CMD(mkdir,  cmd_mkdir, HELP_MKDIR)
+XCMD_EXPORT_CMD(touch,  cmd_touch, HELP_TOUCH)
+XCMD_EXPORT_CMD(write,  cmd_write, HELP_WRITE)
+
 static xcmd_t cmds[] =
-    {
-        {"ls", cmd_ls, HELP_LS, NULL},
-        {"df", cmd_df, HELP_DF, NULL},
-        {"cd", cmd_cd, HELP_CD, NULL},
-        {"read", cmd_read, HELP_READ, NULL},
-        {"rm", cmd_rm, HELP_RM, NULL},
-        {"mv", cmd_mv, HELP_MV, NULL},
-        {"sync", cmd_sync, HELP_SYNC, NULL},
-        {"mkdir", cmd_mkdir, HELP_MKDIR, NULL},
-        {"touch", cmd_touch, HELP_TOUCH, NULL},
-        {"write", cmd_write, HELP_WRITE, NULL},
+{
+#ifndef ENABLE_XCMD_EXPORT
+    {"ls", cmd_ls, HELP_LS, NULL},
+    {"df", cmd_df, HELP_DF, NULL},
+    {"cd", cmd_cd, HELP_CD, NULL},
+    {"read", cmd_read, HELP_READ, NULL},
+    {"rm", cmd_rm, HELP_RM, NULL},
+    {"mv", cmd_mv, HELP_MV, NULL},
+    {"sync", cmd_sync, HELP_SYNC, NULL},
+    {"mkdir", cmd_mkdir, HELP_MKDIR, NULL},
+    {"touch", cmd_touch, HELP_TOUCH, NULL},
+    {"write", cmd_write, HELP_WRITE, NULL},
+#endif
 };
 
 void fs_cmds_init(void)

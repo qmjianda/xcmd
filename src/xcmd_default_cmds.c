@@ -6,7 +6,7 @@
  * @Description: In User Settings Edit
  * @FilePath: /xcmd/src/xcmd_default_cmds.c
  */
-#include "xcmd_confg.h"
+#include "xcmd_default_confg.h"
 #include "xcmd_default_cmds.h"
 #include "xcmd.h"
 #include <stdlib.h>
@@ -19,23 +19,21 @@ static int cmd_clear(int argc, char* argv[])
 
 static int cmd_help(int argc, char* argv[])
 {
-    xcmd_t *p = xcmd_cmdlist_get();
-    while(p)
+    xcmd_t *p = NULL;
+    XCMD_CMD_FOR_EACH(p)
     {
         xcmd_print("%-20s %s\r\n",p->name, p->help);
-        p = p->next;
     }
     return 0;
 }
 
 static int cmd_keys(int argc, char* argv[])
 {
-    xcmd_key_t *p = xcmd_keylist_get();
-    while(p)
+    xcmd_key_t *p = NULL;
+    XCMD_KEY_FOR_EACH(p)
     {
         xcmd_print("0x%08X\t", p->key);
         xcmd_print("%s\r\n",p->help);
-        p = p->next;
     }
     return 0;
 }
@@ -53,12 +51,19 @@ static int cmd_logo(int argc, char* argv[])
     return 0;
 }
 
+XCMD_EXPORT_CMD(clear, cmd_clear, "clear screen")
+XCMD_EXPORT_CMD(help, cmd_help, "show this list")
+XCMD_EXPORT_CMD(keys, cmd_keys, "show keys")
+XCMD_EXPORT_CMD(logo, cmd_logo, "show logo")
+
 static xcmd_t cmds[] = 
 {
+#ifndef ENABLE_XCMD_EXPORT
     {"clear", cmd_clear, "clear screen", NULL},
     {"help", cmd_help, "show this list", NULL},
     {"keys", cmd_keys, "show keys", NULL},
     {"logo", cmd_logo, "show logo", NULL},
+#endif
 };
 
 void default_cmds_init(void)

@@ -17,9 +17,18 @@
   "C_Cpp_Runner.enableWarnings": true,
   "C_Cpp_Runner.warningsAsError": false,
   "files.associations": {
-    "*.json": "c",
+    "*.json": "jsonc",
     "cmath": "c",
     "complex": "c",
-    "xcmd_default_keys.h": "c"
+    "xcmd_default_keys.h": "c",
+    "xcmd.h": "c",
+    "xcmd_default_cmds.h": "c",
+    "typeinfo": "c",
+    "xcmd_define.h": "c",
+    "xcmd_default_confg.h": "c",
+    "ex_keys.h": "c",
+    "ex_cmds.h": "c",
+    "test.h": "c",
+    "ctype.h": "c"
   }
 }

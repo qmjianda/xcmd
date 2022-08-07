@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "xcmd.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "test.h"
 
 int cmd_get_char(unsigned char *ch)

@@ -8,7 +8,6 @@
  */
 #include <Arduino.h>
 #include "xcmd.h"
-#include "test.h"
 
 int cmd_get_char(uint8_t *ch)
 {
@@ -32,8 +31,6 @@ int cmd_put_char(uint8_t ch)
 void setup() {
     Serial.begin(115200);
     xcmd_init(cmd_get_char, cmd_put_char);
-    test_cmd_init();
-    test_keys_init();
 }
 
 void loop() {

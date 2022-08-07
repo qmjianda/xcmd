@@ -53,7 +53,6 @@ static int list_test(int argc, char* argv[])
     return 0;
 }
 
-
 static int list_note_del(int argc, char* argv[])
 {
     struct student *p;
@@ -268,16 +267,23 @@ static int List_traverse(int argc, char* argv[])
     return 0; 
 }
 
-static xcmd_t cmds[] = 
-{
+XCMD_EXPORT_CMD(list,   list_test, "list test demo")          //链表增加节点
+XCMD_EXPORT_CMD(list1,   list_note_del, "list note del demo")     //链表删除节点
+XCMD_EXPORT_CMD(list2,   list_note_rep, "list note replace demo") //链表替换节点
+XCMD_EXPORT_CMD(list3,   list_note_del_insert, "list note del and insert demo")   //链表删除并插入节点
+XCMD_EXPORT_CMD(list4,   List_to_merge, "List to merge")      //链表的合并
+XCMD_EXPORT_CMD(list5,   List_traverse, "List to merge")      //链表的遍历
+
+static xcmd_t cmds[] = {
+#ifndef ENABLE_XCMD_EXPORT
     {"list",   list_test, "list test demo", NULL},          //链表增加节点
     {"list1",   list_note_del, "list note del demo", NULL},     //链表删除节点
     {"list2",   list_note_rep, "list note replace demo", NULL}, //链表替换节点
     {"list3",   list_note_del_insert, "list note del and insert demo", NULL},   //链表删除并插入节点
     {"list4",   List_to_merge, "List to merge", NULL},      //链表的合并
     {"list5",   List_traverse, "List to merge", NULL},      //链表的遍历
+#endif
 };
-
 
 void ex_list_init(void)
 {

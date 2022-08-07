@@ -5,9 +5,17 @@
 *Listings/
 *OBJ/
 
+example/stm32/qemu
+
 #file
 xcmder
 *.map
+*.bin
+*.elf
+*.list
+*.log
 *.uvoptx
 *.uvguix*
 *fatfs.img
+example/stm32/qemu/DAC_OUT_PUT1.txt
+example/stm32/qemu/DAC_OUT_PUT2.txt
