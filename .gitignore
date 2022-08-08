@@ -5,7 +5,7 @@
 *Listings/
 *OBJ/
 
-example/stm32/qemu
+example/stm32/qemu/qemu_stm32
 
 #file
 xcmder
