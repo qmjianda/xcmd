@@ -13,7 +13,9 @@ OBJ += xcmd.o \
 	   ff.o \
 	   ffunicode.o \
 	   fatfs_port.o \
-	   fs_cmds.o
+	   fs_cmds.o\
+	   fatfs_disk_mmc.o\
+	   fatfs_disk_ram.o
 
 VPATH := ../../src \
 		 ../../extensions/test \
@@ -21,8 +23,8 @@ VPATH := ../../src \
 		 ../../extensions/ex_list \
 		 ../../extensions/ex_cmds \
 		 ../../extensions/net_cmds \
-		 ./FatFs/source \
 		 ../../extensions/fs_cmds \
+		 ../../extensions/fs_cmds/FatFs/source \
 
 INC += -I./ \
 	   -I../../inc \
@@ -31,7 +33,7 @@ INC += -I./ \
 	   -I../../extensions/ex_list \
 	   -I../../extensions/ex_cmds \
 	   -I../../extensions/net_cmds \
-	   -IFatFs/source \
+	   -I../../extensions/fs_cmds/FatFs/source \
 	   -I../../extensions/fs_cmds \
 
 OBJ_WITH_BUILD_DIR:=$(addprefix build/,$(OBJ))
