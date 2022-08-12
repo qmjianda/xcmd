@@ -20,7 +20,9 @@ typedef struct __history
 struct
 {
     struct
-    {
+    {   
+        ssize_t write_fd;
+        ssize_t read_fd;
         int (*get_c)(uint8_t*);
         int (*put_c)(uint8_t);
     }io;
@@ -64,6 +66,31 @@ struct
     }parser;
     uint8_t _initOK;
 } g_xcmder = {0};
+
+ssize_t file_open(char *name, int is_write, int is_append) __attribute__((weak));
+void file_close(ssize_t fd) __attribute__((weak));
+int file_write(ssize_t fd, const char *str) __attribute__((weak));
+int file_read(ssize_t fd, char *buf, int buflen) __attribute__((weak));
+
+void file_close(ssize_t fd)
+{
+}
+
+ssize_t file_open(char *name, int is_write, int is_append)
+{
+    return -1;
+}
+
+int file_write(ssize_t fd, const char *str)
+{
+    return -1;
+}
+
+
+int file_read(ssize_t fd, char *buf, int buflen)
+{
+    return -1;
+}
 
 static char *xcmd_strpbrk(char*s, const char *delim)  //返回s1中第一个满足条件的字符的指针, 并且保留""号内的源格式
 {
@@ -159,6 +186,27 @@ static int xcmd_get_param(char* msg, char*delim, char* get[], int max_num)
 	return ret;
 }
 
+static int xcmd_redirected(int argc, char*argv[])
+{
+    for(int i=1; i<(argc-1); i++)
+    {
+        if(argv[i][0] == '>')
+        {
+            argc = i;
+            if(argv[i][1] == '>')
+            {
+                g_xcmder.io.write_fd = file_open(argv[i+1], 1, 1);
+            }
+            else
+            {
+                g_xcmder.io.write_fd = file_open(argv[i+1], 1, 0);
+            }
+            break;
+        }
+    }
+    return argc;
+}
+
 static int xcmd_cmd_match(int argc, char*argv[])
 {
     uint8_t flag = 0;
@@ -178,7 +226,10 @@ static int xcmd_cmd_match(int argc, char*argv[])
                     break;
                 }
             }
+            argc = xcmd_redirected(argc, argv);
             ret = p->func(argc, argv);
+            file_close(g_xcmder.io.write_fd);
+            g_xcmder.io.write_fd = -1;
             break;
         }
     }
@@ -310,6 +361,13 @@ static void xcmd_parser(uint8_t byte)
 
 void xcmd_put_str(const char *str)
 {
+    if(g_xcmder.io.write_fd != -1)
+    {
+        if(file_write(g_xcmder.io.write_fd, str) != -1)
+        {
+            return;
+        }
+    }
     for(uint16_t i=0; str[i]; i++)
 	{
 		g_xcmder.io.put_c(str[i]);
@@ -648,6 +706,8 @@ void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
 	{
         g_xcmder.io.get_c = get_c;
 		g_xcmder.io.put_c = put_c;
+        g_xcmder.io.read_fd = -1;
+        g_xcmder.io.write_fd = -1;
 
         g_xcmder.parser.prompt = XCMD_DEFAULT_PROMPT;
         g_xcmder.parser.byte_num = 0;

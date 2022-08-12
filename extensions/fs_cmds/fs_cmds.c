@@ -9,6 +9,7 @@
 #include "fs_cmds.h"
 #include "xcmd.h"
 #include "ff.h"
+#include "fatfs_port.h"
 
 #define RESAULT_TO_STR(r) resault_to_str_map[r]
 static char *resault_to_str_map[] =
@@ -41,13 +42,13 @@ static FILINFO fno;
 #define HELP_DF ("Show Disk Info. Usage: df")
 #define HELP_LS ("List information about the FILEs. Usage: ls")
 #define HELP_CD ("Change the shell working directory. Usage: cd path")
-#define HELP_READ ("Read FILE. Usage: read path")
+#define HELP_CAT ("Read FILE. Usage: cat path")
 #define HELP_RM ("Delete FILE. Usage: rm [-r:dir] path")
 #define HELP_MV ("Move FILE. Usage: mv path")
 #define HELP_SYNC ("Sync Usage: sync")
 #define HELP_MKDIR ("Make DIR. Usage: mkdir path")
 #define HELP_TOUCH ("Create empty FILE. Usage: touch path")
-#define HELP_WRITE ("Write str to FILE. Usage: Write [-a:append] path str")
+#define HELP_WRITE ("Write str to FILE. Usage: wr string (>|>>) filename")
 
 static FRESULT scan_files(
     char *path /* Start node to be scanned (***also used as work area***) */
@@ -152,9 +153,10 @@ static FRESULT df(char* path, DWORD* totle_byte, DWORD* free_byte)
         #if FF_MAX_SS != FF_MIN_SS
             *totle_byte = tot_sect * fs->ssize;
             *free_byte = fre_sect * fs->ssize;
-        #endif
+        #else
             *totle_byte = tot_sect * FF_MAX_SS;
             *free_byte = fre_sect * FF_MAX_SS;
+        #endif
     }
     return res;
 }
@@ -163,21 +165,23 @@ static int cmd_df(int argc, char* argv[])
 {
     FRESULT res;
     DWORD fre_bytes, tot_bytes;
-    res = df("0:", &tot_bytes, &fre_bytes);
-    if (res != FR_OK)
+    char * disk_path;
+    for(int i=0; i<FF_VOLUMES; i++)
     {
-        xcmd_print("0: Failure:%s\r\n", RESAULT_TO_STR(res));
-        return -1;
+        disk_path = f_disk_path(i);
+        if(disk_path)
+        {
+            res = df(disk_path, &tot_bytes, &fre_bytes);
+            if (res != FR_OK)
+            {
+                xcmd_print("%s Failure:%s\r\n", disk_path, RESAULT_TO_STR(res));
+            }
+            else
+            {
+                xcmd_print("%s %lu/%lu KiB.\r\n", disk_path, fre_bytes/1024, tot_bytes / 1024);
+            }
+        }
     }
-    xcmd_print("0:/ %lu/%lu KiB.\r\n", fre_bytes/1024, tot_bytes / 1024);
-
-    res = df("1:", &tot_bytes, &fre_bytes);
-    if (res != FR_OK)
-    {
-        xcmd_print("1: Failure:%s\r\n", RESAULT_TO_STR(res));
-        return -1;
-    }
-    xcmd_print("1:/ %lu/%lu KiB.\r\n", fre_bytes/1024, tot_bytes / 1024);
     return 0;
 }
 
@@ -217,50 +221,6 @@ static int cmd_cd(int argc, char *argv[])
         xcmd_print("%s\r\n", HELP_CD);
         return -1;
     }
-    return 0;
-}
-
-static int cmd_read(int argc, char *argv[])
-{
-    if (argc >= 2)
-    {
-        FRESULT res;
-        res = f_open(&fp, argv[1], FA_READ);
-        if (res != FR_OK)
-        {
-            xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
-            return -1;
-        }
-        else
-        {
-            char buf[128];
-            UINT br;
-            while (1)
-            {
-                res = f_read(&fp, buf, 128, &br);
-                if (res != FR_OK)
-                {
-                    xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
-                    f_close(&fp);
-                    return -1;
-                }
-                if (br == 0)
-                {
-                    break;
-                }
-                for(UINT i=0; i<br; i++)
-                {
-                    xcmd_print("%c", buf[i]);
-                }
-            }
-        }
-    }
-    else
-    {
-        xcmd_print("%s\r\n", HELP_READ);
-        return -1;
-    }
-    f_close(&fp);
     return 0;
 }
 
@@ -385,70 +345,125 @@ static int cmd_touch(int argc, char *argv[])
     return 0;
 }
 
-static int cmd_write(int argc, char *argv[])
+static int cmd_cat(int argc, char *argv[])
 {
-    uint8_t append_flag = 0;
-    uint8_t param_num = 3;
-    /* 查找可选参数 */
-    if (strcmp(argv[1], "-a") == 0)
+    if (argc >= 2)
     {
-        append_flag = 1;
-        param_num = 4;
-    }
-
-    FRESULT res = FR_INVALID_PARAMETER;
-    char *str = NULL;
-    if (argc >= param_num)
-    {
-        if (append_flag)
-        {
-            res = f_open(&fp, argv[2], FA_WRITE | FA_OPEN_APPEND);
-            str = argv[3];
-        }
-        else
-        {
-            res = f_open(&fp, argv[1], FA_WRITE | FA_CREATE_ALWAYS);
-            str = argv[2];
-        }
-
+        FRESULT res;
+        res = f_open(&fp, argv[1], FA_READ);
         if (res != FR_OK)
         {
-            xcmd_print("Failure:%s", RESAULT_TO_STR(res));
+            xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
             return -1;
         }
         else
         {
+            char buf[128];
             UINT br;
-            res = f_write(&fp, str, strlen(str), &br);
-            res = f_write(&fp, "\n", 1, &br);
-            f_close(&fp);
-            if (res != FR_OK)
+            while (1)
             {
-                xcmd_print("Failure:%s", RESAULT_TO_STR(res));
-                return -1;
+                res = f_read(&fp, buf, 128, &br);
+                if (res != FR_OK)
+                {
+                    xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+                    f_close(&fp);
+                    return -1;
+                }
+                if (br == 0)
+                {
+                    break;
+                }
+                for(UINT i=0; i<br; i++)
+                {
+                    xcmd_print("%c", buf[i]);
+                }
             }
         }
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_WRITE);
+        xcmd_print("%s\r\n", HELP_CAT);
         return -1;
     }
+    f_close(&fp);
     return 0;
 }
 
- 
+ssize_t file_open(char *name, int is_write, int is_append)
+{
+    FRESULT res;
+    BYTE mode = 0;
+    if(is_write)
+    {
+        if (is_append)
+        {
+            mode = FA_WRITE | FA_OPEN_APPEND;
+        }
+        else
+        {
+            mode = FA_WRITE | FA_CREATE_ALWAYS;
+        }
+    }
+    else
+    {
+        mode = FA_READ;
+    }
+    res = f_open(&fp, name, mode);
+    if (res != FR_OK)
+    {
+        return -1;
+    }
+    return (ssize_t)&fp;
+}
+
+void file_close(ssize_t fd)
+{
+    if(fd != -1)
+        f_close((FIL*)fd);
+}
+
+int file_read(ssize_t fd, char *buf, int buflen)
+{
+    FRESULT res;
+    UINT br;
+    if(fd != -1)
+    {
+        res = f_read((FIL*)fd, buf, buflen, &br);
+        if (res != FR_OK)
+        {
+            return -1;
+        }
+        return 0;
+    }
+    return -1;
+}
+
+int file_write(ssize_t fd, const char *str)
+{
+
+    FRESULT res = FR_INVALID_PARAMETER;
+    if(fd != -1)
+    {
+        UINT br;
+        res = f_write((FIL*)fd, str, strlen(str), &br);
+        if (res != FR_OK)
+        {
+            return -1;
+        }
+        return 0;
+    }
+    return -1;
+}
 
 XCMD_EXPORT_CMD(ls,  cmd_ls, HELP_LS)
 XCMD_EXPORT_CMD(df,  cmd_df, HELP_DF)
 XCMD_EXPORT_CMD(cd,  cmd_cd, HELP_CD)
-XCMD_EXPORT_CMD(read,  cmd_read, HELP_READ)
+XCMD_EXPORT_CMD(cat,  cmd_cat, HELP_CAT)
 XCMD_EXPORT_CMD(rm,  cmd_rm, HELP_RM)
 XCMD_EXPORT_CMD(mv,  cmd_mv, HELP_MV)
 XCMD_EXPORT_CMD(sync,  cmd_sync, HELP_SYNC)
 XCMD_EXPORT_CMD(mkdir,  cmd_mkdir, HELP_MKDIR)
 XCMD_EXPORT_CMD(touch,  cmd_touch, HELP_TOUCH)
-XCMD_EXPORT_CMD(write,  cmd_write, HELP_WRITE)
 
 static xcmd_t cmds[] =
 {
@@ -456,13 +471,12 @@ static xcmd_t cmds[] =
     {"ls", cmd_ls, HELP_LS, NULL},
     {"df", cmd_df, HELP_DF, NULL},
     {"cd", cmd_cd, HELP_CD, NULL},
-    {"read", cmd_read, HELP_READ, NULL},
+    {"cat", cmd_cat, HELP_CAT, NULL},
     {"rm", cmd_rm, HELP_RM, NULL},
     {"mv", cmd_mv, HELP_MV, NULL},
     {"sync", cmd_sync, HELP_SYNC, NULL},
     {"mkdir", cmd_mkdir, HELP_MKDIR, NULL},
-    {"touch", cmd_touch, HELP_TOUCH, NULL},
-    {"write", cmd_write, HELP_WRITE, NULL},
+    {"touch", cmd_touch, HELP_TOUCH, NULL}
 #endif
 };
 

@@ -14,9 +14,11 @@
 #include "diskio.h"
 #include <stdio.h>
 
+#define MAX_VOL_NAME_LEN    (16)
+
 typedef struct __DiskIo
 {
-    char * disk_name;
+    char disk_path[MAX_VOL_NAME_LEN];
     DSTATUS (*disk_status)(void);
     DSTATUS (*disk_initialize)(void);
     DRESULT (*disk_read)(BYTE *buff, LBA_t sector, UINT count);
@@ -24,7 +26,7 @@ typedef struct __DiskIo
     DRESULT (*disk_ioctl) (BYTE cmd, void *buff);
 }DiskIo_t;
 
-int f_disk_regist(DiskIo_t * disk, int id);
+int f_disk_regist(DiskIo_t * disk, const char* volume_name, int id);
 DiskIo_t * f_disk_get(int id);
-
+char * f_disk_path(int id);
 #endif 
