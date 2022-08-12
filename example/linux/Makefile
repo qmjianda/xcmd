@@ -48,8 +48,11 @@ build/%.o:%.c
 mkbuilddir:
 	mkdir -p build
 
-.PHONY:clean 
+.PHONY:clean distclean
 clean:
+	rm -rf build xcmder xcmder.map
+
+distclean:
 	rm -rf build xcmder fatfs.img xcmder.map
 
 
