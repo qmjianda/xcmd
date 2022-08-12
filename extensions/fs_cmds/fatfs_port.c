@@ -11,21 +11,29 @@
 
 static DiskIo_t * g_Disks[FF_VOLUMES] = {0};
 
-int f_disk_regist(DiskIo_t * disk, int id)
+#if FF_STR_VOLUME_ID >= 1
+#ifndef FF_VOLUME_STRS
+const char* VolumeStr[FF_VOLUMES] = {0};
+#else
+static char * VolumeStr[FF_VOLUMES] = {FF_VOLUME_STRS};
+#endif
+#endif
+
+int f_disk_regist(DiskIo_t * disk, const char* volume_name, int id)
 {
-    if(!disk)
+    if(!disk || !volume_name)
     {
         return -1;
     }
-
     if(id<0)
     {
         for(int i=0; i<FF_VOLUMES; i++)
         {
-            if(!g_Disks[id])
+            if(!g_Disks[i])
             {
                 g_Disks[i] = disk;
-                return i;
+                id = i;
+                goto ok;
             }
         }
     }
@@ -34,10 +42,39 @@ int f_disk_regist(DiskIo_t * disk, int id)
         if((id < FF_VOLUMES) && !g_Disks[id])
         {
             g_Disks[id] = disk;
-            return id;
+            goto ok;
         }
     }
     return -1;
+
+ok:
+#if FF_STR_VOLUME_ID >= 1
+
+#ifndef FF_VOLUME_STRS
+
+#if FF_STR_VOLUME_ID == 1
+    snprintf(disk->disk_path, MAX_VOL_NAME_LEN, "%s:", volume_name);
+#endif
+#if FF_STR_VOLUME_ID == 2
+    snprintf(disk->disk_path, MAX_VOL_NAME_LEN, "/%s/", volume_name);
+#endif
+    VolumeStr[id] = volume_name;
+    
+#else
+
+#if FF_STR_VOLUME_ID == 1
+    snprintf(disk->disk_path, MAX_VOL_NAME_LEN, "%s:", VolumeStr[id]);
+#endif
+#if FF_STR_VOLUME_ID == 2
+    snprintf(disk->disk_path, MAX_VOL_NAME_LEN, "/%s/", VolumeStr[id]);
+#endif
+
+#endif
+
+#else
+    snprintf(disk->disk_path, MAX_VOL_NAME_LEN, "%d:", id);
+#endif
+    return id;
 }
 
 DiskIo_t * f_disk_get(int id)
@@ -45,6 +82,15 @@ DiskIo_t * f_disk_get(int id)
     if(id < FF_VOLUMES)
     {
         return g_Disks[id];
+    }
+    return NULL;
+}
+
+char * f_disk_path(int id)
+{
+    if(id < FF_VOLUMES)
+    {
+        return g_Disks[id]->disk_path;
     }
     return NULL;
 }
