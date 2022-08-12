@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include "diskio.h"
 
 #define MMC_DISK_SECTION_SIZE   (512)
 #define MMC_DISK_SECTION_COUNT  (1024)
@@ -101,24 +100,24 @@ static DRESULT m_disk_ioctl(BYTE cmd, void *buff)
 int mmc_disk_init(void)
 {
     FRESULT res;
-    disk.disk_name = "MMC Disk";
     disk.disk_initialize = m_disk_initialize;
     disk.disk_ioctl = m_disk_ioctl;
     disk.disk_read = m_disk_read;
     disk.disk_status = m_disk_status;
     disk.disk_write = m_disk_write;
-    if(f_disk_regist(&disk, 1) == -1)
+
+    if(f_disk_regist(&disk, "MMC", 1) == -1)
     {
         printf("MMC disk regist ERROR!\r\n");
         return FR_DISK_ERR;
     }
 
-    res = f_mount(&g_fs, "1:", 1); //挂载文件系统 ， "1:"就是挂载的设备号为1的设备
+    res = f_mount(&g_fs, disk.disk_path, 1); //挂载文件系统 ， "1:"就是挂载的设备号为1的设备
     if (res == FR_NO_FILESYSTEM) //FR_NO_FILESYSTEM值为13，表示没有有效的设备
     {
-        res = f_mkfs("1:", 0, g_work, sizeof(g_work));
-        res = f_mount(NULL, "1:", 1);  //取消文件系统
-        res = f_mount(&g_fs, "1:", 1); //挂载文件系统
+        res = f_mkfs(disk.disk_path, 0, g_work, sizeof(g_work));
+        res = f_mount(NULL, disk.disk_path, 1);  //取消文件系统
+        res = f_mount(&g_fs, disk.disk_path, 1); //挂载文件系统
     }
     
     if(res == FR_OK)
