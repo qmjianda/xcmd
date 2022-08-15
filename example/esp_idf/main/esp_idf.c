@@ -33,6 +33,6 @@ void app_main(void)
     while(1)
     {
         xcmd_task();
-        vTaskDelay(pdMS_TO_TICKS(10));
+        // vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
