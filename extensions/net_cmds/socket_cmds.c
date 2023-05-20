@@ -18,7 +18,7 @@ static int x_inet_send_to(int fd, char* ip, uint16_t port, void* data, uint16_t 
     return ret;
 }
 
-static void xcmd_udp_client(int argc ,char**argv)
+static int xcmd_udp_client(int argc ,char**argv)
 {
     if(argc >= 4)
     {
@@ -26,7 +26,7 @@ static void xcmd_udp_client(int argc ,char**argv)
         if(udp<0)
         {
             xcmd_print("Open socket error!!\r\n");
-            return;
+            return -1;
         }
         char* ip = argv[1];
         uint16_t port = atoi(argv[2]);
@@ -36,7 +36,7 @@ static void xcmd_udp_client(int argc ,char**argv)
         {
             xcmd_print("Send msg error\r\n");
             close(udp);
-            return;
+            return -1;
         }
         close(udp);
     }
@@ -44,9 +44,10 @@ static void xcmd_udp_client(int argc ,char**argv)
     {
         xcmd_print("Usage: udp_client ip port msg");
     }
+    return 0;
 }
 
-void xcmd_udp_service(int argc, char** argv)
+static int xcmd_udp_service(int argc, char** argv)
 {
     struct sockaddr_in addrin;
     addrin.sin_family = AF_INET;
@@ -75,7 +76,7 @@ void xcmd_udp_service(int argc, char** argv)
     {
         xcmd_print("Bind error\r\n");
         close(udp);
-        return;
+        return -1;
     }
 
     struct sockaddr_in client_addr;
@@ -90,12 +91,17 @@ void xcmd_udp_service(int argc, char** argv)
         xcmd_print(rcv_buf);
     }
     close(udp);
+    return 0;
 }
 
+XCMD_EXPORT_CMD(udp_client, xcmd_udp_client, "Usage: udp_client ip port msg")
+XCMD_EXPORT_CMD(udp_service, xcmd_udp_service, "Usage: udp_service [ip] [port:default(8080)]")
 static xcmd_t cmds[] = 
 {
+#ifndef ENABLE_XCMD_EXPORT
     {"udp_client", xcmd_udp_client, "Usage: udp_client ip port msg", NULL},
     {"udp_service", xcmd_udp_service, "Usage: udp_service [ip] [port:default(8080)]", NULL},
+#endif
 };
 
 void socket_cmds_init(void)

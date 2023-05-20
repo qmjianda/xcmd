@@ -1,4 +1,3 @@
-#include "xcmd_confg.h"
 #include "xcmd.h"
 #include "xcmd_default_cmds.h"
 #include "xcmd_default_keys.h"
@@ -21,23 +20,21 @@ typedef struct __history
 struct
 {
     struct
-    {
+    {   
+        ssize_t write_fd;
+        ssize_t read_fd;
         int (*get_c)(uint8_t*);
         int (*put_c)(uint8_t);
     }io;
 
     struct 
     {
-        uint16_t len;
-        xcmd_t *head;
-        xcmd_t *tail;
+        xcmd_t head;
     }cmd_list;
 
     struct
     {
-        uint16_t len;
-        xcmd_key_t *head;
-        xcmd_key_t *tail;
+        xcmd_key_t head;
     }key_list;
 
     struct
@@ -69,6 +66,31 @@ struct
     }parser;
     uint8_t _initOK;
 } g_xcmder = {0};
+
+ssize_t file_open(char *name, int is_write, int is_append) __attribute__((weak));
+void file_close(ssize_t fd) __attribute__((weak));
+int file_write(ssize_t fd, const char *str) __attribute__((weak));
+int file_read(ssize_t fd, char *buf, int buflen) __attribute__((weak));
+
+void file_close(ssize_t fd)
+{
+}
+
+ssize_t file_open(char *name, int is_write, int is_append)
+{
+    return -1;
+}
+
+int file_write(ssize_t fd, const char *str)
+{
+    return -1;
+}
+
+
+int file_read(ssize_t fd, char *buf, int buflen)
+{
+    return -1;
+}
 
 static char *xcmd_strpbrk(char*s, const char *delim)  //返回s1中第一个满足条件的字符的指针, 并且保留""号内的源格式
 {
@@ -164,12 +186,33 @@ static int xcmd_get_param(char* msg, char*delim, char* get[], int max_num)
 	return ret;
 }
 
+static int xcmd_redirected(int argc, char*argv[])
+{
+    for(int i=1; i<(argc-1); i++)
+    {
+        if(argv[i][0] == '>')
+        {
+            argc = i;
+            if(argv[i][1] == '>')
+            {
+                g_xcmder.io.write_fd = file_open(argv[i+1], 1, 1);
+            }
+            else
+            {
+                g_xcmder.io.write_fd = file_open(argv[i+1], 1, 0);
+            }
+            break;
+        }
+    }
+    return argc;
+}
+
 static int xcmd_cmd_match(int argc, char*argv[])
 {
-    xcmd_t *p = g_xcmder.cmd_list.head;
     uint8_t flag = 0;
     int ret = -1;
-    while(p)
+    xcmd_t *p = NULL;
+    XCMD_CMD_FOR_EACH(p)
     {
         if(strcmp(p->name, argv[0]) == 0)
         {
@@ -183,10 +226,12 @@ static int xcmd_cmd_match(int argc, char*argv[])
                     break;
                 }
             }
+            argc = xcmd_redirected(argc, argv);
             ret = p->func(argc, argv);
+            file_close(g_xcmder.io.write_fd);
+            g_xcmder.io.write_fd = -1;
             break;
         }
-        p = p->next;
     }
     if(flag)
     {
@@ -201,8 +246,8 @@ static int xcmd_cmd_match(int argc, char*argv[])
 
 static void xcmd_key_match(char* key)
 {
-    xcmd_key_t *p = g_xcmder.key_list.head;
-    while(p)
+    xcmd_key_t *p = NULL;
+    XCMD_KEY_FOR_EACH(p)
     {
         if(strcmp(key, p->key) == 0)
         {
@@ -211,7 +256,6 @@ static void xcmd_key_match(char* key)
                 break;
             }
         }
-        p = p->next;
     }
 }
 
@@ -300,7 +344,7 @@ static void xcmd_parser(uint8_t byte)
 
     if(num > 0)
     {
-        if( !(g_xcmder.parser.recv_hook_func && g_xcmder.parser.recv_hook_func(g_xcmder.parser.encode_buf)) )
+        if( !(g_xcmder.parser.recv_hook_func && !g_xcmder.parser.recv_hook_func(g_xcmder.parser.encode_buf)) )
         {
             if(CMD_IS_PRINT(g_xcmder.parser.encode_buf[0]))
             {
@@ -317,6 +361,13 @@ static void xcmd_parser(uint8_t byte)
 
 void xcmd_put_str(const char *str)
 {
+    if(g_xcmder.io.write_fd != -1)
+    {
+        if(file_write(g_xcmder.io.write_fd, str) != -1)
+        {
+            return;
+        }
+    }
     for(uint16_t i=0; str[i]; i++)
 	{
 		g_xcmder.io.put_c(str[i]);
@@ -550,113 +601,84 @@ int xcmd_exec(char* str)
 
 int xcmd_key_register(xcmd_key_t *keys, uint16_t number)
 {
+#ifndef ENABLE_XCMD_EXPORT
     uint16_t i=0; 
-    if(g_xcmder.key_list.len == 0)
-    {
-        g_xcmder.key_list.head = &keys[i++];
-        g_xcmder.key_list.head->next = NULL;
-        g_xcmder.key_list.tail = g_xcmder.key_list.head;
-        ++g_xcmder.key_list.len;
-    }
+    xcmd_key_t * temp;
 
     while(i<number)
     {
-        g_xcmder.key_list.tail->next = &keys[i];
-        g_xcmder.key_list.tail = g_xcmder.key_list.tail->next;
-        keys[i].next = NULL;
-        ++g_xcmder.key_list.len;
+        temp = g_xcmder.key_list.head.next;
+        g_xcmder.key_list.head.next = &keys[i];
+        keys[i].next = temp;
         ++i;
     }
-    return g_xcmder.key_list.len;
+#endif
+    return 0;
 }
 
 int xcmd_cmd_register(xcmd_t *cmds, uint16_t number)
 {
-    uint16_t i=0; 
-    if(g_xcmder.cmd_list.len == 0)
-    {
-        g_xcmder.cmd_list.head = &cmds[i++];
-        g_xcmder.cmd_list.head->next = NULL;
-        g_xcmder.cmd_list.tail = g_xcmder.cmd_list.head;
-        ++g_xcmder.cmd_list.len;
-    }
-
+#ifndef ENABLE_XCMD_EXPORT
+    xcmd_t * temp;
+    uint16_t i = 0;
     while(i<number)
     {
-        g_xcmder.cmd_list.tail->next = &cmds[i];
-        g_xcmder.cmd_list.tail = g_xcmder.cmd_list.tail->next;
-        cmds[i].next = NULL;
-        ++g_xcmder.cmd_list.len;
+        temp = g_xcmder.cmd_list.head.next;
+        g_xcmder.cmd_list.head.next = &cmds[i];
+        cmds[i].next = temp;
         ++i;
     }
-    return g_xcmder.cmd_list.len;
+#endif
+    return 0;
 }
 
 xcmd_key_t *xcmd_keylist_get(void)
 {
-    return g_xcmder.key_list.head;
+#ifndef ENABLE_XCMD_EXPORT
+    return g_xcmder.key_list.head.next;
+#endif
 }
 
 xcmd_t *xcmd_cmdlist_get(void)
 {
-    return g_xcmder.cmd_list.head;
+#ifndef ENABLE_XCMD_EXPORT
+    return g_xcmder.cmd_list.head.next;
+#endif
 }
 
 int xcmd_unregister_cmd(char *cmd)
 {
-    xcmd_t *p = g_xcmder.cmd_list.head;
-    xcmd_t *bk = p;
-    while(p)
+#ifndef ENABLE_XCMD_EXPORT
+    xcmd_t *bk = &g_xcmder.cmd_list.head;
+    xcmd_t *p = NULL;
+    XCMD_CMD_FOR_EACH(p)
     {
         if(strcmp(cmd, p->name) == 0)
         {
-            if(g_xcmder.cmd_list.len == 1)
-            {
-                g_xcmder.cmd_list.head = g_xcmder.cmd_list.tail = NULL;
-            }
-            else
-            {
-                bk->next = p->next;
-                if(p->next == NULL)
-                {
-                    g_xcmder.cmd_list.tail = bk;
-                }
-            }
-            g_xcmder.cmd_list.len--;
+            bk->next = p->next;
             return 0;
         }
         bk = p;
-        p = p->next;
     }
+#endif
     return -1;
 }
 
 int xcmd_unregister_key(char *key)
 {
-    xcmd_key_t *p = g_xcmder.key_list.head;
-    xcmd_key_t *bk = p;
-    while(p)
+#ifndef ENABLE_XCMD_EXPORT
+    xcmd_key_t *bk = &g_xcmder.key_list.head;
+    xcmd_key_t *p = NULL;
+    XCMD_KEY_FOR_EACH(p)
     {
         if(strcmp(key, p->key) == 0)
         {
-            if(g_xcmder.key_list.len == 1)
-            {
-                g_xcmder.key_list.head = g_xcmder.key_list.tail = NULL;
-            }
-            else
-            {
-                bk->next = p->next;
-                if(p->next == NULL)
-                {
-                    g_xcmder.key_list.tail = bk;
-                }
-            }
-            g_xcmder.key_list.len--;
+            bk->next = p->next;
             return 0;
         }
         bk = p;
-        p = p->next;
     }
+#endif
     return -1;
 }
 
@@ -684,13 +706,16 @@ void xcmd_init( int (*get_c)(uint8_t*), int (*put_c)(uint8_t))
 	{
         g_xcmder.io.get_c = get_c;
 		g_xcmder.io.put_c = put_c;
+        g_xcmder.io.read_fd = -1;
+        g_xcmder.io.write_fd = -1;
 
         g_xcmder.parser.prompt = XCMD_DEFAULT_PROMPT;
         g_xcmder.parser.byte_num = 0;
         g_xcmder.parser.cursor = 0;
 		g_xcmder.parser.encode_case_stu = 0;
-        g_xcmder.cmd_list.len = 0;
-        g_xcmder.cmd_list.head = NULL;
+#ifndef ENABLE_XCMD_EXPORT
+        g_xcmder.cmd_list.head.next = NULL;
+#endif
 
         if(g_xcmder._initOK == 0)
         {

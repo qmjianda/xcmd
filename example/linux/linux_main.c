@@ -14,14 +14,13 @@
 #include "test.h"
 #include "ex_keys.h"
 #include "ex_cmds.h"
+#include "ex_list.h"
 #include "fs_cmds.h"
 #include "socket_cmds.h"
 #include "ff.h"
+#include "fatfs_disk_mmc.h"
+#include "fatfs_disk_ram.h"
 
-FATFS g_fs_ram;
-FATFS g_fs_mmc;
-BYTE g_work_ram[FF_MAX_SS]; //一定是一个全局变量
-BYTE g_work_mmc[FF_MAX_SS]; //一定是一个全局变量
 FIL g_fp;
 
 int getch(void)
@@ -97,56 +96,11 @@ void fatfs_test(char* path)
     }
 }
 
-int ram_fatfs_init(void)
-{
-    FRESULT res;                   //局部变量
-    res = f_mount(&g_fs_ram, "0:", 1); //挂载文件系统 ， "1:"就是挂载的设备号为1的设备
-    if (res == FR_NO_FILESYSTEM) //FR_NO_FILESYSTEM值为13，表示没有有效的设备
-    {
-        res = f_mkfs("0:", 0, g_work_ram, sizeof(g_work_ram));
-        res = f_mount(NULL, "0:", 1);  //取消文件系统
-        res = f_mount(&g_fs_ram, "0:", 1); //挂载文件系统
-    }
-    
-    if(res == FR_OK)
-    {
-        printf("RAM fs init OK!\r\n");
-    }
-    else
-    {
-        printf("RAM fs init ERROR!\r\n");
-    }
-
-    return res;
-}
-
-int mmc_fatfs_init(void)
-{
-    FRESULT res;                   //局部变量
-    res = f_mount(&g_fs_mmc, "1:", 1); //挂载文件系统 ， "1:"就是挂载的设备号为1的设备
-    if (res == FR_NO_FILESYSTEM) //FR_NO_FILESYSTEM值为13，表示没有有效的设备
-    {
-        res = f_mkfs("1:", 0, g_work_mmc, sizeof(g_work_mmc));
-        res = f_mount(NULL, "1:", 1);  //取消文件系统
-        res = f_mount(&g_fs_mmc, "1:", 1); //挂载文件系统
-    }
-
-    if(res == FR_OK)
-    {
-        printf("MMC fs init OK!\r\n");
-    }
-    else
-    {
-        printf("MMC fs init ERROR!\r\n");
-    }
-    return res;
-}
-
 int main(void)
 {
     xcmd_init(cmd_get_char, cmd_put_char);
-    ram_fatfs_init();
-    mmc_fatfs_init();
+    ram_disk_init();
+    mmc_disk_init();
     test_cmd_init();
     test_keys_init();
     user_keys_init();
@@ -154,7 +108,7 @@ int main(void)
     ex_cmds_init();
     socket_cmds_init();
     fs_cmds_init();
-    linux_cmd_init();
+    ex_list_init();
     while (1)
     {
         xcmd_task();

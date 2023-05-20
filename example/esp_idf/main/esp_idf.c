@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "xcmd.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "test.h"
 
 int cmd_get_char(unsigned char *ch)
@@ -35,6 +33,6 @@ void app_main(void)
     while(1)
     {
         xcmd_task();
-        vTaskDelay(pdMS_TO_TICKS(10));
+        // vTaskDelay(pdMS_TO_TICKS(10));
     }
 }

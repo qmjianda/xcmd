@@ -29,6 +29,7 @@ static int xcmd_ctr_u(void *pv)
     return 0;
 }
 
+
 static int xcmd_ctr_k(void *pv)
 {
     /* 删除光标右边的所有字符 */
@@ -50,6 +51,7 @@ static int xcmd_ctr_l(void *pv)
     xcmd_exec("clear");
     return 0;
 }
+
 
 static int xcmd_ctr_left(void *pv)
 {
@@ -76,6 +78,7 @@ static int xcmd_ctr_left(void *pv)
     return 0;
 }
 
+
 static int xcmd_ctr_right(void *pv)
 {
     char *line = xcmd_display_get();
@@ -99,8 +102,17 @@ static int xcmd_ctr_right(void *pv)
     return 0;
 }
 
+XCMD_EXPORT_KEY(KEY_CTR_A, xcmd_ctr_a, "ctr+a")
+XCMD_EXPORT_KEY(KEY_CTR_E, xcmd_ctr_e, "ctr+e")
+XCMD_EXPORT_KEY(KEY_CTR_U, xcmd_ctr_u, "ctr+u")
+XCMD_EXPORT_KEY(KEY_CTR_K, xcmd_ctr_k, "ctr+k")
+XCMD_EXPORT_KEY(KEY_CTR_L, xcmd_ctr_l, "ctr+l")
+XCMD_EXPORT_KEY(KEY_CTR_LEFT, xcmd_ctr_left, "ctr+lelf")
+XCMD_EXPORT_KEY(KEY_CTR_RIGHT, xcmd_ctr_right, "ctr+lelf")
+
 static xcmd_key_t ex_keys[] = 
 {
+#ifndef ENABLE_XCMD_EXPORT
     {KEY_CTR_A, xcmd_ctr_a, "ctr+a", NULL},
     {KEY_CTR_E, xcmd_ctr_e, "ctr+e", NULL},
     {KEY_CTR_U, xcmd_ctr_u, "ctr+u", NULL},
@@ -108,6 +120,7 @@ static xcmd_key_t ex_keys[] =
     {KEY_CTR_L, xcmd_ctr_l, "ctr+l", NULL},
     {KEY_CTR_LEFT, xcmd_ctr_left, "ctr+lelf", NULL},
     {KEY_CTR_RIGHT, xcmd_ctr_right, "ctr+right", NULL},
+#endif
 };
 
 
