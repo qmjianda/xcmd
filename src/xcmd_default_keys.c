@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-09-15 00:11:50
- * @LastEditTime: 2021-10-27 09:16:27
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /xcmd/src/xcmd_default_keys.c
- */
 #include "xcmd_default_confg.h"
 #include "xcmd.h"
 #include "xcmd_default_keys.h"
@@ -23,88 +15,85 @@ static int xcmd_str_match(const char* str1, const char* str2)
     return i;
 }
 
-
-static int xcmd_del_char(void *pv)
+static int xcmd_del_char(int argc, char* argv[])
 {
-	xcmd_display_delete_char();
+    xcmder_t *xcmder = XCMD_CURRENT();
+    xnr_line_delete(&xcmder->line);
     return 0;
 }
 XCMD_EXPORT_KEY(KEY_CTR_H, xcmd_del_char, "backspace")
 XCMD_EXPORT_KEY(KEY_BACKSPACE, xcmd_del_char, "delete")
 
-static int xcmd_enter(void *pv)
+static int xcmd_enter(int argc, char* argv[])
 {
-    char *cmd = xcmd_end_of_input();
-    xcmd_print("\n\r");
-    if(cmd[0])
+    xcmder_t *xcmder = XCMD_CURRENT();
+    char out_line[XNR_LINE_MAX_LENGTH] = {0};
+    xcmd_print(xcmder, "\n\r");
+    char *line = xnr_line_line(&xcmder->line);
+    xnr_history_append(&xcmder->history, line);
+    xnr_var_repalce(&xcmder->var_tab, line, out_line, XNR_LINE_MAX_LENGTH);
+    if(out_line[0])
     {
-        xcmd_exec(cmd);
-        cmd[0] = '\0';
+        xcmd_exec(xcmder, out_line);
     }
-#ifndef XCMD_DEFAULT_PROMPT_CLOLR
-        xcmd_print("%s", xcmd_get_prompt());
-#else
-        xcmd_print(XCMD_DEFAULT_PROMPT_CLOLR "%s" TX_DEF, xcmd_get_prompt());
-#endif
+    xnr_line_clear(&xcmder->line);
     return 0;
 }
 XCMD_EXPORT_KEY(KEY_CTR_M, xcmd_enter, "enter")
 XCMD_EXPORT_KEY(KEY_CTR_J, xcmd_enter, "enter")
 
-static int xcmd_cursor_left(void *pv)
+static int xcmd_cursor_left(int argc, char* argv[])
 {
-    uint16_t pos = xcmd_display_cursor_get();
-	if(pos > 0)
-	{
-		pos--;
-        xcmd_display_cursor_set(pos);
-	}
+    xcmder_t *xcmder = XCMD_CURRENT();
+	xnr_line_cursor_left(&xcmder->line);
     return 0;
 }
 XCMD_EXPORT_KEY(KEY_LEFT, xcmd_cursor_left, "left")
 
-static int xcmd_cursor_right(void *pv)
+static int xcmd_cursor_right(int argc, char* argv[])
 {
-    uint16_t pos = xcmd_display_cursor_get();
-    pos++;
-    xcmd_display_cursor_set(pos);
+    xcmder_t *xcmder = XCMD_CURRENT();
+	xnr_line_cursor_right(&xcmder->line);
     return 0;
 }
 XCMD_EXPORT_KEY(KEY_RIGHT, xcmd_cursor_right, "right")
 
 #if XCMD_HISTORY_MAX_NUM
-static int xcmd_history_dw(void *pv)
+static int xcmd_history_dw(int argc, char* argv[])
 {
-    char *line = xcmd_history_prev();
-    xcmd_display_clear();
-    if(line)
+    xcmder_t *xcmder = XCMD_CURRENT();
+    char out_line[XNR_LINE_MAX_LENGTH] = {0};
+	if (xnr_history_dw(&xcmder->history, out_line, XNR_LINE_MAX_LENGTH) > 0)
     {
-        xcmd_display_print(line);
+        xnr_line_clear(&xcmder->line);
+        xnr_line_puts(&xcmder->line, out_line);
     }
     return 0;
 }
 XCMD_EXPORT_KEY(KEY_DW, xcmd_history_dw, "down")
 
-static int xcmd_history_up(void *pv)
+static int xcmd_history_up(int argc, char* argv[])
 {
-    char *line = xcmd_history_next();
-    if(line)
+    xcmder_t *xcmder = XCMD_CURRENT();
+    char out_line[XNR_LINE_MAX_LENGTH] = {0};
+	if (xnr_history_up(&xcmder->history, out_line, XNR_LINE_MAX_LENGTH) > 0)
     {
-        xcmd_display_clear();
-        xcmd_display_print(line);
+        xnr_line_clear(&xcmder->line);
+        xnr_line_puts(&xcmder->line, out_line);
     }
     return 0;
 }
 XCMD_EXPORT_KEY(KEY_UP, xcmd_history_up, "up")
 #endif
 
-static int xcmd_auto_completion(void *pv)
+static int xcmd_auto_completion(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     xcmd_t *match_cmd_first = NULL;
     uint16_t match_num = 0;
     uint16_t match_subscript_min = 0;
-    char *display_line = xcmd_display_get();
-    uint16_t cursor_pos = xcmd_display_cursor_get();
+    char *display_line = xnr_line_line(&xcmder->line);
+    uint16_t cursor_pos = xnr_line_cursor(&xcmder->line);
     xcmd_t *p = NULL;
     XCMD_CMD_FOR_EACH(p)
     {
@@ -117,14 +106,14 @@ static int xcmd_auto_completion(void *pv)
             }
             else if(match_num == 1)
             {
-                xcmd_print("\r\n%-15s%-15s", match_cmd_first->name, p->name);
+                xcmd_print(xcmder,"\r\n%-15s%-15s", match_cmd_first->name, p->name);
             }
             else
             {
-                xcmd_print("%-15s", p->name);
+                xcmd_print(xcmder, "%-15s", p->name);
                 if((match_num%4) == 0)
                 {
-                    xcmd_print("\r\n");
+                    xcmd_print(xcmder, "\r\n");
                 }
             }
             uint16_t subscript = xcmd_str_match(match_cmd_first->name, p->name);
@@ -138,14 +127,14 @@ static int xcmd_auto_completion(void *pv)
 
     if(match_num == 1)
     {
-        xcmd_display_clear();
-        xcmd_display_print("%s", match_cmd_first->name);
+        xnr_line_clear(&xcmder->line);
+        xnr_line_puts(&xcmder->line, match_cmd_first->name);
     }
     else if(match_num > 1)
     {
-        xcmd_print("\r\n");
-        xcmd_display_clear();
-        xcmd_display_write(match_cmd_first->name, match_subscript_min);
+        xcmd_print(xcmder, "\r\n");
+        xnr_line_clear(&xcmder->line);
+        xnr_line_write(&xcmder->line, match_cmd_first->name, match_subscript_min);
     }
     return 0;
 }

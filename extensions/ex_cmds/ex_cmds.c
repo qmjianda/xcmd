@@ -13,13 +13,14 @@
 
 static int cmd_run(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     if(argc >= 2)
     {
         xcmd_exec(argv[1]);
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_RUN);
+        xcmd_print(xcmder, "%s\r\n", HELP_RUN);
     }
     return 0;
 }

@@ -69,7 +69,7 @@ static FRESULT scan_files(
                     break; /* Break on error or end of dir */
                 if (fno.fattrib & AM_DIR)
                 { /* It is a directory */
-                    xcmd_print("\x1B[34m"
+                    xcmd_print(xcmder, "\x1B[34m"
                             "%s"
                             "\x1B[0m"
                             "  ",
@@ -77,7 +77,7 @@ static FRESULT scan_files(
                 }
                 else
                 { /* It is a file. */
-                    xcmd_print("%s  ", fno.fname);
+                    xcmd_print(xcmder, "%s  ", fno.fname);
                 }
             }
             f_closedir(&dir);
@@ -85,7 +85,7 @@ static FRESULT scan_files(
     }
     else
     {
-        xcmd_print("%s  ", fno.fname);
+        xcmd_print(xcmder, "%s  ", fno.fname);
     }
     return res;
 }
@@ -163,6 +163,7 @@ static FRESULT df(char* path, DWORD* totle_byte, DWORD* free_byte)
 
 static int cmd_df(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     FRESULT res;
     DWORD fre_bytes, tot_bytes;
     char * disk_path;
@@ -174,11 +175,11 @@ static int cmd_df(int argc, char* argv[])
             res = df(disk_path, &tot_bytes, &fre_bytes);
             if (res != FR_OK)
             {
-                xcmd_print("%s Failure:%s\r\n", disk_path, RESAULT_TO_STR(res));
+                xcmd_print(xcmder, "%s Failure:%s\r\n", disk_path, RESAULT_TO_STR(res));
             }
             else
             {
-                xcmd_print("%s %lu/%lu KiB.\r\n", disk_path, fre_bytes/1024, tot_bytes / 1024);
+                xcmd_print(xcmder, "%s %lu/%lu KiB.\r\n", disk_path, fre_bytes/1024, tot_bytes / 1024);
             }
         }
     }
@@ -207,7 +208,7 @@ static int cmd_cd(int argc, char *argv[])
         res = f_chdir(argv[1]);
         if (res != FR_OK)
         {
-            xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+            xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
         }
         else
         {
@@ -218,7 +219,7 @@ static int cmd_cd(int argc, char *argv[])
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_CD);
+        xcmd_print(xcmder, "%s\r\n", HELP_CD);
         return -1;
     }
     return 0;
@@ -243,7 +244,7 @@ static int cmd_rm(int argc, char *argv[])
             res = rm_dir(argv[2]);
             if (res != FR_OK)
             {
-                xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+                xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
                 return -1;
             }
         }
@@ -252,19 +253,19 @@ static int cmd_rm(int argc, char *argv[])
             res = f_stat(argv[1], &fno);
             if (res != FR_OK)
             {
-                xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+                xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
                 return -1;
             }
             if (fno.fattrib & AM_DIR)
             {
-                xcmd_print("Failure:%s\r\n", "PATH is DIR");
+                xcmd_print(xcmder, "Failure:%s\r\n", "PATH is DIR");
             }
             else
             {
                 res = f_unlink(argv[1]);
                 if (res != FR_OK)
                 {
-                    xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+                    xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
                     return -1;
                 }
             }
@@ -272,7 +273,7 @@ static int cmd_rm(int argc, char *argv[])
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_RM);
+        xcmd_print(xcmder, "%s\r\n", HELP_RM);
         return -1;
     }
     return 0;
@@ -286,13 +287,13 @@ static int cmd_mv(int argc, char *argv[])
         res = f_rename(argv[1], argv[2]);
         if (res != FR_OK)
         {
-            xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+            xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
             return -1;
         }
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_MV);
+        xcmd_print(xcmder, "%s\r\n", HELP_MV);
         return -1;
     }
     return 0;
@@ -312,13 +313,13 @@ static int cmd_mkdir(int argc, char *argv[])
         res = f_mkdir(argv[1]);
         if (res != FR_OK)
         {
-            xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+            xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
             return 0;
         }
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_MKDIR);
+        xcmd_print(xcmder, "%s\r\n", HELP_MKDIR);
         return -1;
     }
     return 0;
@@ -332,14 +333,14 @@ static int cmd_touch(int argc, char *argv[])
         res = f_open(&fp, argv[1], FA_CREATE_NEW);
         if ((res != FR_OK) && (res != FR_EXIST))
         {
-            xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+            xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
             return -1;
         }
         f_close(&fp);
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_TOUCH);
+        xcmd_print(xcmder, "%s\r\n", HELP_TOUCH);
         return -1;
     }
     return 0;
@@ -353,7 +354,7 @@ static int cmd_cat(int argc, char *argv[])
         res = f_open(&fp, argv[1], FA_READ);
         if (res != FR_OK)
         {
-            xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+            xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
             return -1;
         }
         else
@@ -365,7 +366,7 @@ static int cmd_cat(int argc, char *argv[])
                 res = f_read(&fp, buf, 128, &br);
                 if (res != FR_OK)
                 {
-                    xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
+                    xcmd_print(xcmder, "Failure:%s\r\n", RESAULT_TO_STR(res));
                     f_close(&fp);
                     return -1;
                 }
@@ -375,14 +376,14 @@ static int cmd_cat(int argc, char *argv[])
                 }
                 for(UINT i=0; i<br; i++)
                 {
-                    xcmd_print("%c", buf[i]);
+                    xcmd_print(xcmder, "%c", buf[i]);
                 }
             }
         }
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_CAT);
+        xcmd_print(xcmder, "%s\r\n", HELP_CAT);
         return -1;
     }
     f_close(&fp);

@@ -12,6 +12,7 @@ struct student
 
 static int list_test(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     struct student *p;
     struct student stu1;
     struct student stu2;  
@@ -55,6 +56,7 @@ static int list_test(int argc, char* argv[])
 
 static int list_note_del(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     struct student *p;
     struct student stu1;
     struct student stu2;  
@@ -99,6 +101,7 @@ static int list_note_del(int argc, char* argv[])
 
 static int list_note_rep(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     struct student *p;
     struct student stu1;
     struct student stu2;  
@@ -142,6 +145,7 @@ static int list_note_rep(int argc, char* argv[])
 
 static int list_note_del_insert(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     struct student *p;
     struct student stu1;
     struct student stu2;  
@@ -183,6 +187,7 @@ static int list_note_del_insert(int argc, char* argv[])
 
 static int List_to_merge(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     struct student *p;
     struct student *q;
     struct student stu1;
@@ -235,6 +240,7 @@ static int List_to_merge(int argc, char* argv[])
 
 static int List_traverse(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     struct student *p;
     struct student stu1;
     struct student stu2;  

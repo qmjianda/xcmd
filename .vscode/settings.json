@@ -29,6 +29,32 @@
     "ex_keys.h": "c",
     "ex_cmds.h": "c",
     "test.h": "c",
-    "ctype.h": "c"
-  }
+    "ctype.h": "c",
+    "string.h": "c",
+    "stdarg.h": "c",
+    "stddef.h": "c",
+    "unistd.h": "c",
+    "stdlib.h": "c",
+    "stdio.h": "c",
+    "xnr_line.h": "c"
+  },
+  "cmake.sourceDirectory": "/home/hqm/project/xcmd/example/esp_idf",
+  "MicroPython.executeButton": [
+    {
+      "text": "▶",
+      "tooltip": "运行",
+      "alignment": "left",
+      "command": "extension.executeFile",
+      "priority": 3.5
+    }
+  ],
+  "MicroPython.syncButton": [
+    {
+      "text": "$(sync)",
+      "tooltip": "同步",
+      "alignment": "left",
+      "command": "extension.execute",
+      "priority": 4
+    }
+  ]
 }

@@ -4,59 +4,65 @@
 #define IS_ALPHA(c) ( (c>='A' && c<='Z') || (c>='a' && c<='z') )
 #define IS_NUMBER(c)    (c>='0' && c<='9')
 
-static int xcmd_ctr_a(void *pv)
+static int xcmd_ctr_a(int argc, char* argv[])
 {
     /* 移动光标到头 */
-    xcmd_display_cursor_set(0);
+    xcmder_t *xcmder = XCMD_CURRENT();
+    xnr_line_cursor_set(&xcmder->line, 0);
     return 0;
 }
 
-static int xcmd_ctr_e(void *pv)
+static int xcmd_ctr_e(int argc, char* argv[])
 {
     /* 移动光标到尾 */
-    xcmd_display_cursor_set(-1);
+    xcmder_t *xcmder = XCMD_CURRENT();
+    xnr_line_cursor_set(&xcmder->line, XCMD_LINE_MAX_LENGTH);
     return 0;
 }
 
-static int xcmd_ctr_u(void *pv)
+static int xcmd_ctr_u(int argc, char* argv[])
 {
     /* 删除光标左边的所有字符 */
-    uint16_t pos = xcmd_display_cursor_get();
-    for(uint16_t i=0; i<pos; i++)
+    xcmder_t *xcmder = XCMD_CURRENT();
+    int pos = xnr_line_cursor(&xcmder->line);
+    for(int i=0; i<pos; i++)
     {
-        xcmd_display_delete_char();
+        xnr_line_delete(&xcmder->line);
     }
     return 0;
 }
 
 
-static int xcmd_ctr_k(void *pv)
+static int xcmd_ctr_k(int argc, char* argv[])
 {
     /* 删除光标右边的所有字符 */
-    uint16_t pos = xcmd_display_cursor_get();
-    xcmd_display_cursor_set(-1);
+    xcmder_t *xcmder = XCMD_CURRENT();
+    int pos = xnr_line_cursor(&xcmder->line);
+    xnr_line_cursor_set(&xcmder->line, XCMD_LINE_MAX_LENGTH);
     while(1)
     {
-        if(xcmd_display_cursor_get() == pos)
+        if(xnr_line_cursor(&xcmder->line) == pos)
         {
             break;
         }
-        xcmd_display_delete_char();
+        xnr_line_delete(&xcmder->line);
     }
     return 0;
 }
 
-static int xcmd_ctr_l(void *pv)
+static int xcmd_ctr_l(int argc, char* argv[])
 {
-    xcmd_exec("clear");
+    xcmder_t *xcmder = XCMD_CURRENT();
+    xcmd_exec(xcmder, "clear");
     return 0;
 }
 
 
-static int xcmd_ctr_left(void *pv)
+static int xcmd_ctr_left(int argc, char* argv[])
 {
-    char *line = xcmd_display_get();
-    uint16_t pos = xcmd_display_cursor_get();
+    xcmder_t *xcmder = XCMD_CURRENT();
+    char *line = xnr_line_line(&xcmder->line);
+    uint16_t pos = xnr_line_cursor(&xcmder->line);
     while(pos)
     {
         pos--;
@@ -74,15 +80,16 @@ static int xcmd_ctr_left(void *pv)
         }
         pos--;
     }
-    xcmd_display_cursor_set(pos);
+    xnr_line_cursor_set(&xcmder->line, pos);
     return 0;
 }
 
 
-static int xcmd_ctr_right(void *pv)
+static int xcmd_ctr_right(int argc, char* argv[])
 {
-    char *line = xcmd_display_get();
-    uint16_t pos = xcmd_display_cursor_get();
+    xcmder_t *xcmder = XCMD_CURRENT();
+    char *line = xnr_line_line(&xcmder->line);
+    uint16_t pos = xnr_line_cursor(&xcmder->line);
     while(line[pos++])
     {
         if(IS_ALPHA(line[pos]) || IS_NUMBER(line[pos]))
@@ -98,7 +105,7 @@ static int xcmd_ctr_right(void *pv)
             break;
         }
     }
-    xcmd_display_cursor_set(pos);
+    xnr_line_cursor_set(&xcmder->line, pos);
     return 0;
 }
 

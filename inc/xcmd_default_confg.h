@@ -46,6 +46,10 @@ extern   "C" {
 #define XCMD_DEFAULT_PROMPT_CLOLR   TX_GREEN /*提示符颜色*/
 #endif
 
+#ifndef XCMD_VAR_BUF_SZIE
+#define XCMD_VAR_BUF_SZIE      (32)
+#endif
+
 #ifndef ENABLE_XCMD_EXPORT
 //#define ENABLE_XCMD_EXPORT /*使能XCMD_EXPORT_CMD和XCMD_EXPORT_KEY*/
 #endif

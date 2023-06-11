@@ -11,7 +11,7 @@
 #include "xcmd.h"
 #include "test.h"
 
-#define EXIT_MESSAGE() xcmd_print(g_cmder, "press \"q\" or \"Q\" to exit!\r\n")
+#define EXIT_MESSAGE() xcmd_print(xcmder, g_cmder, "press \"q\" or \"Q\" to exit!\r\n")
 
 #define EXIT_CHECK()                 \
     do                               \
@@ -31,6 +31,7 @@
 
 static uint8_t param_check(int need, int argc, char*argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     uint8_t i,ret = 0;
     if(need<(argc))
     {
@@ -38,16 +39,16 @@ static uint8_t param_check(int need, int argc, char*argv[])
     }
     else
     {
-        xcmd_print("err need %d but input %d:\r\n", need, argc-1);
-    	xcmd_print("input= ");
+        xcmd_print(xcmder, "err need %d but input %d:\r\n", need, argc-1);
+    	xcmd_print(xcmder, "input= ");
 	    for(i=0; i<argc; i++)
 	    {
 	        if(argv[i] != NULL)
 	        {
-	            xcmd_print("%s ", argv[i]);
+	            xcmd_print(xcmder, "%s ", argv[i]);
 	        }
 	    }
-	    xcmd_print("\r\n");
+	    xcmd_print(xcmder, "\r\n");
         ret = 0;
     }
     return ret;
@@ -55,6 +56,7 @@ static uint8_t param_check(int need, int argc, char*argv[])
 
 static int cmd_example(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     uint8_t i;
     if(param_check(1, argc, argv))
 	{
@@ -62,21 +64,21 @@ static int cmd_example(int argc, char* argv[])
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print("%s\r\n", argv[i]);
+		    	xcmd_print(xcmder, "%s\r\n", argv[i]);
 			}
 		}
 		if(strcmp(argv[1], "-i") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print("%d\r\n", atoi(argv[i]));
+		    	xcmd_print(xcmder, "%d\r\n", atoi(argv[i]));
 			}
 		}
 		if(strcmp(argv[1], "-f") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print("%f\r\n", atof(argv[i]));
+		    	xcmd_print(xcmder, "%f\r\n", atof(argv[i]));
 			}
 		}
 	}
@@ -85,6 +87,7 @@ static int cmd_example(int argc, char* argv[])
 
 static int cmd_history(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     uint16_t len = xcmd_history_len();
 
     do
@@ -97,7 +100,7 @@ static int cmd_history(int argc, char* argv[])
         char *line = xcmd_history_prev();
         if(line)
         {
-            xcmd_print("%s\r\n", line);
+            xcmd_print(xcmder, "%s\r\n", line);
         }
         else
         {
@@ -109,6 +112,7 @@ static int cmd_history(int argc, char* argv[])
 
 static int cmd_delete_cmd(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     int res = 0;
     if (argc == 2)
     {
@@ -120,12 +124,13 @@ static int cmd_delete_cmd(int argc, char* argv[])
     }
     return 0;
 error:
-    xcmd_print("Too many parameters are entered or there is no command\r\n");
+    xcmd_print(xcmder, "Too many parameters are entered or there is no command\r\n");
     return -1;
 }
 
 static int cmd_delete_key(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     int res = 0;
     if (argc == 2)
     {
@@ -137,35 +142,36 @@ static int cmd_delete_key(int argc, char* argv[])
     }
     return 0;
 error:
-    xcmd_print("Too many parameters are entered or there is no command\r\n");
+    xcmd_print(xcmder, "Too many parameters are entered or there is no command\r\n");
     return -1;
 }
 
 
 static int cmd_ctr_q(void* pv)
 {
-    xcmd_print("this is ctr+q\n");
+    xcmd_print(xcmder, "this is ctr+q\n");
     return 0;
 }
 
 static int cmd_print_color(int argc, char* argv[])
 {
-    xcmd_print(TX_DEF      "txt_color = DEF    \r\n"   TX_DEF);
-    xcmd_print(TX_RED      "txt_color = RED    \r\n"   TX_DEF);
-    xcmd_print(TX_BLACK    "txt_color = BLACK  \r\n"   TX_DEF);
-    xcmd_print(TX_GREEN    "txt_color = GREEN  \r\n"   TX_DEF);
-    xcmd_print(TX_YELLOW   "txt_color = YELLOW \r\n"   TX_DEF);
-    xcmd_print(TX_BLUE     "txt_color = BLUE   \r\n"   TX_DEF);
-    xcmd_print(TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
-    xcmd_print(TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
+    xcmder_t *xcmder = XCMD_CURRENT();
+    xcmd_print(xcmder, TX_DEF      "txt_color = DEF    \r\n"   TX_DEF);
+    xcmd_print(xcmder, TX_RED      "txt_color = RED    \r\n"   TX_DEF);
+    xcmd_print(xcmder, TX_BLACK    "txt_color = BLACK  \r\n"   TX_DEF);
+    xcmd_print(xcmder, TX_GREEN    "txt_color = GREEN  \r\n"   TX_DEF);
+    xcmd_print(xcmder, TX_YELLOW   "txt_color = YELLOW \r\n"   TX_DEF);
+    xcmd_print(xcmder, TX_BLUE     "txt_color = BLUE   \r\n"   TX_DEF);
+    xcmd_print(xcmder, TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
+    xcmd_print(xcmder, TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
 
-    xcmd_print(BK_DEF       "background_color = BK_DEF"    BK_DEF "\r\n");
-    xcmd_print(BK_BLACK     "background_color = BK_BLACK"  BK_DEF "\r\n");
-    xcmd_print(BK_RED       "background_color = BK_RED"    BK_DEF "\r\n");
-    xcmd_print(BK_GREEN     "background_color = BK_GREEN"  BK_DEF "\r\n");
-    xcmd_print(BK_YELLOW    "background_color = BK_YELLOW" BK_DEF "\r\n");
-    xcmd_print(BK_BLUE      "background_color = BK_BLUE"   BK_DEF "\r\n");
-    xcmd_print(BK_WHITE     "background_color = BK_WHITE"  BK_DEF "\r\n");
+    xcmd_print(xcmder, BK_DEF       "background_color = BK_DEF"    BK_DEF "\r\n");
+    xcmd_print(xcmder, BK_BLACK     "background_color = BK_BLACK"  BK_DEF "\r\n");
+    xcmd_print(xcmder, BK_RED       "background_color = BK_RED"    BK_DEF "\r\n");
+    xcmd_print(xcmder, BK_GREEN     "background_color = BK_GREEN"  BK_DEF "\r\n");
+    xcmd_print(xcmder, BK_YELLOW    "background_color = BK_YELLOW" BK_DEF "\r\n");
+    xcmd_print(xcmder, BK_BLUE      "background_color = BK_BLUE"   BK_DEF "\r\n");
+    xcmd_print(xcmder, BK_WHITE     "background_color = BK_WHITE"  BK_DEF "\r\n");
     return 0;
 }
 
