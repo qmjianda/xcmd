@@ -36,7 +36,7 @@ static char *resault_to_str_map[] =
         "FR_INVALID_PARAMETER"    /* (19) Given parameter is invalid */
 };
 static char g_prompt[128];
-static FIL fp;
+static FIL g_file[1];
 static FILINFO fno;
 
 #define HELP_DF ("Show Disk Info. Usage: df")
@@ -329,13 +329,13 @@ static int cmd_touch(int argc, char *argv[])
     if (argc >= 2)
     {
         FRESULT res;
-        res = f_open(&fp, argv[1], FA_CREATE_NEW);
+        res = f_open(&g_file[0], argv[1], FA_CREATE_NEW);
         if ((res != FR_OK) && (res != FR_EXIST))
         {
             xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
             return -1;
         }
-        f_close(&fp);
+        f_close(&g_file[0]);
     }
     else
     {
@@ -350,7 +350,7 @@ static int cmd_cat(int argc, char *argv[])
     if (argc >= 2)
     {
         FRESULT res;
-        res = f_open(&fp, argv[1], FA_READ);
+        res = f_open(&g_file[0], argv[1], FA_READ);
         if (res != FR_OK)
         {
             xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
@@ -362,11 +362,11 @@ static int cmd_cat(int argc, char *argv[])
             UINT br;
             while (1)
             {
-                res = f_read(&fp, buf, 128, &br);
+                res = f_read(&g_file[0], buf, 128, &br);
                 if (res != FR_OK)
                 {
                     xcmd_print("Failure:%s\r\n", RESAULT_TO_STR(res));
-                    f_close(&fp);
+                    f_close(&g_file[0]);
                     return -1;
                 }
                 if (br == 0)
@@ -385,11 +385,11 @@ static int cmd_cat(int argc, char *argv[])
         xcmd_print("%s\r\n", HELP_CAT);
         return -1;
     }
-    f_close(&fp);
+    f_close(&g_file[0]);
     return 0;
 }
 
-ssize_t file_open(char *name, int is_write, int is_append)
+int file_open(char *name, int is_write, int is_append)
 {
     FRESULT res;
     BYTE mode = 0;
@@ -408,27 +408,27 @@ ssize_t file_open(char *name, int is_write, int is_append)
     {
         mode = FA_READ;
     }
-    res = f_open(&fp, name, mode);
+    res = f_open(&g_file[0], name, mode);
     if (res != FR_OK)
     {
         return -1;
     }
-    return (ssize_t)&fp;
+    return 0;
 }
 
-void file_close(ssize_t fd)
+void file_close(int fd)
 {
     if(fd != -1)
-        f_close((FIL*)fd);
+        f_close(&g_file[fd]);
 }
 
-int file_read(ssize_t fd, char *buf, int buflen)
+int file_read(int fd, char *buf, int buflen)
 {
     FRESULT res;
     UINT br;
     if(fd != -1)
     {
-        res = f_read((FIL*)fd, buf, buflen, &br);
+        res = f_read(&g_file[fd], buf, buflen, &br);
         if (res != FR_OK)
         {
             return -1;
@@ -438,14 +438,14 @@ int file_read(ssize_t fd, char *buf, int buflen)
     return -1;
 }
 
-int file_write(ssize_t fd, const char *str)
+int file_write(int fd, const char *str)
 {
 
     FRESULT res = FR_INVALID_PARAMETER;
     if(fd != -1)
     {
         UINT br;
-        res = f_write((FIL*)fd, str, strlen(str), &br);
+        res = f_write(&g_file[fd], str, strlen(str), &br);
         if (res != FR_OK)
         {
             return -1;
