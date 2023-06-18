@@ -21,8 +21,8 @@ struct
 {
     struct
     {   
-        ssize_t write_fd;
-        ssize_t read_fd;
+        int write_fd;
+        int read_fd;
         int (*get_c)(uint8_t*);
         int (*put_c)(uint8_t);
     }io;
@@ -67,27 +67,27 @@ struct
     uint8_t _initOK;
 } g_xcmder = {0};
 
-ssize_t file_open(char *name, int is_write, int is_append) __attribute__((weak));
-void file_close(ssize_t fd) __attribute__((weak));
-int file_write(ssize_t fd, const char *str) __attribute__((weak));
-int file_read(ssize_t fd, char *buf, int buflen) __attribute__((weak));
+int file_open(char *name, int is_write, int is_append) __attribute__((weak));
+void file_close(int fd) __attribute__((weak));
+int file_write(int fd, const char *str) __attribute__((weak));
+int file_read(int fd, char *buf, int buflen) __attribute__((weak));
 
-void file_close(ssize_t fd)
+void file_close(int fd)
 {
 }
 
-ssize_t file_open(char *name, int is_write, int is_append)
-{
-    return -1;
-}
-
-int file_write(ssize_t fd, const char *str)
+int file_open(char *name, int is_write, int is_append)
 {
     return -1;
 }
 
+int file_write(int fd, const char *str)
+{
+    return -1;
+}
 
-int file_read(ssize_t fd, char *buf, int buflen)
+
+int file_read(int fd, char *buf, int buflen)
 {
     return -1;
 }
