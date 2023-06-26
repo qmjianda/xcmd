@@ -31,9 +31,9 @@ static int list_test(int argc, char* argv[])
          //list_add_tail(&p->list,&stu.list);
      }
      
-    printf("list_add: \r\n");
+    xcmd_print(xcmder, "list_add: \r\n");
     list_for_each(pos, &stu1.stu_list) {
-        printf("ID = %d,math = %d\n",((struct student*)pos)->ID,((struct student*)pos)->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",((struct student*)pos)->ID,((struct student*)pos)->math);
     }
     
     //尾插法创建stu stu1链表
@@ -47,9 +47,9 @@ static int list_test(int argc, char* argv[])
          list_add_tail(&p->stu_list,&stu2.stu_list);
      }
      
-    printf("list_add_tail: \r\n");
+    xcmd_print(xcmder, "list_add_tail: \r\n");
     list_for_each(pos, &stu2.stu_list) {
-        printf("ID = %d,math = %d\n",((struct student*)pos)->ID,((struct student*)pos)->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",((struct student*)pos)->ID,((struct student*)pos)->math);
     }
     return 0;
 }
@@ -79,9 +79,9 @@ static int list_note_del(int argc, char* argv[])
          //list_add_tail(&p->list,&stu.list);
      }
      
-    printf("list_add: \r\n");
+    xcmd_print(xcmder, "list_add: \r\n");
     list_for_each(pos1, &stu1.stu_list) {
-        printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
     
     //删除
@@ -92,9 +92,9 @@ static int list_note_del(int argc, char* argv[])
         }
     }
     
-    printf("list_del\r\n");
+    xcmd_print(xcmder, "list_del\r\n");
     list_for_each_entry(pos2,&stu1.stu_list,stu_list) {
-        printf("ID = %d,math = %d\n",pos2->ID,pos2->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",pos2->ID,pos2->math);
     }
     return 0;
 }
@@ -123,9 +123,9 @@ static int list_note_rep(int argc, char* argv[])
          //尾插法
          //list_add_tail(&p->list,&stu.list);
      }
-    printf("list_add: \r\n");
+    xcmd_print(xcmder, "list_add: \r\n");
     list_for_each(pos1, &stu1.stu_list) {
-        printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
  
     //替换
@@ -135,9 +135,9 @@ static int list_note_rep(int argc, char* argv[])
             break;
         }
     }
-    printf("list_replace\r\n");
+    xcmd_print(xcmder, "list_replace\r\n");
     list_for_each_entry(pos2,&stu1.stu_list,stu_list) {
-        printf("ID = %d,math = %d\n",pos2->ID,pos2->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",pos2->ID,pos2->math);
     }
     return 0; 
 }
@@ -166,9 +166,9 @@ static int list_note_del_insert(int argc, char* argv[])
          //尾插法
          //list_add_tail(&p->list,&stu.list);
      }
-    printf("list_add: \r\n");
+    xcmd_print(xcmder, "list_add: \r\n");
     list_for_each(pos1, &stu1.stu_list) {
-        printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
  
     //移位替换
@@ -178,9 +178,9 @@ static int list_note_del_insert(int argc, char* argv[])
             break;
         }
     }
-    printf("list_move\r\n");
+    xcmd_print(xcmder, "list_move\r\n");
     list_for_each_entry(pos2,&stu1.stu_list,stu_list) {
-        printf("ID = %d,math = %d\n",pos2->ID,pos2->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",pos2->ID,pos2->math);
     }
     return 0;
 }
@@ -208,9 +208,9 @@ static int List_to_merge(int argc, char* argv[])
          //尾插法
          //list_add_tail(&p->list,&stu.list);
      }
-    printf("stu1: \r\n");
+    xcmd_print(xcmder, "stu1: \r\n");
     list_for_each(pos1, &stu1.stu_list) {
-        printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
     //头插法创建stu2 list 链表
      for (int i = 0;i < 3;i++) {
@@ -222,16 +222,16 @@ static int List_to_merge(int argc, char* argv[])
          //尾插法
          //list_add_tail(&p->list,&stu.list);
      }
-    printf("stu2: \r\n");
+    xcmd_print(xcmder, "stu2: \r\n");
     list_for_each(pos1, &stu2.stu_list) {
-        printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
 
     //合并
     list_splice(&stu1.stu_list,&stu2.stu_list);
-    printf("list_splice\r\n");
+    xcmd_print(xcmder, "list_splice\r\n");
     list_for_each(pos1, &stu2.stu_list) {
-        printf("stu2 ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
+        xcmd_print(xcmder, "stu2 ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
     
 
@@ -260,14 +260,14 @@ static int List_traverse(int argc, char* argv[])
          //尾插法
          //list_add_tail(&p->list,&stu.list);
      }
-    printf("stu1: \r\n");
+    xcmd_print(xcmder, "stu1: \r\n");
     list_for_each(pos1, &stu1.stu_list) {
-        printf("ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
+        xcmd_print(xcmder, "ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
 
-    printf("list_for_each_prev\r\n");
+    xcmd_print(xcmder, "list_for_each_prev\r\n");
     list_for_each_prev(pos1, &stu1.stu_list){
-        printf("stu2 ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
+        xcmd_print(xcmder, "stu2 ID = %d,math = %d\n",((struct student*)pos1)->ID,((struct student*)pos1)->math);
     }
 
     return 0; 

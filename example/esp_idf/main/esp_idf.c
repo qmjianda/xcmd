@@ -1,38 +1,42 @@
-/*
- * @Author: your name
- * @Date: 2021-09-14 23:58:24
- * @LastEditTime: 2021-09-22 22:50:56
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /xcmd/example/linux/linux_main.c
- */
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "xcmd.h"
 #include "test.h"
+#include "esp_cmds.h"
 
-int cmd_get_char(unsigned char *ch)
+xcmder_t xcmder;
+
+static int io_write(int fd, const char *buf, size_t len)
 {
-    *ch = getc(stdin);
-    return 1;
+    for (int i = 0; i < len; i++)
+    {
+        putchar(buf[i]);
+    }
+    return len;
 }
 
-int cmd_put_char(unsigned char ch)
+static int io_read(int fd, char *buf, size_t len)
 {
-    putchar(ch);
-    return 1;
+    for (int i = 0; i < len; i++)
+    {
+        buf[i] = getc(stdin);
+    }
+    return len;
 }
 
 void app_main(void)
-{
-    xcmd_init(cmd_get_char, cmd_put_char);
+{   
+    xcmd_init(&xcmder, io_write, io_read);
     test_cmd_init();
     test_keys_init();
+    esp32_cmds_init();
     
     while(1)
     {
-        xcmd_task();
-        // vTaskDelay(pdMS_TO_TICKS(10));
+        xcmd_task(&xcmder);
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }

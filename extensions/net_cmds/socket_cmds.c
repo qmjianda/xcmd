@@ -20,12 +20,13 @@ static int x_inet_send_to(int fd, char* ip, uint16_t port, void* data, uint16_t 
 
 static int xcmd_udp_client(int argc ,char**argv)
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     if(argc >= 4)
     {
         int udp = socket(AF_INET, SOCK_DGRAM, 0);
         if(udp<0)
         {
-            xcmd_print("Open socket error!!\r\n");
+            xcmd_print(xcmder, "Open socket error!!\r\n");
             return -1;
         }
         char* ip = argv[1];
@@ -34,7 +35,7 @@ static int xcmd_udp_client(int argc ,char**argv)
         uint16_t len = strlen(data);
         if(x_inet_send_to(udp, ip, port, data, len) < 0)
         {
-            xcmd_print("Send msg error\r\n");
+            xcmd_print(xcmder, "Send msg error\r\n");
             close(udp);
             return -1;
         }
@@ -42,13 +43,14 @@ static int xcmd_udp_client(int argc ,char**argv)
     }
     else
     {
-        xcmd_print("Usage: udp_client ip port msg");
+        xcmd_print(xcmder, "Usage: udp_client ip port msg");
     }
     return 0;
 }
 
 static int xcmd_udp_service(int argc, char** argv)
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     struct sockaddr_in addrin;
     addrin.sin_family = AF_INET;
 
@@ -70,11 +72,11 @@ static int xcmd_udp_service(int argc, char** argv)
     int udp = socket(AF_INET, SOCK_DGRAM, 0);
     if(udp<0)
     {
-        xcmd_print("Open socket error!!\r\n");
+        xcmd_print(xcmder, "Open socket error!!\r\n");
     }
     if(bind(udp, (struct sockaddr*)&addrin, sizeof(addrin)) < 0)
     {
-        xcmd_print("Bind error\r\n");
+        xcmd_print(xcmder, "Bind error\r\n");
         close(udp);
         return -1;
     }
@@ -87,8 +89,8 @@ static int xcmd_udp_service(int argc, char** argv)
     if(rcv_len>0)
     {   
         rcv_buf[rcv_len] = '\0';
-        xcmd_print("rcv from \"ip=%s port=%d\" msg:\r\n", inet_ntoa(client_addr.sin_addr),  ntohs(client_addr.sin_port));
-        xcmd_print(rcv_buf);
+        xcmd_print(xcmder, "rcv from \"ip=%s port=%d\" msg:\r\n", inet_ntoa(client_addr.sin_addr),  ntohs(client_addr.sin_port));
+        xcmd_print(xcmder, rcv_buf);
     }
     close(udp);
     return 0;

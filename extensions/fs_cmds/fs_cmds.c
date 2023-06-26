@@ -1,15 +1,8 @@
-/*
- * @Author: your name
- * @Date: 2021-10-09 17:14:58
- * @LastEditTime: 2021-10-11 21:26:22
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /xcmd/extensions/fs_cmds/fs_cmds.c
- */
 #include "fs_cmds.h"
 #include "xcmd.h"
 #include "ff.h"
 #include "fatfs_port.h"
+#include <stddef.h>
 
 #define RESAULT_TO_STR(r) resault_to_str_map[r]
 static char *resault_to_str_map[] =
@@ -51,6 +44,7 @@ static FILINFO fno;
 #define HELP_WRITE ("Write str to FILE. Usage: wr string (>|>>) filename")
 
 static FRESULT scan_files(
+    xcmder_t *xcmder,
     char *path /* Start node to be scanned (***also used as work area***) */
 )
 {
@@ -69,11 +63,7 @@ static FRESULT scan_files(
                     break; /* Break on error or end of dir */
                 if (fno.fattrib & AM_DIR)
                 { /* It is a directory */
-                    xcmd_print(xcmder, "\x1B[34m"
-                            "%s"
-                            "\x1B[0m"
-                            "  ",
-                            fno.fname);
+                    xcmd_print(xcmder, ANSI_COLOR_TXT(ANSI_BLUE, "%s"), fno.fname);
                 }
                 else
                 { /* It is a file. */
@@ -188,19 +178,21 @@ static int cmd_df(int argc, char* argv[])
 
 static int cmd_ls(int argc, char *argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     if (argc == 1)
     {
-        scan_files("./");
+        scan_files(xcmder, "./");
     }
     else
     {
-        scan_files(argv[1]);
+        scan_files(xcmder, argv[1]);
     }
     return 0;
 }
 
 static int cmd_cd(int argc, char *argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     if (argc >= 2)
     {
         FRESULT res;
@@ -227,6 +219,7 @@ static int cmd_cd(int argc, char *argv[])
 
 static int cmd_rm(int argc, char *argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     FRESULT res;
     uint8_t dir_flag = 0;
     uint8_t param_num = 2;
@@ -281,6 +274,7 @@ static int cmd_rm(int argc, char *argv[])
 
 static int cmd_mv(int argc, char *argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     if (argc >= 3)
     {
         FRESULT res;
@@ -307,6 +301,7 @@ static int cmd_sync(int argc, char *argv[])
 
 static int cmd_mkdir(int argc, char *argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     if (argc >= 2)
     {
         FRESULT res;
@@ -327,6 +322,7 @@ static int cmd_mkdir(int argc, char *argv[])
 
 static int cmd_touch(int argc, char *argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     if (argc >= 2)
     {
         FRESULT res;
@@ -348,6 +344,7 @@ static int cmd_touch(int argc, char *argv[])
 
 static int cmd_cat(int argc, char *argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     if (argc >= 2)
     {
         FRESULT res;
@@ -481,8 +478,8 @@ static xcmd_t cmds[] =
 #endif
 };
 
-void fs_cmds_init(void)
+void fs_cmds_init(xcmder_t *xcmder)
 {
     xcmd_cmd_register(cmds, sizeof(cmds) / sizeof(xcmd_t));
-    xcmd_exec("cd 1:");
+    xcmd_exec(xcmder, "cd 1:");
 }

@@ -6,15 +6,15 @@ extern   "C" {
 #endif
 
 #ifndef XCMD_LINE_MAX_LENGTH
-#define XCMD_LINE_MAX_LENGTH    (64) /* 命令行支持的最大字符数 */
+#define XCMD_LINE_MAX_LENGTH    (32) /* 命令行支持的最大字符数 */
 #endif
 
 #ifndef XCMD_PRINT_BUF_MAX_LENGTH
-#define XCMD_PRINT_BUF_MAX_LENGTH   (128) /* xcmd_print缓存 */
+#define XCMD_PRINT_BUF_MAX_LENGTH   (64) /* xcmd_print缓存 */
 #endif  
 
 #ifndef  XCMD_HISTORY_BUF_SZIE
-#define XCMD_HISTORY_BUF_SZIE    (256)  /* 支持的历史记录个数, 这个参数对内存的影响很大，建议arduino设置为0，0为不支持 */
+#define XCMD_HISTORY_BUF_SZIE    (64)  /* 支持的历史记录个数, 这个参数对内存的影响很大，建议arduino设置为0，0为不支持 */
 #endif
 
 #ifndef XCMD_PARAM_MAX_NUM
@@ -35,7 +35,7 @@ extern   "C" {
 #endif
 
 #ifndef XCMD_VAR_NUM
-#define XCMD_VAR_NUM      (8)
+#define XCMD_VAR_NUM      (4)
 #endif
 
 #ifndef XCMD_VAR_NAME_BUF_SZIE
@@ -43,7 +43,7 @@ extern   "C" {
 #endif
 
 #ifndef XCMD_VAR_VAR_SZIE
-#define XCMD_VAR_VAR_SZIE      (64)
+#define XCMD_VAR_VAR_SZIE      (32)
 #endif
 
 #ifndef ENABLE_XCMD_EXPORT

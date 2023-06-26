@@ -20,12 +20,12 @@
     "*.json": "jsonc",
     "cmath": "c",
     "complex": "c",
-    "xcmd_default_keys.h": "c",
+    "xcmd_keys.h": "c",
     "xcmd.h": "c",
-    "xcmd_default_cmds.h": "c",
+    "xcmd_cmds.h": "c",
     "typeinfo": "c",
     "xcmd_define.h": "c",
-    "xcmd_default_confg.h": "c",
+    "xcmd_confg.h": "c",
     "ex_keys.h": "c",
     "ex_cmds.h": "c",
     "test.h": "c",
@@ -36,7 +36,9 @@
     "unistd.h": "c",
     "stdlib.h": "c",
     "stdio.h": "c",
-    "xnr_line.h": "c"
+    "xnr_line.h": "c",
+    "errno.h": "c",
+    "stdint.h": "c"
   },
   "cmake.sourceDirectory": "/home/hqm/project/xcmd/example/esp_idf",
   "MicroPython.executeButton": [
@@ -56,5 +58,7 @@
       "command": "extension.execute",
       "priority": 4
     }
-  ]
+  ],
+  "idf.port": "/dev/ttyUSB0",
+  "idf.adapterTargetName": "esp32s2"
 }

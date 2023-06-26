@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-10-11 13:40:10
- * @LastEditTime: 2021-10-11 13:41:15
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /xcmd/extensions/ex_cmds/ex_cmds.c
- */
 #include "ex_cmds.h"
 #include "xcmd.h"
 
@@ -16,7 +8,7 @@ static int cmd_run(int argc, char* argv[])
     xcmder_t *xcmder = XCMD_CURRENT();
     if(argc >= 2)
     {
-        xcmd_exec(argv[1]);
+        xcmd_exec(xcmder, argv[1]);
     }
     else
     {

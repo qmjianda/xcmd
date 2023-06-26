@@ -1,6 +1,6 @@
 [submodule "extensions/fs_cmds/fatfs"]
 	path = extensions/fs_cmds/fatfs
-	url = https://github.com/abbrev/fatfs.git
+	url = https://gitee.com/open-source-library/fatfs.git
 [submodule "src/xnr"]
 	path = src/xnr
 	url = https://gitee.com/two_salted_eggs/XNanoReadLine.git

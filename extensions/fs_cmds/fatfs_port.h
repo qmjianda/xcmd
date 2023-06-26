@@ -1,12 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-10-09 13:55:20
- * @LastEditTime: 2021-10-09 15:51:46
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /xcmd/example/linux/fatfs_port.h
- */
-
 #ifndef FATFS_PORT_H
 #define FATFS_PORT_H
 

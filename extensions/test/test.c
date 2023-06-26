@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2021-09-22 22:33:17
- * @LastEditTime: 2021-10-11 13:41:50
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /xcmd/extensions/test/test.c
- */
 #include <string.h>
 #include <stdlib.h>
 #include "xcmd.h"
@@ -88,19 +80,13 @@ static int cmd_example(int argc, char* argv[])
 static int cmd_history(int argc, char* argv[])
 {
     xcmder_t *xcmder = XCMD_CURRENT();
-    uint16_t len = xcmd_history_len();
-
-    do
+    char out_line[XNR_LINE_MAX_LENGTH] = {0};
+    int len = xnr_history_length(&xcmder->history);
+    for(int i=0; i<len; i++)
     {
-        xcmd_history_next();
-    }while(len--);
-
-    while(1)
-    {
-        char *line = xcmd_history_prev();
-        if(line)
+        if(xnr_history_get(&xcmder->history, i, out_line, XNR_LINE_MAX_LENGTH) > 0)
         {
-            xcmd_print(xcmder, "%s\r\n", line);
+            xcmd_print(xcmder, "%s\r\n", out_line);
         }
         else
         {
@@ -147,8 +133,9 @@ error:
 }
 
 
-static int cmd_ctr_q(void* pv)
+static int cmd_ctr_q(int argc, char* argv[])
 {
+    xcmder_t *xcmder = XCMD_CURRENT();
     xcmd_print(xcmder, "this is ctr+q\n");
     return 0;
 }
@@ -156,22 +143,21 @@ static int cmd_ctr_q(void* pv)
 static int cmd_print_color(int argc, char* argv[])
 {
     xcmder_t *xcmder = XCMD_CURRENT();
-    xcmd_print(xcmder, TX_DEF      "txt_color = DEF    \r\n"   TX_DEF);
-    xcmd_print(xcmder, TX_RED      "txt_color = RED    \r\n"   TX_DEF);
-    xcmd_print(xcmder, TX_BLACK    "txt_color = BLACK  \r\n"   TX_DEF);
-    xcmd_print(xcmder, TX_GREEN    "txt_color = GREEN  \r\n"   TX_DEF);
-    xcmd_print(xcmder, TX_YELLOW   "txt_color = YELLOW \r\n"   TX_DEF);
-    xcmd_print(xcmder, TX_BLUE     "txt_color = BLUE   \r\n"   TX_DEF);
-    xcmd_print(xcmder, TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
-    xcmd_print(xcmder, TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
+    xcmd_print(xcmder, "%s\r\n", ANSI_COLOR_TXT(ANSI_DEFAULT, "txt_color = DEF"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_COLOR_TXT(ANSI_RED, "txt_color = RED"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_COLOR_TXT(ANSI_BLACK, "txt_color = BLACK"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_COLOR_TXT(ANSI_GREEN, "txt_color = GREEN"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_COLOR_TXT(ANSI_YELLOW, "txt_color = YELLOW"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_COLOR_TXT(ANSI_BLUE, "txt_color = BLUE"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_COLOR_TXT(ANSI_WHITE, "txt_color = WHITE"));
 
-    xcmd_print(xcmder, BK_DEF       "background_color = BK_DEF"    BK_DEF "\r\n");
-    xcmd_print(xcmder, BK_BLACK     "background_color = BK_BLACK"  BK_DEF "\r\n");
-    xcmd_print(xcmder, BK_RED       "background_color = BK_RED"    BK_DEF "\r\n");
-    xcmd_print(xcmder, BK_GREEN     "background_color = BK_GREEN"  BK_DEF "\r\n");
-    xcmd_print(xcmder, BK_YELLOW    "background_color = BK_YELLOW" BK_DEF "\r\n");
-    xcmd_print(xcmder, BK_BLUE      "background_color = BK_BLUE"   BK_DEF "\r\n");
-    xcmd_print(xcmder, BK_WHITE     "background_color = BK_WHITE"  BK_DEF "\r\n");
+    xcmd_print(xcmder, "%s\r\n", ANSI_BG_TXT(ANSI_BG_DEFAULT, "background_color = BK_DEF"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_BG_TXT(ANSI_BG_RED, "background_color = BK_RED"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_BG_TXT(ANSI_BG_BLACK, "background_color = BK_BLACK"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_BG_TXT(ANSI_BG_GREEN, "background_color = BK_GREEN"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_BG_TXT(ANSI_BG_YELLOW, "background_color = BK_YELLOW"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_BG_TXT(ANSI_BG_BLUE, "background_color = BK_BLUE"));
+    xcmd_print(xcmder, "%s\r\n", ANSI_BG_TXT(ANSI_BG_WHITE, "background_color = BK_WHITE"));
     return 0;
 }
 

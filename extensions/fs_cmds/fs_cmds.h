@@ -5,7 +5,7 @@
 extern   "C" {
 #endif
 
-void fs_cmds_init(void);
+void fs_cmds_init(xcmder_t *xcmder);
 
 #ifdef __cplusplus
         }

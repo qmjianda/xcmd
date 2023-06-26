@@ -7,12 +7,12 @@
 #define LIST_POISON2  NULL
 
 //计算member在type中的位置
-#define offsetof(type, member)  (size_t)(&((type*)0)->member)
+#define offset_of(type, member)  (size_t)(&((type*)0)->member)
 
 //根据member的地址获取type的起始地址
 #define container_of(ptr, type, member) ({          \
         const typeof(((type *)0)->member)*__mptr = (ptr);    \
-    (type *)((char *)__mptr - offsetof(type, member)); })
+    (type *)((char *)__mptr - offset_of(type, member)); })
 
 //链表结构
 struct list_head
