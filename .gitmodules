@@ -1,7 +1,6 @@
-[submodule "third_party/XNanoReadLine"]
-	path = third_party/XNanoReadLine
-	url = https://gitee.com/two_salted_eggs/XNanoReadLine.git
-	url = https://github.com/qmjianda/XNanoReadLine.git
-[submodule "third_party/fatfs"]
-	path = third_party/fatfs
+[submodule "extensions/fs_cmds/fatfs"]
+	path = extensions/fs_cmds/fatfs
 	url = https://github.com/abbrev/fatfs.git
+[submodule "src/xnr"]
+	path = src/xnr
+	url = https://gitee.com/two_salted_eggs/XNanoReadLine.git
