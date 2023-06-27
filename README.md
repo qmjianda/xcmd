@@ -1,5 +1,5 @@
 # xcmd
-
+[English Version](./README.en.md)s
 #### 效果展示
 
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0922/220957_66faa768_1680380.gif "演示1.gif")
@@ -16,13 +16,11 @@ xcmd是一款单片机命令行工具，移植十分方便，并且对flash与ra
 6. **支持 `xcmd_cmd_register()/xcmd_key_register`方法注册命令或按键**
 7. **支持 `XCMD_EXPORT_CMD()/XCMD_EXPORT_KEY()`方法直接导出命令或按键，不需要额外运行注册函数**
 
-#### 支持的平台
+#### 支持的平台示例
 
 1. linux
 2. arduino
-3. stm32
-4. esp32
-5. qemu-stm32
+3. esp32
 
 #### 测试过的串口软件
 
@@ -50,34 +48,38 @@ xcmd是一款单片机命令行工具，移植十分方便，并且对flash与ra
 
 ```C
 /* 例如移植到Arduino平台 */
-int cmd_get_char(uint8_t *ch)
+#include "src/xcmd.h"
+#include "arduino_xcmd.h"
+#include <Arduino.h>
+
+xcmder_t xcmder;
+
+static int io_write(int fd, const char *buf, size_t len)
 {
-    if(Serial.available())
-    {
-        *ch =  Serial.read();
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
+    Serial.write(buf, len);
+    return len;
 }
 
-int cmd_put_char(uint8_t ch)
+static int io_read(int fd, char *buf, size_t len)
 {
-    Serial.write(ch);
-    return 1;
+    int  i=0;
+    while (Serial.available() > 0)
+    {
+        buf[i++] = (char)Serial.read();
+    }
+    return i;
 }
 
 void setup() {
     Serial.begin(115200);
-    xcmd_init(cmd_get_char, cmd_put_char);
+    xcmd_init(&xcmder, io_write, io_read);
 }
 
 void loop() {
-  
-    xcmd_task();
+    
+    xcmd_task(&xcmder);
 }
+
 ```
 
 #### 配置
@@ -87,12 +89,50 @@ void loop() {
 **注意**： 如果不知道如何修改连接脚本，建议不要使能ENABLE_XCMD_EXPORT。不使能ENABLE_XCMD_EXPORT的情况下有更好的兼容性移植更加简单
 
 ```C
-#define XCMD_LINE_MAX_LENGTH          (128)           /* 命令行支持的最大字符数 */
-#define XCMD_HISTORY_MAX_NUM          (16)            /* 支持的历史记录个数, 这个参数对内存的影响很大，建议arduino设置为0，0为不支持 */
-#define XCMD_PARAM_MAX_NUM            (8)             /* 支持输入的参数个数 */
-// #define XCMD_DEFAULT_PROMPT           "->"            /* 提示符 */
-// #define XCMD_DEFAULT_PROMPT_CLOLR     TX_GREEN        /* 提示符颜色 */
-// #define ENABLE_XCMD_EXPORT                            /* 需要修改lds，启用后支持XCMD_EXPORT_CMD和XCMD_EXPORT_KEY方法导出命令 */
+#ifndef XCMD_LINE_MAX_LENGTH
+#define XCMD_LINE_MAX_LENGTH    (32) /* 命令行支持的最大字符数 */
+#endif
+
+#ifndef XCMD_PRINT_BUF_MAX_LENGTH
+#define XCMD_PRINT_BUF_MAX_LENGTH   (64) /* xcmd_print缓存 */
+#endif  
+
+#ifndef  XCMD_HISTORY_BUF_SZIE
+#define XCMD_HISTORY_BUF_SZIE    (64)  /* 支持的历史记录个数, 这个参数对内存的影响很大，建议arduino设置为0，0为不支持 */
+#endif
+
+#ifndef XCMD_PARAM_MAX_NUM
+#define XCMD_PARAM_MAX_NUM      (8)  /* 支持输入的参数个数 */
+#endif
+
+#if XCMD_PRINT_BUF_MAX_LENGTH <  (XCMD_LINE_MAX_LENGTH+32)
+#undef XCMD_PRINT_BUF_MAX_LENGTH
+#define XCMD_PRINT_BUF_MAX_LENGTH   (XCMD_LINE_MAX_LENGTH+32) /* xcmd_print缓存 */
+#endif 
+
+#ifndef XCMD_DEFAULT_PROMPT
+#define XCMD_DEFAULT_PROMPT     "$ " /*提示符*/
+#endif
+
+#ifndef XCMD_DEFAULT_PROMPT_CLOLR
+#define XCMD_DEFAULT_PROMPT_CLOLR   ANSI_BLUE /*提示符颜色*/
+#endif
+
+#ifndef XCMD_VAR_NUM
+#define XCMD_VAR_NUM      (4)
+#endif
+
+#ifndef XCMD_VAR_NAME_BUF_SZIE
+#define XCMD_VAR_NAME_BUF_SZIE      (32)
+#endif
+
+#ifndef XCMD_VAR_VAR_SZIE
+#define XCMD_VAR_VAR_SZIE      (32)
+#endif
+
+#ifndef ENABLE_XCMD_EXPORT
+//#define ENABLE_XCMD_EXPORT /*使能XCMD_EXPORT_CMD和XCMD_EXPORT_KEY*/
+#endif
 ```
 
 #### 使用说明

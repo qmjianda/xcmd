@@ -11,6 +11,7 @@ static int cmd_clear(int argc, char* argv[])
     xcmd_print(xcmder, "\033c");
     return 0;
 }
+XCMD_EXPORT_CMD(clear, cmd_clear, "clear screen")
 
 static int cmd_help(int argc, char* argv[])
 {
@@ -22,6 +23,7 @@ static int cmd_help(int argc, char* argv[])
     }
     return 0;
 }
+XCMD_EXPORT_CMD(help, cmd_help, "show this list")
 
 static int cmd_keys(int argc, char* argv[])
 {
@@ -34,6 +36,7 @@ static int cmd_keys(int argc, char* argv[])
     }
     return 0;
 }
+XCMD_EXPORT_CMD(keys, cmd_keys, "show keys")
 
 static int cmd_logo(int argc, char* argv[])
 {
@@ -48,7 +51,9 @@ static int cmd_logo(int argc, char* argv[])
     xcmd_print(xcmder, "%-10s %s\r\n","Version", VERSION);
     return 0;
 }
+XCMD_EXPORT_CMD(logo, cmd_logo, "show logo")
 
+#if XCMD_VAR_NUM!=0
 static int cmd_set(int argc, char* argv[])
 {
     xcmder_t *xcmder = XCMD_CURRENT();
@@ -58,6 +63,7 @@ static int cmd_set(int argc, char* argv[])
     }
     return 0;
 }
+XCMD_EXPORT_CMD(setvar, cmd_set, "set var")
 
 static int cmd_var(int argc, char* argv[])
 {
@@ -74,13 +80,8 @@ static int cmd_var(int argc, char* argv[])
     }
     return 0;
 }
-
-XCMD_EXPORT_CMD(clear, cmd_clear, "clear screen")
-XCMD_EXPORT_CMD(help, cmd_help, "show this list")
-XCMD_EXPORT_CMD(keys, cmd_keys, "show keys")
-XCMD_EXPORT_CMD(logo, cmd_logo, "show logo")
-XCMD_EXPORT_CMD(setvar, cmd_set, "set var")
 XCMD_EXPORT_CMD(var, cmd_var, "get all var")
+#endif
 
 static xcmd_t cmds[] = 
 {
@@ -89,8 +90,10 @@ static xcmd_t cmds[] =
     {"help", cmd_help, "show this list", NULL},
     {"keys", cmd_keys, "show keys", NULL},
     {"logo", cmd_logo, "show logo", NULL},
+#if XCMD_VAR_NUM!=0
     {"setvar", cmd_set, "set var", NULL},
     {"var", cmd_var, "get all var", NULL},
+#endif
 #endif
 };
 

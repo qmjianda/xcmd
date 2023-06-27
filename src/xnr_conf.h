@@ -3,6 +3,8 @@
 
 #include "xcmd_confg.h"
 
+/* 注意请勿修改此处代码 */
+
 //行缓存长度
 #ifndef  XNR_LINE_MAX_LENGTH
 #define XNR_LINE_MAX_LENGTH (XCMD_LINE_MAX_LENGTH)

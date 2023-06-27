@@ -354,18 +354,26 @@ void xcmd_init(xcmder_t *xcmder, io_write_t write, io_read_t read)
 #ifndef ENABLE_XCMD_EXPORT
         g_cmd_list.head.next = NULL;
 #endif
-        xnr_var_init(&xcmder->var_tab, xcmder->var_buf, XCMD_VAR_NUM);
         xnr_io_init(&xcmder->io, write, read);
         xnr_key_init(&xcmder->key);
         xnr_line_init(&xcmder->line, &xcmder->io);
+#if XCMD_HISTORY_BUF_SZIE != 0
         xnr_history_init(&xcmder->history, &xcmder->io);
+#endif
+#if XCMD_VAR_NUM!=0
+        xnr_var_init(&xcmder->var_tab, xcmder->var_buf, XCMD_VAR_NUM);
+#endif
+#if XCMD_VAR_NUM==0
+        char *var_val = ANSI_COLOR_TXT(XCMD_DEFAULT_PROMPT_CLOLR, XCMD_DEFAULT_PROMPT);
+#else
+        xnr_var_set(&xcmder->var_tab, "prompt", ANSI_COLOR_TXT(XCMD_DEFAULT_PROMPT_CLOLR, XCMD_DEFAULT_PROMPT));
+        char *var_val = xnr_var_value(&xcmder->var_tab, "prompt");
+#endif
+        xnr_line_bind_prompt(&xcmder->line, var_val);
         default_cmds_init();
         default_keys_init();
         xcmd_exec(xcmder, "logo");
         xcmd_unregister_cmd("logo");
-        xnr_var_set(&xcmder->var_tab, "prompt", ANSI_COLOR_TXT(XCMD_DEFAULT_PROMPT_CLOLR, XCMD_DEFAULT_PROMPT));
-        char *var_val = xnr_var_value(&xcmder->var_tab, "prompt");
-        xnr_line_bind_prompt(&xcmder->line, var_val);
         xnr_line_clear(&xcmder->line);
         xcmder->_initOK = 1;
     }

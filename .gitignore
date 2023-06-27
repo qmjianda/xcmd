@@ -4,6 +4,7 @@
 *DebugConfig/
 *Listings/
 *OBJ/
+*example/arduino/src
 
 example/stm32/qemu/qemu_stm32
 

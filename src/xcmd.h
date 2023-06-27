@@ -105,9 +105,13 @@ typedef struct xcmd
 {
     xnr_io_t io;
     xnr_key_t key;
+#if XCMD_VAR_NUM!=0
     xnr_var_tab_t var_tab;
     xnr_var_t var_buf[XCMD_VAR_NUM];
+#endif
+#if XCMD_HISTORY_BUF_SZIE != 0
     xnr_history_t history;
+#endif
     xnr_line_t line;
     cmd_func_t unknow_cmd_cbk; // 输入为命令序列，输出未处理
     cmd_func_t pre_cmd_cbk;    // 输入为命令序列，输出重新赋值给argc

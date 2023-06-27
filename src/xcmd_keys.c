@@ -30,8 +30,15 @@ static int xcmd_enter(int argc, char *argv[])
     char out_line[XNR_LINE_MAX_LENGTH] = {0};
     xcmd_print(xcmder, "\n\r");
     char *line = xnr_line_line(&xcmder->line);
+#if XCMD_HISTORY_BUF_SZIE != 0
     xnr_history_append(&xcmder->history, line);
+#endif
+#if XCMD_VAR_NUM!=0
     xnr_var_repalce(&xcmder->var_tab, line, out_line, XNR_LINE_MAX_LENGTH);
+#else
+    strncpy(out_line, line, XNR_LINE_MAX_LENGTH);
+#endif
+
     if (out_line[0])
     {
         xcmd_exec(xcmder, out_line);
@@ -61,6 +68,7 @@ static int xcmd_cursor_right(int argc, char *argv[])
 }
 XCMD_EXPORT_KEY(KEY_RIGHT, xcmd_cursor_right, "right")
 
+#if XCMD_HISTORY_BUF_SZIE != 0
 static int xcmd_history_dw(int argc, char *argv[])
 {
     xcmder_t *xcmder = XCMD_CURRENT();
@@ -90,6 +98,7 @@ static int xcmd_history_up(int argc, char *argv[])
     return 0;
 }
 XCMD_EXPORT_KEY(KEY_UP, xcmd_history_up, "up")
+#endif
 
 static int xcmd_auto_completion(int argc, char *argv[])
 {
@@ -155,8 +164,10 @@ static xcmd_key_t default_keys[] =
         {KEY_LEFT, xcmd_cursor_left, "left", NULL},
         {KEY_RIGHT, xcmd_cursor_right, "right", NULL},
         {KEY_TAB, xcmd_auto_completion, "tab", NULL},
+#if XCMD_HISTORY_BUF_SZIE != 0
         {KEY_DW, xcmd_history_dw, "down", NULL},
         {KEY_UP, xcmd_history_up, "up", NULL},
+#endif
 #endif
 };
 

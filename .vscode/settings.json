@@ -38,7 +38,8 @@
     "stdio.h": "c",
     "xnr_line.h": "c",
     "errno.h": "c",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "*.xcmd_confg": "c"
   },
   "cmake.sourceDirectory": "/home/hqm/project/xcmd/example/esp_idf",
   "MicroPython.executeButton": [
