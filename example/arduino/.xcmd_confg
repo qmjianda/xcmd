@@ -9,9 +9,9 @@ extern   "C" {
 
 #define XCMD_PRINT_BUF_MAX_LENGTH       (64) /* xcmd_print缓存 */
 
-#define XCMD_HISTORY_BUF_SZIE           (128)  /* 支持的历史记录缓存大小，实际历史记录个数取决于记录的命令长度，建议内存较小的单片机设置为0 */
+#define XCMD_HISTORY_BUF_SZIE           (0)  /* 支持的历史记录缓存大小，实际历史记录个数取决于记录的命令长度，建议内存较小的单片机设置为0 */
 
-#define XCMD_PARAM_MAX_NUM              (8)  /* 支持输入的参数个数 */
+#define XCMD_PARAM_MAX_NUM              (6)  /* 支持输入的参数个数 */
 
 #if XCMD_PRINT_BUF_MAX_LENGTH <  (XCMD_LINE_MAX_LENGTH+32)
 #undef XCMD_PRINT_BUF_MAX_LENGTH

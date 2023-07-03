@@ -6,6 +6,7 @@
 #include "xcmd_cmds.h"
 #include "xcmd_keys.h"
 
+#ifndef ENABLE_XCMD_EXPORT
 static struct
 {
     xcmd_t head;
@@ -15,6 +16,7 @@ static struct
 {
     xcmd_key_t head;
 } g_key_list;
+#endif
 
 int xcmd_key_register(xcmd_key_t *keys, uint16_t number)
 {

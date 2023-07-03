@@ -17,19 +17,19 @@ extern "C"
 #endif
 
 typedef int (*cmd_func_t)(int, char **);
+
 typedef struct cmd
 {
     const char *name;
     cmd_func_t func;
     const char *help;
-#ifndef ENABLE_XCMD_EXPORT
     struct cmd *next;
-#endif
 } xcmd_t;
+
 typedef xcmd_t xcmd_key_t;
 
 #ifndef XCMD_PARAM_MAX_NUM
-#define XCMD_PARAM_MAX_NUM      (8)  /* 支持输入的参数个数 */
+#define XCMD_PARAM_MAX_NUM (8) /* 支持输入的参数个数 */
 #endif
 
 #define XCMD_CURRENT() ((xcmder_t *)(argv[argc]))
@@ -63,16 +63,18 @@ typedef xcmd_t xcmd_key_t;
                                                  xcmd_cmd_##_name = {                              \
                                                      .name = #_name,                               \
                                                      .func = _func,                                \
-                                                     .help = _help};
+                                                     .help = _help,                                \
+                                                     .next = NULL};
 #define XCMD_EXPORT_KEY(_key, _func, _help) XCMD_USED const xcmd_key_t XCMD_SECTION("_xcmd_key_list") \
                                                 xcmd_key_##_key = {                                   \
-                                                    .key = _key,                                      \
+                                                    .name = _key,                                     \
                                                     .func = _func,                                    \
-                                                    .help = _help};
-extern xcmd_t _xcmd_cmd_list_start;
-extern xcmd_t _xcmd_cmd_list_end;
-extern xcmd_key_t _xcmd_key_list_start;
-extern xcmd_key_t _xcmd_key_list_end;
+                                                    .help = _help,                                     \
+                                                    .next = NULL};
+    extern xcmd_t _xcmd_cmd_list_start;
+    extern xcmd_t _xcmd_cmd_list_end;
+    extern xcmd_key_t _xcmd_key_list_start;
+    extern xcmd_key_t _xcmd_key_list_end;
 #define XCMD_CMD_FOR_EACH(pos) for ((pos) = &_xcmd_cmd_list_start; (pos) < &_xcmd_cmd_list_end; ++(pos))
 #define XCMD_KEY_FOR_EACH(pos) for ((pos) = &_xcmd_key_list_start; (pos) < &_xcmd_key_list_end; ++(pos))
 #else
@@ -96,16 +98,16 @@ xcmd_key_t *xcmd_keylist_get(void);
 #define XCMD_KEY_FOR_EACH(pos) for ((pos) = xcmd_keylist_get(); (pos); (pos) = (pos)->next)
 #endif
 
-#define xcmd_print(xcmder, fmt, args...)        xnr_io_printf(&(xcmder)->io, fmt, ##args)
-#define xcmd_puts(xcmder, str)                  xnr_io_puts(&(xcmder)->io, str)
-#define xcmd_putc(xcmder, c)                    xnr_io_putc(&(xcmder)->io, c)
-#define xcmd_getc(xcmder)                       xnr_io_getc(&(xcmder)->io)
+#define xcmd_print(xcmder, fmt, args...) xnr_io_printf(&(xcmder)->io, fmt, ##args)
+#define xcmd_puts(xcmder, str) xnr_io_puts(&(xcmder)->io, str)
+#define xcmd_putc(xcmder, c) xnr_io_putc(&(xcmder)->io, c)
+#define xcmd_getc(xcmder) xnr_io_getc(&(xcmder)->io)
 
 typedef struct xcmd
 {
     xnr_io_t io;
     xnr_key_t key;
-#if XCMD_VAR_NUM!=0
+#if XCMD_VAR_NUM != 0
     xnr_var_tab_t var_tab;
     xnr_var_t var_buf[XCMD_VAR_NUM];
 #endif
@@ -117,8 +119,8 @@ typedef struct xcmd
     cmd_func_t pre_cmd_cbk;    // 输入为命令序列，输出重新赋值给argc
     cmd_func_t after_cmd_cbk;  // 输入为命令序列，输出未处理
     void *user_data;           // 用户数据
-    int optind;     // 选项在参数列表中的位置
-    char *optarg;   // 选项参数的值
+    int optind;                // 选项在参数列表中的位置
+    char *optarg;              // 选项参数的值
     bool _initOK;
 } xcmder_t;
 
@@ -129,7 +131,7 @@ void xcmd_reg_pre_cmd_cbk(xcmder_t *xcmder, cmd_func_t cbk);
 void xcmd_reg_after_cmd_cbk(xcmder_t *xcmder, cmd_func_t cbk);
 
 int xcmd_exec(xcmder_t *xcmder, char *str);
-int xcmd_getopt(xcmder_t *xcmder, int argc, char * const argv[], const char *optstring);
+int xcmd_getopt(xcmder_t *xcmder, int argc, char *const argv[], const char *optstring);
 
 int xcmd_key_register(xcmd_key_t *keys, uint16_t number);
 int xcmd_unregister_key(char *key);
