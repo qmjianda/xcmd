@@ -26,7 +26,7 @@ extern   "C" {
 #define XCMD_VAR_NAME_BUF_SZIE          (64)  /* 变量名最大长度，可以为0 */
 #define XCMD_VAR_VAR_SZIE               (128) /* 变量最大长度，可以为0 */
 
-//#define ENABLE_XCMD_EXPORT /*使能XCMD_EXPORT_CMD和XCMD_EXPORT_KEY*/
+#define ENABLE_XCMD_EXPORT /*使能XCMD_EXPORT_CMD和XCMD_EXPORT_KEY*/
 
 #ifdef __cplusplus
         }

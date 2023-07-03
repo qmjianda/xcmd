@@ -88,6 +88,7 @@ static int after_cmd(int argc, char *argv[])
 int main(void)
 {
     xcmder_t xcmder;
+    printf("xcmd_t = %ld\r\n", sizeof(xcmd_t));
     xcmd_init(&xcmder, io_write, io_read);
     xcmd_reg_pre_cmd_cbk(&xcmder, pre_cmd);
     xcmd_reg_after_cmd_cbk(&xcmder, after_cmd);

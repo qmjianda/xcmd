@@ -56,6 +56,11 @@ static int cmd_shell(int argc, char* argv[])
     free(cmd_str);
     return 0;
 }
+XCMD_EXPORT_CMD(ls, cmd_shell, "linux ls")
+XCMD_EXPORT_CMD(cat, cmd_shell, "linux cat")
+XCMD_EXPORT_CMD(pwd, cmd_shell, "linux pwd")
+XCMD_EXPORT_CMD(echo, cmd_shell, "linux echo")
+XCMD_EXPORT_CMD(rm, cmd_shell, "linux rm")
 
 static int cmd_cd(int argc, char* argv[])
 {
@@ -84,24 +89,20 @@ static int cmd_cd(int argc, char* argv[])
     free(cmd_str);
     return 0;
 }
+XCMD_EXPORT_CMD(cd, cmd_cd, "linux cd")
 
 
 static xcmd_t cmds[] = 
 {
 #ifndef ENABLE_XCMD_EXPORT
-    {"ls", cmd_shell, NULL, NULL},
-    {"cd", cmd_cd, NULL, NULL},
-    {"cat", cmd_shell, NULL, NULL},
-    {"pwd", cmd_shell, NULL, NULL},
-    {"echo", cmd_shell, NULL, NULL},
-    {"rm", cmd_shell, NULL, NULL},
+    {"ls", cmd_shell, "linux ls"},
+    {"cd", cmd_cd, "linux cd"},
+    {"cat", cmd_shell, "linux cat"},
+    {"pwd", cmd_shell, "linux pwd"},
+    {"echo", cmd_shell, "linux echo"},
+    {"rm", cmd_shell, "linux rm"},
 #endif
 };
-XCMD_EXPORT_CMD(ls, cmd_shell, NULL)
-XCMD_EXPORT_CMD(cd, cmd_cd, NULL)
-XCMD_EXPORT_CMD(cat, cmd_shell, NULL)
-XCMD_EXPORT_CMD(echo, cmd_shell, NULL)
-XCMD_EXPORT_CMD(rm, cmd_shell, NULL)
 
 void linux_cmds_init(void)
 {

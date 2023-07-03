@@ -37,8 +37,10 @@ INC += -I./ \
 
 OBJ_WITH_BUILD_DIR:=$(addprefix build/,$(OBJ))
 
+LDSCRIPT = linux.ld
+
 all: mkbuilddir $(OBJ_WITH_BUILD_DIR)
-	gcc $(OBJ_WITH_BUILD_DIR) -o $(BIN) -Wl,-Map,$(BIN).map
+	gcc $(OBJ_WITH_BUILD_DIR) -o $(BIN) -Wl,-Map,$(BIN).map -T$(LDSCRIPT)
 
 build/%.o:%.c
 	gcc -g -O0 -Wall -c $(INC) -o $@ $<
