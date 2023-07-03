@@ -46,56 +46,7 @@ static uint8_t param_check(int need, int argc, char*argv[])
     return ret;
 }
 
-static int cmd_example(int argc, char* argv[])
-{
-    xcmder_t *xcmder = XCMD_CURRENT();
-    uint8_t i;
-    if(param_check(1, argc, argv))
-	{
-		if(strcmp(argv[1], "-s") == 0)
-		{
-			for(i=2; i<argc; i++)
-		    {
-		    	xcmd_print(xcmder, "%s\r\n", argv[i]);
-			}
-		}
-		if(strcmp(argv[1], "-i") == 0)
-		{
-			for(i=2; i<argc; i++)
-		    {
-		    	xcmd_print(xcmder, "%d\r\n", atoi(argv[i]));
-			}
-		}
-		if(strcmp(argv[1], "-f") == 0)
-		{
-			for(i=2; i<argc; i++)
-		    {
-		    	xcmd_print(xcmder, "%f\r\n", atof(argv[i]));
-			}
-		}
-	}
-    return 0;
-}
-
-static int cmd_history(int argc, char* argv[])
-{
-    xcmder_t *xcmder = XCMD_CURRENT();
-    char out_line[XNR_LINE_MAX_LENGTH] = {0};
-    int len = xnr_history_length(&xcmder->history);
-    for(int i=0; i<len; i++)
-    {
-        if(xnr_history_get(&xcmder->history, i, out_line, XNR_LINE_MAX_LENGTH) > 0)
-        {
-            xcmd_print(xcmder, "%s\r\n", out_line);
-        }
-        else
-        {
-            break;
-        }
-    }
-    return 0;
-}
-
+#ifndef ENABLE_XCMD_EXPORT
 static int cmd_delete_cmd(int argc, char* argv[])
 {
     xcmder_t *xcmder = XCMD_CURRENT();
@@ -131,7 +82,59 @@ error:
     xcmd_print(xcmder, "Too many parameters are entered or there is no command\r\n");
     return -1;
 }
+#endif
 
+static int cmd_example(int argc, char* argv[])
+{
+    xcmder_t *xcmder = XCMD_CURRENT();
+    uint8_t i;
+    if(param_check(1, argc, argv))
+	{
+		if(strcmp(argv[1], "-s") == 0)
+		{
+			for(i=2; i<argc; i++)
+		    {
+		    	xcmd_print(xcmder, "%s\r\n", argv[i]);
+			}
+		}
+		if(strcmp(argv[1], "-i") == 0)
+		{
+			for(i=2; i<argc; i++)
+		    {
+		    	xcmd_print(xcmder, "%d\r\n", atoi(argv[i]));
+			}
+		}
+		if(strcmp(argv[1], "-f") == 0)
+		{
+			for(i=2; i<argc; i++)
+		    {
+		    	xcmd_print(xcmder, "%f\r\n", atof(argv[i]));
+			}
+		}
+	}
+    return 0;
+}
+XCMD_EXPORT_CMD(example, cmd_example, "example [-f|-i|-s] [val]")
+
+static int cmd_history(int argc, char* argv[])
+{
+    xcmder_t *xcmder = XCMD_CURRENT();
+    char out_line[XNR_LINE_MAX_LENGTH] = {0};
+    int len = xnr_history_length(&xcmder->history);
+    for(int i=0; i<len; i++)
+    {
+        if(xnr_history_get(&xcmder->history, i, out_line, XNR_LINE_MAX_LENGTH) > 0)
+        {
+            xcmd_print(xcmder, "%s\r\n", out_line);
+        }
+        else
+        {
+            break;
+        }
+    }
+    return 0;
+}
+XCMD_EXPORT_CMD(history, cmd_history, "show history list")
 
 static int cmd_ctr_q(int argc, char* argv[])
 {
@@ -139,6 +142,7 @@ static int cmd_ctr_q(int argc, char* argv[])
     xcmd_print(xcmder, "this is ctr+q\n");
     return 0;
 }
+XCMD_EXPORT_KEY(KEY_CTR_Q, cmd_ctr_q, "ctr+q")
 
 static int cmd_print_color(int argc, char* argv[])
 {
@@ -160,9 +164,6 @@ static int cmd_print_color(int argc, char* argv[])
     xcmd_print(xcmder, "%s\r\n", ANSI_BG_TXT(ANSI_BG_WHITE, "background_color = BK_WHITE"));
     return 0;
 }
-
-XCMD_EXPORT_CMD(history, cmd_history, "show history list")
-XCMD_EXPORT_CMD(example, cmd_example, "example [-f|-i|-s] [val]")
 XCMD_EXPORT_CMD(color,   cmd_print_color, "printf color text")
 
 static xcmd_t cmds[] = 
