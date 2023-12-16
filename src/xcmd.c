@@ -415,7 +415,7 @@ char* xcmd_display_get(void)
 void xcmd_display_clear(void)
 {
     char *line = xcmd_display_get();
-    xcmd_print(DL(0));
+    xcmd_print(DL(1));
 #ifndef XCMD_DEFAULT_PROMPT_CLOLR
     xcmd_put_str(xcmd_get_prompt());
 #else
