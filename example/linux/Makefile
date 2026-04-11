@@ -1,12 +1,13 @@
 BIN = xcmder
 CC = gcc
-CFLAGS = -g -O0 -Wall -I./ -I../../inc
+CFLAGS = -g -O0 -Wall -I./ -I../../inc -I../../extensions/vfs -DXCMD_USE_VFS
 
 SRC_DIR = ../../src
 EXT_DIR = ../../extensions
 BUILD_DIR = build
 
-SRC = $(SRC_DIR)/xcmd_session.c \
+SRC = $(SRC_DIR)/xcmd_io.c \
+       $(SRC_DIR)/xcmd_session.c \
        $(SRC_DIR)/xcmd_line_editor.c \
        $(SRC_DIR)/xcmd_term.c \
        $(SRC_DIR)/xcmd_term_ansi.c \

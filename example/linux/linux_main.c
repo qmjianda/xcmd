@@ -4,6 +4,7 @@
 #include <string.h>
 #include "xcmd_platform.h"
 #include "xcmd.h"
+#include "xcmd_io.h"
 #include "xcmd_session.h"
 #include "xcmd_term.h"
 #include "test.h"
@@ -70,22 +71,18 @@ int cmd_put_char(uint8_t ch)
 
 int main(void)
 {
-    /* Initialize RAM disk and FatFS first */
     if (ram_disk_init() != 0) {
         printf("Failed to initialize RAM disk\r\n");
         return -1;
     }
 
-    /* Initialize MMC disk (if needed) */
     if (mmc_disk_init() != 0) {
         printf("Failed to initialize MMC disk\r\n");
         return -1;
     }
 
-    /* Initialize VFS */
     xcmd_vfs_cmds_init();
     
-    /* Create FatFS VFS backend and mount it */
     static xcmd_vfs_fatfs_t fatfs_backend;
     xcmd_vfs_fatfs_init(&fatfs_backend, ram_disk_get_path());
     xcmd_vfs_t *vfs = xcmd_vfs_get_global();
@@ -94,16 +91,27 @@ int main(void)
         return -1;
     }
     
-    static xcmd_session_t session;
-    xcmd_session_t *sess = &session;
+    xcmd_io_t *io = xcmd_io_term_create(cmd_get_char, cmd_put_char);
+    if (!io) {
+        printf("Failed to create terminal IO\r\n");
+        return -1;
+    }
     
-    if (xcmd_session_init(sess, cmd_get_char, cmd_put_char,
-                          xcmd_term_get_ansi_ops()) != 0) {
-        printf("Failed to init xcmd sessance\r\n");
+    xcmd_term_ops_t *term_ops = xcmd_term_get_ansi_ops();
+    if (!term_ops) {
+        printf("Failed to get terminal operations\r\n");
         return -1;
     }
 
-
+    static xcmd_session_t session;
+    xcmd_session_t *sess = &session;
+    
+    if (xcmd_session_init(sess, io, term_ops) != 0) {
+        printf("Failed to init xcmd session\r\n");
+        return -1;
+    }
+    
+    xcmd_session_set_vfs(sess, vfs);
     
     test_cmd_init();
     ex_cmds_init();
