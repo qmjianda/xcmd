@@ -4,5 +4,6 @@
 #include "ff.h"
 
 int ram_disk_init(void);
+const char* ram_disk_get_path(void);
 
 #endif

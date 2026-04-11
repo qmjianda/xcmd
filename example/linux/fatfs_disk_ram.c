@@ -6,7 +6,7 @@ static DiskIo_t disk;
 
 #define RAM_DISK_SECTION_SIZE   (512)
 #define RAM_DISK_SECTION_COUNT  (256)
-static char *ram_buf[RAM_DISK_SECTION_COUNT][RAM_DISK_SECTION_SIZE];
+static char ram_buf[RAM_DISK_SECTION_COUNT][RAM_DISK_SECTION_SIZE];
 static FATFS g_fs;
 static BYTE g_work[FF_MAX_SS];
 
@@ -67,21 +67,29 @@ int ram_disk_init(void)
         return FR_DISK_ERR;
     }
 
-    res = f_mount(&g_fs, disk.disk_path, 1); //挂载文件系统 ， "1:"就是挂载的设备号为1的设备
-    if (res == FR_NO_FILESYSTEM) //FR_NO_FILESYSTEM值为13，表示没有有效的设备
+    /* Mount FatFS first to create filesystem if needed, then unmount for VFS to take over */
+    res = f_mount(&g_fs, disk.disk_path, 1);
+    if (res == FR_NO_FILESYSTEM)
     {
         res = f_mkfs(disk.disk_path, 0, g_work, sizeof(g_work));
-        res = f_mount(NULL, disk.disk_path, 1);  //取消文件系统
-        res = f_mount(&g_fs, disk.disk_path, 1); //挂载文件系统
+        res = f_mount(NULL, disk.disk_path, 1);
+        res = f_mount(&g_fs, disk.disk_path, 1);
     }
-    
+
     if(res == FR_OK)
     {
         printf("RAM fs init OK!\r\n");
+        /* Unmount so VFS can take control */
+        f_mount(NULL, disk.disk_path, 1);
     }
     else
     {
         printf("RAM fs init ERROR!\r\n");
     }
     return res;
+}
+
+const char* ram_disk_get_path(void)
+{
+    return disk.disk_path;
 }

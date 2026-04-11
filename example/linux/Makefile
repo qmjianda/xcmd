@@ -1,58 +1,74 @@
 BIN = xcmder
+CC = gcc
+CFLAGS = -g -O0 -Wall -I./ -I../../inc
 
-OBJ += xcmd.o \
-	   xcmd_default_keys.o \
-	   xcmd_default_cmds.o \
-	   linux_main.o \
-	   test.o \
-	   ex_keys.o \
-	   ex_list.o \
-	   ex_cmds.o \
-	   socket_cmds.o \
-	   diskio.o \
-	   ff.o \
-	   ffunicode.o \
-	   fatfs_port.o \
-	   fs_cmds.o\
-	   fatfs_disk_mmc.o\
-	   fatfs_disk_ram.o
+SRC_DIR = ../../src
+EXT_DIR = ../../extensions
+BUILD_DIR = build
 
-VPATH := ../../src \
-		 ../../extensions/test \
-		 ../../extensions/ex_keys \
-		 ../../extensions/ex_list \
-		 ../../extensions/ex_cmds \
-		 ../../extensions/net_cmds \
-		 ../../extensions/fs_cmds \
-		 ../../extensions/fs_cmds/FatFs/source \
+SRC = $(SRC_DIR)/xcmd_session.c \
+       $(SRC_DIR)/xcmd_line_editor.c \
+       $(SRC_DIR)/xcmd_term.c \
+       $(SRC_DIR)/xcmd_term_ansi.c \
+       $(SRC_DIR)/xcmd_term_dumb.c \
+       $(SRC_DIR)/xcmd_default_cmds.c
 
-INC += -I./ \
-	   -I../../inc \
-	   -I../../extensions/test \
-	   -I../../extensions/ex_keys \
-	   -I../../extensions/ex_list \
-	   -I../../extensions/ex_cmds \
-	   -I../../extensions/net_cmds \
-	   -I../../extensions/fs_cmds/FatFs/source \
-	   -I../../extensions/fs_cmds \
+EXT_SRC = $(EXT_DIR)/test/test.c \
+          $(EXT_DIR)/ex_list/ex_list.c \
+          $(EXT_DIR)/ex_cmds/ex_cmds.c \
+          $(EXT_DIR)/net_cmds/socket_cmds.c \
+          $(EXT_DIR)/fs_cmds/FatFs/source/diskio.c \
+          $(EXT_DIR)/fs_cmds/FatFs/source/ff.c \
+          $(EXT_DIR)/fs_cmds/FatFs/source/ffunicode.c \
+          $(EXT_DIR)/fs_cmds/fatfs_port.c \
+          $(EXT_DIR)/vfs/xcmd_vfs.c \
+          $(EXT_DIR)/vfs/xcmd_vfs_fatfs.c \
+          $(EXT_DIR)/vfs/xcmd_vfs_cmds.c
 
-OBJ_WITH_BUILD_DIR:=$(addprefix build/,$(OBJ))
+EXT_INC = -I$(EXT_DIR)/test \
+          -I$(EXT_DIR)/ex_list \
+          -I$(EXT_DIR)/ex_cmds \
+          -I$(EXT_DIR)/net_cmds \
+          -I$(EXT_DIR)/fs_cmds/FatFs/source \
+          -I$(EXT_DIR)/fs_cmds \
+          -I$(EXT_DIR)/vfs
 
-all: mkbuilddir $(OBJ_WITH_BUILD_DIR)
-	gcc $(OBJ_WITH_BUILD_DIR) -o $(BIN) -Wl,-Map,$(BIN).map
+# Generate object file paths in build directory
+OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC)) \
+      $(patsubst $(EXT_DIR)/%.c,$(BUILD_DIR)/ext/%.o,$(EXT_SRC)) \
+      $(BUILD_DIR)/linux_main.o \
+      $(BUILD_DIR)/fatfs_disk_mmc.o \
+      $(BUILD_DIR)/fatfs_disk_ram.o
 
-build/%.o:%.c
-	gcc -g -O0 -Wall -c $(INC) -o $@ $<
+all: $(BIN)
 
-.PHONY:mkbuilddir
-mkbuilddir:
-	mkdir -p build
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)/ext/test \
+		$(BUILD_DIR)/ext/ex_list \
+		$(BUILD_DIR)/ext/ex_cmds \
+		$(BUILD_DIR)/ext/net_cmds \
+		$(BUILD_DIR)/ext/fs_cmds/FatFs/source \
+		$(BUILD_DIR)/ext/vfs
 
-.PHONY:clean distclean
+$(BIN): $(OBJ)
+	$(CC) $^ -o $@ -Wl,-Map,$@.map
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/ext/%.o: $(EXT_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
+
+$(BUILD_DIR)/linux_main.o: linux_main.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(EXT_INC) -I$(EXT_DIR)/fs_cmds -c $< -o $@
+
+$(BUILD_DIR)/fatfs_disk_mmc.o: fatfs_disk_mmc.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
+
+$(BUILD_DIR)/fatfs_disk_ram.o: fatfs_disk_ram.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
+
 clean:
-	rm -rf build xcmder xcmder.map
+	rm -rf $(BUILD_DIR) $(BIN) $(BIN).map
 
-distclean:
-	rm -rf build xcmder fatfs.img xcmder.map
-
-
+.PHONY: all clean

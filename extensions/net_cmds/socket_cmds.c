@@ -25,7 +25,7 @@ static int xcmd_udp_client(int argc ,char**argv)
         int udp = socket(AF_INET, SOCK_DGRAM, 0);
         if(udp<0)
         {
-            xcmd_print("Open socket error!!\r\n");
+            xcmd_session_print_current("Open socket error!!\r\n");
             return -1;
         }
         char* ip = argv[1];
@@ -34,7 +34,7 @@ static int xcmd_udp_client(int argc ,char**argv)
         uint16_t len = strlen(data);
         if(x_inet_send_to(udp, ip, port, data, len) < 0)
         {
-            xcmd_print("Send msg error\r\n");
+            xcmd_session_print_current("Send msg error\r\n");
             close(udp);
             return -1;
         }
@@ -42,7 +42,7 @@ static int xcmd_udp_client(int argc ,char**argv)
     }
     else
     {
-        xcmd_print("Usage: udp_client ip port msg");
+        xcmd_session_print_current("Usage: udp_client ip port msg");
     }
     return 0;
 }
@@ -70,11 +70,11 @@ static int xcmd_udp_service(int argc, char** argv)
     int udp = socket(AF_INET, SOCK_DGRAM, 0);
     if(udp<0)
     {
-        xcmd_print("Open socket error!!\r\n");
+        xcmd_session_print_current("Open socket error!!\r\n");
     }
     if(bind(udp, (struct sockaddr*)&addrin, sizeof(addrin)) < 0)
     {
-        xcmd_print("Bind error\r\n");
+        xcmd_session_print_current("Bind error\r\n");
         close(udp);
         return -1;
     }
@@ -87,8 +87,8 @@ static int xcmd_udp_service(int argc, char** argv)
     if(rcv_len>0)
     {   
         rcv_buf[rcv_len] = '\0';
-        xcmd_print("rcv from \"ip=%s port=%d\" msg:\r\n", inet_ntoa(client_addr.sin_addr),  ntohs(client_addr.sin_port));
-        xcmd_print(rcv_buf);
+        xcmd_session_print_current("rcv from \"ip=%s port=%d\" msg:\r\n", inet_ntoa(client_addr.sin_addr),  ntohs(client_addr.sin_port));
+        xcmd_session_print_current(rcv_buf);
     }
     close(udp);
     return 0;

@@ -15,11 +15,11 @@ static int cmd_run(int argc, char* argv[])
 {
     if(argc >= 2)
     {
-        xcmd_exec(argv[1]);
+        xcmd_session_exec(xcmd_session_get_current(), argv[1]);
     }
     else
     {
-        xcmd_print("%s\r\n", HELP_RUN);
+        xcmd_session_print_current("%s\r\n", HELP_RUN);
     }
     return 0;
 }

@@ -38,16 +38,16 @@ static uint8_t param_check(int need, int argc, char*argv[])
     }
     else
     {
-        xcmd_print("err need %d but input %d:\r\n", need, argc-1);
-    	xcmd_print("input= ");
+        xcmd_session_print_current("err need %d but input %d:\r\n", need, argc-1);
+    	xcmd_session_print_current("input= ");
 	    for(i=0; i<argc; i++)
 	    {
 	        if(argv[i] != NULL)
 	        {
-	            xcmd_print("%s ", argv[i]);
+	            xcmd_session_print_current("%s ", argv[i]);
 	        }
 	    }
-	    xcmd_print("\r\n");
+	    xcmd_session_print_current("\r\n");
         ret = 0;
     }
     return ret;
@@ -62,21 +62,21 @@ static int cmd_example(int argc, char* argv[])
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print("%s\r\n", argv[i]);
+		    	xcmd_session_print_current("%s\r\n", argv[i]);
 			}
 		}
 		if(strcmp(argv[1], "-i") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print("%d\r\n", atoi(argv[i]));
+		    	xcmd_session_print_current("%d\r\n", atoi(argv[i]));
 			}
 		}
 		if(strcmp(argv[1], "-f") == 0)
 		{
 			for(i=2; i<argc; i++)
 		    {
-		    	xcmd_print("%f\r\n", atof(argv[i]));
+		    	xcmd_session_print_current("%f\r\n", atof(argv[i]));
 			}
 		}
 	}
@@ -85,19 +85,19 @@ static int cmd_example(int argc, char* argv[])
 
 static int cmd_history(int argc, char* argv[])
 {
-    uint16_t len = xcmd_history_len();
+    uint16_t len = xcmd_session_history_len(xcmd_session_get_current());
 
     do
     {
-        xcmd_history_next();
+        xcmd_session_history_next_current();
     }while(len--);
 
     while(1)
     {
-        char *line = xcmd_history_prev();
+        const char *line = xcmd_session_history_prev_current();
         if(line)
         {
-            xcmd_print("%s\r\n", line);
+            xcmd_session_print_current("%s\r\n", line);
         }
         else
         {
@@ -120,52 +120,28 @@ static int cmd_delete_cmd(int argc, char* argv[])
     }
     return 0;
 error:
-    xcmd_print("Too many parameters are entered or there is no command\r\n");
+    xcmd_session_print_current("Too many parameters are entered or there is no command\r\n");
     return -1;
-}
-
-static int cmd_delete_key(int argc, char* argv[])
-{
-    int res = 0;
-    if (argc == 2)
-    {
-        res = xcmd_unregister_key(argv[1]);
-        if (res)
-        {
-            goto error;
-        }
-    }
-    return 0;
-error:
-    xcmd_print("Too many parameters are entered or there is no command\r\n");
-    return -1;
-}
-
-
-static int cmd_ctr_q(void* pv)
-{
-    xcmd_print("this is ctr+q\n");
-    return 0;
 }
 
 static int cmd_print_color(int argc, char* argv[])
 {
-    xcmd_print(TX_DEF      "txt_color = DEF    \r\n"   TX_DEF);
-    xcmd_print(TX_RED      "txt_color = RED    \r\n"   TX_DEF);
-    xcmd_print(TX_BLACK    "txt_color = BLACK  \r\n"   TX_DEF);
-    xcmd_print(TX_GREEN    "txt_color = GREEN  \r\n"   TX_DEF);
-    xcmd_print(TX_YELLOW   "txt_color = YELLOW \r\n"   TX_DEF);
-    xcmd_print(TX_BLUE     "txt_color = BLUE   \r\n"   TX_DEF);
-    xcmd_print(TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
-    xcmd_print(TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
+    xcmd_session_print_current(TX_DEF      "txt_color = DEF    \r\n"   TX_DEF);
+    xcmd_session_print_current(TX_RED      "txt_color = RED    \r\n"   TX_DEF);
+    xcmd_session_print_current(TX_BLACK    "txt_color = BLACK  \r\n"   TX_DEF);
+    xcmd_session_print_current(TX_GREEN    "txt_color = GREEN  \r\n"   TX_DEF);
+    xcmd_session_print_current(TX_YELLOW   "txt_color = YELLOW \r\n"   TX_DEF);
+    xcmd_session_print_current(TX_BLUE     "txt_color = BLUE   \r\n"   TX_DEF);
+    xcmd_session_print_current(TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
+    xcmd_session_print_current(TX_WHITE    "txt_color = WHITE  \r\n"   TX_DEF);
 
-    xcmd_print(BK_DEF       "background_color = BK_DEF"    BK_DEF "\r\n");
-    xcmd_print(BK_BLACK     "background_color = BK_BLACK"  BK_DEF "\r\n");
-    xcmd_print(BK_RED       "background_color = BK_RED"    BK_DEF "\r\n");
-    xcmd_print(BK_GREEN     "background_color = BK_GREEN"  BK_DEF "\r\n");
-    xcmd_print(BK_YELLOW    "background_color = BK_YELLOW" BK_DEF "\r\n");
-    xcmd_print(BK_BLUE      "background_color = BK_BLUE"   BK_DEF "\r\n");
-    xcmd_print(BK_WHITE     "background_color = BK_WHITE"  BK_DEF "\r\n");
+    xcmd_session_print_current(BK_DEF       "background_color = BK_DEF"    BK_DEF "\r\n");
+    xcmd_session_print_current(BK_BLACK     "background_color = BK_BLACK"  BK_DEF "\r\n");
+    xcmd_session_print_current(BK_RED       "background_color = BK_RED"    BK_DEF "\r\n");
+    xcmd_session_print_current(BK_GREEN     "background_color = BK_GREEN"  BK_DEF "\r\n");
+    xcmd_session_print_current(BK_YELLOW    "background_color = BK_YELLOW" BK_DEF "\r\n");
+    xcmd_session_print_current(BK_BLUE      "background_color = BK_BLUE"   BK_DEF "\r\n");
+    xcmd_session_print_current(BK_WHITE     "background_color = BK_WHITE"  BK_DEF "\r\n");
     return 0;
 }
 
@@ -179,24 +155,11 @@ static xcmd_t cmds[] =
     {"history", cmd_history, "show history list", NULL},
     {"example", cmd_example, "example [-f|-i|-s] [val]", NULL},
     {"delcmd",  cmd_delete_cmd, "delete cmd [val]", NULL},
-    {"delkey",  cmd_delete_key, "delete key [val]", NULL},
     {"color",   cmd_print_color, "printf color text", NULL},
-#endif
-};
-
-static xcmd_key_t keys[] = 
-{
-#ifndef ENABLE_XCMD_EXPORT
-    {KEY_CTR_Q, cmd_ctr_q, "ctr+q", NULL},
 #endif
 };
 
 void test_cmd_init(void)
 {
     xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
-}
-
-void test_keys_init(void)
-{
-    xcmd_key_register(keys, sizeof(keys)/sizeof(xcmd_key_t));
 }
