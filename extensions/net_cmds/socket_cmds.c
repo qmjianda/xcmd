@@ -1,5 +1,7 @@
 #include "socket_cmds.h"
-#include "xcmd.h"
+#include "xcmd_cmd.h"
+#include "xcmd_session.h"
+#include "xcmd_define.h"
 #include <stdlib.h>
 #include "xcmd_platform.h"
 
@@ -94,9 +96,9 @@ static int xcmd_udp_service(int argc, char** argv)
     return 0;
 }
 
-XCMD_EXPORT_CMD(udp_client, xcmd_udp_client, "Usage: udp_client ip port msg")
-XCMD_EXPORT_CMD(udp_service, xcmd_udp_service, "Usage: udp_service [ip] [port:default(8080)]")
-static xcmd_t cmds[] = 
+XCMD_EXPORT_CMD(udp_client, xcmd_udp_client, "Usage: udp_client ip port msg", NULL)
+XCMD_EXPORT_CMD(udp_service, xcmd_udp_service, "Usage: udp_service [ip] [port:default(8080)]", NULL)
+static xcmd_cmd_t cmds[] = 
 {
 #ifndef ENABLE_XCMD_EXPORT
     {"udp_client", xcmd_udp_client, "Usage: udp_client ip port msg", NULL},
@@ -106,5 +108,5 @@ static xcmd_t cmds[] =
 
 void socket_cmds_init(void)
 {
-    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
+    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_cmd_t));
 }

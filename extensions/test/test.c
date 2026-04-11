@@ -8,7 +8,9 @@
  */
 #include <string.h>
 #include <stdlib.h>
-#include "xcmd.h"
+#include "xcmd_cmd.h"
+#include "xcmd_session.h"
+#include "xcmd_define.h"
 #include "test.h"
 
 #define EXIT_MESSAGE() xcmd_print(g_cmder, "press \"q\" or \"Q\" to exit!\r\n")
@@ -145,11 +147,11 @@ static int cmd_print_color(int argc, char* argv[])
     return 0;
 }
 
-XCMD_EXPORT_CMD(history, cmd_history, "show history list")
-XCMD_EXPORT_CMD(example, cmd_example, "example [-f|-i|-s] [val]")
-XCMD_EXPORT_CMD(color,   cmd_print_color, "printf color text")
+XCMD_EXPORT_CMD(history, cmd_history, "show history list", NULL)
+XCMD_EXPORT_CMD(example, cmd_example, "example [-f|-i|-s] [val]", NULL)
+XCMD_EXPORT_CMD(color,   cmd_print_color, "printf color text", NULL)
 
-static xcmd_t cmds[] = 
+static xcmd_cmd_t cmds[] = 
 {
 #ifndef ENABLE_XCMD_EXPORT
     {"history", cmd_history, "show history list", NULL},
@@ -161,5 +163,5 @@ static xcmd_t cmds[] =
 
 void test_cmd_init(void)
 {
-    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
+    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_cmd_t));
 }

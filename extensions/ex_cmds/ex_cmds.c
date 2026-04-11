@@ -7,7 +7,8 @@
  * @FilePath: /xcmd/extensions/ex_cmds/ex_cmds.c
  */
 #include "ex_cmds.h"
-#include "xcmd.h"
+#include "xcmd_cmd.h"
+#include "xcmd_session.h"
 
 #define HELP_RUN    ("Run cmd. Usage: run cmd")
 
@@ -24,9 +25,9 @@ static int cmd_run(int argc, char* argv[])
     return 0;
 }
 
-XCMD_EXPORT_CMD(run, cmd_run, HELP_RUN)
+XCMD_EXPORT_CMD(run, cmd_run, HELP_RUN, NULL)
 
-static xcmd_t cmds[] = 
+static xcmd_cmd_t cmds[] = 
 {
 #ifndef ENABLE_XCMD_EXPORT
     {"run", cmd_run, HELP_RUN, NULL},
@@ -35,5 +36,5 @@ static xcmd_t cmds[] =
 
 void ex_cmds_init(void)
 {
-    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
+    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_cmd_t));
 }

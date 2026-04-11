@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "xcmd.h"
+#include "xcmd_cmd.h"
+#include "xcmd_session.h"
 #include "list.h"
 struct student
 {
@@ -267,14 +268,14 @@ static int List_traverse(int argc, char* argv[])
     return 0; 
 }
 
-XCMD_EXPORT_CMD(list,   list_test, "list test demo")          //链表增加节点
-XCMD_EXPORT_CMD(list1,   list_note_del, "list note del demo")     //链表删除节点
-XCMD_EXPORT_CMD(list2,   list_note_rep, "list note replace demo") //链表替换节点
-XCMD_EXPORT_CMD(list3,   list_note_del_insert, "list note del and insert demo")   //链表删除并插入节点
-XCMD_EXPORT_CMD(list4,   List_to_merge, "List to merge")      //链表的合并
-XCMD_EXPORT_CMD(list5,   List_traverse, "List to merge")      //链表的遍历
+XCMD_EXPORT_CMD(list,   list_test, "list test demo", NULL)          //链表增加节点
+XCMD_EXPORT_CMD(list1,   list_note_del, "list note del demo", NULL)     //链表删除节点
+XCMD_EXPORT_CMD(list2,   list_note_rep, "list note replace demo", NULL) //链表替换节点
+XCMD_EXPORT_CMD(list3,   list_note_del_insert, "list note del and insert demo", NULL)   //链表删除并插入节点
+XCMD_EXPORT_CMD(list4,   List_to_merge, "List to merge", NULL)      //链表的合并
+XCMD_EXPORT_CMD(list5,   List_traverse, "List to merge", NULL)      //链表的遍历
 
-static xcmd_t cmds[] = {
+static xcmd_cmd_t cmds[] = {
 #ifndef ENABLE_XCMD_EXPORT
     {"list",   list_test, "list test demo", NULL},          //链表增加节点
     {"list1",   list_note_del, "list note del demo", NULL},     //链表删除节点
@@ -287,7 +288,7 @@ static xcmd_t cmds[] = {
 
 void ex_list_init(void)
 {
-    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
+    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_cmd_t));
 }
 
 

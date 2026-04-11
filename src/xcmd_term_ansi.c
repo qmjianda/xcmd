@@ -3,57 +3,60 @@
 #include <stdio.h>
 #include <string.h>
 
-static void ansi_clear_line(xcmd_term_t *term) {
-    const char *s = "\x1B[2K\r";
-    while (*s) term->put_c(*s++);
+static const char* ansi_clear_line(xcmd_term_t *term) {
+    snprintf(term->buff, sizeof(term->buff), "\x1B[2K\r");
+    return term->buff;
 }
 
-static void ansi_clear_to_eol(xcmd_term_t *term) {
-    const char *s = "\x1B[K";
-    while (*s) term->put_c(*s++);
+static const char* ansi_clear_to_eol(xcmd_term_t *term) {
+    snprintf(term->buff, sizeof(term->buff), "\x1B[K");
+    return term->buff;
 }
 
-static void ansi_cursor_left(xcmd_term_t *term, uint16_t n) {
-    if (n == 0) return;
-    if (n == 1) {
-        term->put_c('\b');
-        return;
+static const char* ansi_cursor_left(xcmd_term_t *term, uint16_t n) {
+    if (n == 0) {
+        term->buff[0] = '\0';
+        return term->buff;
     }
-    char buf[16];
-    snprintf(buf, sizeof(buf), "\x1B[%dD", n);
-    const char *s = buf;
-    while (*s) term->put_c(*s++);
+    if (n == 1) {
+        term->buff[0] = '\b';
+        term->buff[1] = '\0';
+        return term->buff;
+    }
+    snprintf(term->buff, sizeof(term->buff), "\x1B[%dD", n);
+    return term->buff;
 }
 
-static void ansi_cursor_right(xcmd_term_t *term, uint16_t n) {
-    if (n == 0) return;
-    char buf[16];
-    snprintf(buf, sizeof(buf), "\x1B[%dC", n);
-    const char *s = buf;
-    while (*s) term->put_c(*s++);
+static const char* ansi_cursor_right(xcmd_term_t *term, uint16_t n) {
+    if (n == 0) {
+        term->buff[0] = '\0';
+        return term->buff;
+    }
+    snprintf(term->buff, sizeof(term->buff), "\x1B[%dC", n);
+    return term->buff;
 }
 
-static void ansi_cursor_set(xcmd_term_t *term, uint16_t pos) {
-    char buf[16];
-    snprintf(buf, sizeof(buf), "\x1B[%dG", term->prompt_len + pos + 1);
-    const char *s = buf;
-    while (*s) term->put_c(*s++);
+static const char* ansi_cursor_set(xcmd_term_t *term, uint16_t pos) {
+    snprintf(term->buff, sizeof(term->buff), "\x1B[%dG", pos + 1);
+    return term->buff;
 }
 
-static void ansi_insert_chars(xcmd_term_t *term, uint16_t n) {
-    if (n == 0) return;
-    char buf[16];
-    snprintf(buf, sizeof(buf), "\x1B[%d@", n);
-    const char *s = buf;
-    while (*s) term->put_c(*s++);
+static const char* ansi_insert_chars(xcmd_term_t *term, uint16_t n) {
+    if (n == 0) {
+        term->buff[0] = '\0';
+        return term->buff;
+    }
+    snprintf(term->buff, sizeof(term->buff), "\x1B[%d@", n);
+    return term->buff;
 }
 
-static void ansi_delete_chars(xcmd_term_t *term, uint16_t n) {
-    if (n == 0) return;
-    char buf[16];
-    snprintf(buf, sizeof(buf), "\x1B[%dP", n);
-    const char *s = buf;
-    while (*s) term->put_c(*s++);
+static const char* ansi_delete_chars(xcmd_term_t *term, uint16_t n) {
+    if (n == 0) {
+        term->buff[0] = '\0';
+        return term->buff;
+    }
+    snprintf(term->buff, sizeof(term->buff), "\x1B[%dP", n);
+    return term->buff;
 }
 
 static const xcmd_term_ops_t ansi_ops = {

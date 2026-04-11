@@ -1,15 +1,10 @@
-/*
- * @Author: your name
- * @Date: 2021-09-14 23:58:24
- * @LastEditTime: 2021-09-22 22:50:56
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /xcmd/example/linux/linux_main.c
- */
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "xcmd.h"
+#include "xcmd_cmd.h"
+#include "xcmd_io.h"
+#include "xcmd_session.h"
+#include "xcmd_define.h"
 #include "test.h"
 
 int cmd_get_char(unsigned char *ch)
@@ -24,15 +19,22 @@ int cmd_put_char(unsigned char ch)
     return 1;
 }
 
+static xcmd_io_term_ctx_t term_ctx;
+static xcmd_session_t session;
+
 void app_main(void)
 {
-    xcmd_init(cmd_get_char, cmd_put_char);
+    xcmd_io_t *io = XCMD_IO_TERM_STATIC(&term_ctx, cmd_get_char, cmd_put_char);
+    if (!io) {
+        return;
+    }
+    
+    xcmd_session_init(&session, io, xcmd_term_get_ansi_ops());
     test_cmd_init();
     test_keys_init();
     
     while(1)
     {
-        xcmd_task();
-        // vTaskDelay(pdMS_TO_TICKS(10));
+        xcmd_session_task(&session);
     }
 }

@@ -13,41 +13,49 @@
 extern   "C" {
 #endif
 
+#ifdef XCMD_CONFG_H
 #include "xcmd_confg.h"
+#endif
 
-#define VERSION "1.1.0"
+#define VERSION "1.2.0"
 
 #ifndef XCMD_LINE_MAX_LENGTH
-#define XCMD_LINE_MAX_LENGTH    (64) /* 命令行支持的最大字符数 */
+#define XCMD_LINE_MAX_LENGTH    (64)
 #endif
 
 #ifndef XCMD_PRINT_BUF_MAX_LENGTH
-#define XCMD_PRINT_BUF_MAX_LENGTH   (128) /* xcmd_print缓存 */
+#define XCMD_PRINT_BUF_MAX_LENGTH   (128)
 #endif  
 
 #ifndef  XCMD_HISTORY_MAX_NUM
-#define XCMD_HISTORY_MAX_NUM    (8)  /* 支持的历史记录个数, 这个参数对内存的影响很大，建议arduino设置为0，0为不支持 */
+#define XCMD_HISTORY_MAX_NUM    (8)
 #endif
 
 #ifndef XCMD_PARAM_MAX_NUM
-#define XCMD_PARAM_MAX_NUM      (8)  /* 支持输入的参数个数 */
+#define XCMD_PARAM_MAX_NUM      (8)
 #endif
 
 #if XCMD_PRINT_BUF_MAX_LENGTH <  (XCMD_LINE_MAX_LENGTH+32)
 #undef XCMD_PRINT_BUF_MAX_LENGTH
-#define XCMD_PRINT_BUF_MAX_LENGTH   (XCMD_LINE_MAX_LENGTH+32) /* xcmd_print缓存 */
+#define XCMD_PRINT_BUF_MAX_LENGTH   (XCMD_LINE_MAX_LENGTH+32)
 #endif 
 
 #ifndef XCMD_DEFAULT_PROMPT
-#define XCMD_DEFAULT_PROMPT     "->" /*提示符*/
+#define XCMD_DEFAULT_PROMPT     "-> "
 #endif
 
 #ifndef XCMD_DEFAULT_PROMPT_CLOLR
-#define XCMD_DEFAULT_PROMPT_CLOLR   TX_GREEN /*提示符颜色*/
+#define XCMD_DEFAULT_PROMPT_CLOLR   TX_GREEN
 #endif
 
 #ifndef ENABLE_XCMD_EXPORT
-//#define ENABLE_XCMD_EXPORT /*使能XCMD_EXPORT_CMD和XCMD_EXPORT_KEY*/
+#endif
+
+#ifndef XCMD_IO_MAX_DEVICES
+#define XCMD_IO_MAX_DEVICES     (8)
+#endif
+
+#ifndef XCMD_NO_DEPRECATED
 #endif
 
 #ifdef __cplusplus

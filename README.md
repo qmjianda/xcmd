@@ -109,14 +109,14 @@ static int cmd_echo(int argc, char* argv[])
     return 0;
 }
 
-static xcmd_t cmds[] = 
+static xcmd_cmd_t cmds[] = 
 {
     {"echo", cmd_echo, "print anything", NULL},
 };
 
 void test_cmd_init(void)
 {
-    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
+    xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_cmd_t));
 }
 ```
 

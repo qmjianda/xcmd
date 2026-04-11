@@ -12,37 +12,110 @@
 #define ESC_STATE_BRACKET  2
 #define ESC_STATE_END      3
 
-static void term_putc(xcmd_line_editor_t *le, uint8_t c) {
-    xcmd_term_putc(le->term, c);
+static void le_putc(xcmd_line_editor_t *le, uint8_t c) {
+    if (le->io) {
+        xcmd_io_putc(le->io, c);
+    }
 }
 
-static void term_write(xcmd_line_editor_t *le, const char *str) {
-    xcmd_term_write(le->term, str);
+static void le_write(xcmd_line_editor_t *le, const char *str) {
+    if (le->io) {
+        xcmd_io_puts(le->io, str);
+    }
 }
 
-static void refresh_line(xcmd_line_editor_t *le) {
-    xcmd_term_refresh_line(le->term, le->buffer, le->cursor, le->length);
+static void term_clear_line(xcmd_line_editor_t *le) {
+    if (le->term->ops && le->term->ops->clear_line) {
+        const char *seq = le->term->ops->clear_line(le->term);
+        le_write(le, seq);
+    } else {
+        le_putc(le, '\r');
+        for (int i = 0; i < 256; i++) {
+            le_putc(le, ' ');
+        }
+        le_putc(le, '\r');
+    }
 }
 
-int xcmd_le_init(xcmd_line_editor_t *le, 
-                 xcmd_term_t *term) {
+static void term_cursor_set(xcmd_line_editor_t *le, uint16_t pos) {
+    if (le->term->ops && le->term->ops->cursor_set) {
+        const char *seq = le->term->ops->cursor_set(le->term, pos);
+        le_write(le, seq);
+    } else {
+        for (uint16_t i = 0; i < pos; i++) {
+            le_putc(le, '\b');
+        }
+    }
+}
+
+void xcmd_le_refresh(xcmd_line_editor_t *le) {
+    if (!le || !le->term) return;
+    
+    term_clear_line(le);
+    
+    if (le->prompt) {
+        le_write(le, le->prompt);
+    }
+    
+    if (le->length > 0) {
+        le_write(le, le->buffer);
+    }
+    
+    if (le->cursor < le->length) {
+        uint16_t diff = le->length - le->cursor;
+        for (uint16_t i = 0; i < diff; i++) {
+            le_putc(le, '\b');
+        }
+    }
+}
+
+int xcmd_le_init(xcmd_line_editor_t *le, xcmd_term_t *term) {
     if (!le || !term) return -1;
     
     memset(le, 0, sizeof(xcmd_line_editor_t));
     le->term = term;
-    le->length = 0;
-    le->cursor = 0;
-    le->buffer[0] = '\0';
-    le->escape_state = ESC_STATE_IDLE;
-    le->escape_len = 0;
-    le->on_submit = NULL;
+    le->submitted[0] = '\0';
     
     return 0;
 }
 
-void xcmd_le_set_on_submit(xcmd_line_editor_t *le, xcmd_le_submit_cb cb) {
+void xcmd_le_set_complete_cb(xcmd_line_editor_t *le, xcmd_le_complete_cb cb) {
     if (le) {
-        le->on_submit = cb;
+        le->complete_cb = cb;
+    }
+}
+
+static void le_complete(xcmd_line_editor_t *le) {
+    if (!le || !le->complete_cb) return;
+    
+    le->completion.count = 0;
+    le->completion.current = 0;
+    
+    int n = le->complete_cb(le, le->buffer, le->cursor,
+                            le->completion.candidates,
+                            XCMD_LE_COMPLETION_MAX_NUM);
+    if (n <= 0) return;
+    
+    le->completion.count = n;
+    
+    if (n == 1) {
+        const char *match = le->completion.candidates[0];
+        xcmd_le_clear_line(le);
+        while (*match) {
+            xcmd_le_insert_char(le, *match++);
+        }
+    } else if (n > 1) {
+        le_write(le, "\r\n");
+        for (int i = 0; i < n; i++) {
+            le_write(le, le->completion.candidates[i]);
+            le_write(le, "  ");
+        }
+        le_write(le, "\r\n");
+        le_write(le, le->prompt);
+        le_write(le, le->buffer);
+        for (uint16_t i = le->cursor; i < le->length; i++) {
+            le_putc(le, '\b');
+        }
     }
 }
 
@@ -55,7 +128,7 @@ void xcmd_le_insert_char(xcmd_line_editor_t *le, char c) {
         le->length++;
         le->cursor++;
         
-        term_putc(le, c);
+        le_putc(le, c);
     } else {
         memmove(&le->buffer[le->cursor + 1], 
                 &le->buffer[le->cursor],
@@ -66,10 +139,11 @@ void xcmd_le_insert_char(xcmd_line_editor_t *le, char c) {
         le->cursor++;
         
         if (le->term && le->term->ops && le->term->ops->insert_chars) {
-            le->term->ops->insert_chars(le->term, 1);
-            term_putc(le, c);
+            const char *seq = le->term->ops->insert_chars(le->term, 1);
+            le_write(le, seq);
+            le_putc(le, c);
         } else {
-            refresh_line(le);
+            xcmd_le_refresh(le);
         }
     }
 }
@@ -86,10 +160,10 @@ void xcmd_le_delete_char(xcmd_line_editor_t *le) {
     le->length--;
     
     if (le->term && le->term->ops && le->term->ops->delete_chars && le->term->ops->cursor_left) {
-        le->term->ops->cursor_left(le->term, 1);
-        le->term->ops->delete_chars(le->term, 1);
+        le_write(le, le->term->ops->cursor_left(le->term, 1));
+        le_write(le, le->term->ops->delete_chars(le->term, 1));
     } else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -103,9 +177,9 @@ void xcmd_le_delete_char_forward(xcmd_line_editor_t *le) {
     le->buffer[le->length] = '\0';
     
     if (le->term && le->term->ops && le->term->ops->delete_chars) {
-        le->term->ops->delete_chars(le->term, 1);
+        le_write(le, le->term->ops->delete_chars(le->term, 1));
     } else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -114,9 +188,9 @@ void xcmd_le_cursor_left(xcmd_line_editor_t *le) {
 
     le->cursor--;
     if (le->term && le->term->ops && le->term->ops->cursor_left) {
-        le->term->ops->cursor_left(le->term, 1);
+        le_write(le, le->term->ops->cursor_left(le->term, 1));
     } else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -125,9 +199,9 @@ void xcmd_le_cursor_right(xcmd_line_editor_t *le) {
     
     le->cursor++;
     if (le->term && le->term->ops && le->term->ops->cursor_right) {
-        le->term->ops->cursor_right(le->term, 1);
+        le_write(le, le->term->ops->cursor_right(le->term, 1));
     } else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -136,9 +210,9 @@ void xcmd_le_cursor_home(xcmd_line_editor_t *le) {
 
     le->cursor = 0;
     if (le->term && le->term->ops && le->term->ops->cursor_left) {
-        le->term->ops->cursor_left(le->term, le->cursor);
+        le_write(le, le->term->ops->cursor_left(le->term, le->cursor));
     } else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -147,9 +221,9 @@ void xcmd_le_cursor_end(xcmd_line_editor_t *le) {
 
     le->cursor = le->length;
     if (le->term && le->term->ops && le->term->ops->cursor_right) {
-        le->term->ops->cursor_right(le->term, le->length - le->cursor);
+        le_write(le, le->term->ops->cursor_right(le->term, le->length - le->cursor));
     } else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -166,9 +240,9 @@ void xcmd_le_word_left(xcmd_line_editor_t *le) {
     }
 
     if (le->term && le->term->ops && le->term->ops->cursor_set) {
-        le->term->ops->cursor_set(le->term, le->cursor);
+        le_write(le, le->term->ops->cursor_set(le->term, le->cursor));
     } else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -185,9 +259,9 @@ void xcmd_le_word_right(xcmd_line_editor_t *le) {
     }
 
     if (le->term && le->term->ops && le->term->ops->cursor_set) {
-        le->term->ops->cursor_set(le->term, le->cursor);
+        le_write(le, le->term->ops->cursor_set(le->term, le->cursor));
     } else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -199,7 +273,7 @@ void xcmd_le_delete_to_start(xcmd_line_editor_t *le) {
     le->length -= n;
     le->cursor = 0;
     
-    refresh_line(le);
+    xcmd_le_refresh(le);
 }
 
 void xcmd_le_delete_to_end(xcmd_line_editor_t *le) {
@@ -209,10 +283,10 @@ void xcmd_le_delete_to_end(xcmd_line_editor_t *le) {
     le->buffer[le->length] = '\0';
     
     if (le->term && le->term->ops && le->term->ops->clear_to_eol) {
-        le->term->ops->clear_to_eol(le->term);
+        le_write(le, le->term->ops->clear_to_eol(le->term));
     }
     else {
-        refresh_line(le);
+        xcmd_le_refresh(le);
     }
 }
 
@@ -222,13 +296,7 @@ void xcmd_le_clear_line(xcmd_line_editor_t *le) {
     le->length = 0;
     le->cursor = 0;
     le->buffer[0] = '\0';
-    
-    if (le->term && le->term->ops && le->term->ops->clear_line) {
-        le->term->ops->clear_line(le->term);
-    }
-    else {
-        refresh_line(le);
-    }
+    xcmd_le_refresh(le);
 }
 
 void xcmd_le_set_line(xcmd_line_editor_t *le, const char *str) {
@@ -239,19 +307,13 @@ void xcmd_le_set_line(xcmd_line_editor_t *le, const char *str) {
     le->length = strlen(le->buffer);
     le->cursor = le->length;
     
-    refresh_line(le);
+    xcmd_le_refresh(le);
 }
 
-const char* xcmd_le_get_line(xcmd_line_editor_t *le) {
-    return le ? le->buffer : NULL;
-}
-
-uint16_t xcmd_le_get_cursor(xcmd_line_editor_t *le) {
-    return le ? le->cursor : 0;
-}
-
-uint16_t xcmd_le_get_length(xcmd_line_editor_t *le) {
-    return le ? le->length : 0;
+const char* xcmd_le_get_submitted_line(xcmd_line_editor_t *le) {
+    if (!le) return NULL;
+    if (le->submitted[0] == '\0') return NULL;
+    return le->submitted;
 }
 
 static bool is_escape_end(uint8_t c) {
@@ -262,8 +324,16 @@ static bool is_escape_end(uint8_t c) {
             (c >= 'a' && c <= 'z'));
 }
 
-xcmd_le_result_t xcmd_le_feed(xcmd_line_editor_t *le, uint8_t byte) {
-    if (!le) return XCMD_LE_EOF;
+const char* xcmd_le_readline(xcmd_line_editor_t *le, xcmd_io_t *in, xcmd_io_t *out, const char *prompt) {
+    if (!le) return NULL;
+    
+    le->io = out;
+    le->prompt = prompt;
+    
+    uint8_t byte;
+    if (xcmd_io_read(in, &byte, 1) <= 0) {
+        return NULL;
+    }
     
     switch (le->escape_state) {
     case ESC_STATE_IDLE:
@@ -271,7 +341,7 @@ xcmd_le_result_t xcmd_le_feed(xcmd_line_editor_t *le, uint8_t byte) {
             le->escape_buf[0] = byte;
             le->escape_len = 1;
             le->escape_state = ESC_STATE_ESC;
-            return XCMD_LE_MORE;
+            return NULL;
         }
         break;
         
@@ -279,11 +349,11 @@ xcmd_le_result_t xcmd_le_feed(xcmd_line_editor_t *le, uint8_t byte) {
         le->escape_buf[le->escape_len++] = byte;
         if (byte == '[') {
             le->escape_state = ESC_STATE_BRACKET;
-            return XCMD_LE_MORE;
+            return NULL;
         }
         le->escape_len = 0;
         le->escape_state = ESC_STATE_IDLE;
-        return XCMD_LE_MORE;
+        return NULL;
         
     case ESC_STATE_BRACKET:
         le->escape_buf[le->escape_len++] = byte;
@@ -323,13 +393,13 @@ xcmd_le_result_t xcmd_le_feed(xcmd_line_editor_t *le, uint8_t byte) {
             
             le->escape_state = ESC_STATE_IDLE;
             le->escape_len = 0;
-            return XCMD_LE_MORE;
+            return NULL;
         }
         if (le->escape_len >= XCMD_LE_ESCAPE_BUF_LEN - 1) {
             le->escape_state = ESC_STATE_IDLE;
             le->escape_len = 0;
         }
-        return XCMD_LE_MORE;
+        return NULL;
         
     default:
         le->escape_state = ESC_STATE_IDLE;
@@ -338,52 +408,75 @@ xcmd_le_result_t xcmd_le_feed(xcmd_line_editor_t *le, uint8_t byte) {
     }
     
     if (byte == '\r' || byte == '\n') {
-        term_putc(le, '\r');
-        term_putc(le, '\n');
-        if (le->on_submit && le->length > 0) {
-            le->on_submit(le, le->buffer);
+        le_putc(le, '\r');
+        le_putc(le, '\n');
+        if (le->length > 0) {
+            strncpy(le->submitted, le->buffer, XCMD_LE_LINE_MAX_LEN);
+            le->submitted[XCMD_LE_LINE_MAX_LEN] = '\0';
+#if XCMD_LE_HISTORY_MAX_NUM > 0
+            xcmd_le_history_append(le, le->buffer);
+#endif
         }
-        return XCMD_LE_COMPLETE;
+        else {
+            le->submitted[0] = '\0';
+        }
+        le->length = 0;
+        le->cursor = 0;
+        le->buffer[0] = '\0';
+#if XCMD_LE_HISTORY_MAX_NUM > 0
+        le->history.current = NULL;
+#endif
+        xcmd_le_refresh(le);
+        if (le->submitted[0] == '\0') {
+            return NULL;
+        }
+        return le->submitted;
     }
     
     if (byte == 0x7F || byte == 0x08) {
         xcmd_le_delete_char(le);
-        return XCMD_LE_MORE;
+        return NULL;
     }
     
     if (byte == 0x01) {
         xcmd_le_cursor_home(le);
-        return XCMD_LE_MORE;
+        return NULL;
     }
     
     if (byte == 0x05) {
         xcmd_le_cursor_end(le);
-        return XCMD_LE_MORE;
+        return NULL;
     }
     
     if (byte == 0x0B) {
         xcmd_le_delete_to_end(le);
-        return XCMD_LE_MORE;
+        return NULL;
     }
     
     if (byte == 0x15) {
         xcmd_le_delete_to_start(le);
-        return XCMD_LE_MORE;
+        return NULL;
+    }
+    
+    if (byte == '\t') {
+        le_complete(le);
+        return NULL;
     }
     
     if (byte == 0x03) {
         le->length = 0;
         le->cursor = 0;
         le->buffer[0] = '\0';
-        term_write(le, "^C\r\n");
-        return XCMD_LE_CANCEL;
+        le_write(le, "^C\r\n");
+        xcmd_le_refresh(le);
+        return NULL;
     }
     
     if (IS_PRINT(byte)) {
         xcmd_le_insert_char(le, (char)byte);
     }
     
-    return XCMD_LE_MORE;
+    return NULL;
 }
 
 #if XCMD_LE_HISTORY_MAX_NUM > 0

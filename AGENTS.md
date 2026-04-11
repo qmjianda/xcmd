@@ -44,13 +44,13 @@ Two methods:
 
 **Runtime Registration (simpler):**
 ```c
-static xcmd_t cmds[] = {{"echo", cmd_echo, "description", NULL}};
-xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_t));
+static xcmd_cmd_t cmds[] = {{"echo", cmd_echo, "description", NULL}};
+xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_cmd_t));
 ```
 
 **Static Export (requires linker script):**
 ```c
-XCMD_EXPORT_CMD(echo, cmd_echo, "description")
+XCMD_EXPORT_CMD(echo, cmd_echo, "description", NULL)
 ```
 Enable `ENABLE_XCMD_EXPORT` and add sections to linker script (see `example/stm32/qemu/demos/main.ld`).
 

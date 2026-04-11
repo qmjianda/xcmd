@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "xcmd_platform.h"
-#include "xcmd.h"
+#include "xcmd_cmd.h"
 #include "xcmd_io.h"
 #include "xcmd_session.h"
 #include "xcmd_term.h"
+#include "xcmd_define.h"
 #include "test.h"
 #include "ex_cmds.h"
 #include "ex_list.h"
@@ -27,7 +28,7 @@ static int cmd_exit(int argc, char* argv[])
     return 0;
 }
 
-static xcmd_t linux_cmds[] = {
+static xcmd_cmd_t linux_cmds[] = {
     {"exit", cmd_exit, "exit the program", NULL},
 };
 
@@ -56,18 +57,38 @@ int getch(void)
     return ch;
 }
 
-int cmd_get_char(uint8_t *ch)
+int linux_read(xcmd_io_t *io, void *buf, size_t len)
 {
-    *ch = getch();
+    char *char_buf = (char *)buf;
+    char_buf[0] = getch();
     return 1;
 }
 
-int cmd_put_char(uint8_t ch)
+int linux_write(xcmd_io_t *io, const void *buf, size_t len)
 {
-    putchar(ch);
-    fflush(stdout);
-    return 1;
+    const char *char_buf = (const char *)buf;
+    while (len--) {
+        putchar(*char_buf++);
+    }
+    return len; 
 }
+
+int linux_flush(xcmd_io_t *io)
+{
+    fflush(stdout);
+    return 0;
+}
+
+xcmd_io_t linux_io = {
+    .read = linux_read,
+    .write = linux_write,
+    .flush = linux_flush,
+    .close = NULL,
+    .readable = NULL,
+    .user_data = NULL
+};
+
+xcmd_session_t session;
 
 int main(void)
 {
@@ -91,11 +112,6 @@ int main(void)
         return -1;
     }
     
-    xcmd_io_t *io = xcmd_io_term_create(cmd_get_char, cmd_put_char);
-    if (!io) {
-        printf("Failed to create terminal IO\r\n");
-        return -1;
-    }
     
     xcmd_term_ops_t *term_ops = xcmd_term_get_ansi_ops();
     if (!term_ops) {
@@ -103,7 +119,7 @@ int main(void)
         return -1;
     }
 
-    static xcmd_session_t session;
+    xcmd_io_t *io = &linux_io;
     xcmd_session_t *sess = &session;
     
     if (xcmd_session_init(sess, io, term_ops) != 0) {
@@ -118,7 +134,7 @@ int main(void)
     socket_cmds_init();
     ex_list_init();
     xcmd_vfs_register_cmds();
-    xcmd_cmd_register(linux_cmds, sizeof(linux_cmds)/sizeof(xcmd_t));
+    xcmd_cmd_register(linux_cmds, sizeof(linux_cmds)/sizeof(xcmd_cmd_t));
     
     printf("\r\nVFS and FatFS initialized. Try 'ls', 'mkdir test', 'touch file.txt' commands.\r\n\r\n");
     

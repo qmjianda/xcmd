@@ -7,7 +7,9 @@
  * @FilePath: /xcmd/extensions/fs_cmds/fs_cmds.c
  */
 #include "fs_cmds.h"
-#include "xcmd.h"
+#include "xcmd_cmd.h"
+#include "xcmd_session.h"
+#include "xcmd_define.h"
 #include "ff.h"
 #include "fatfs_port.h"
 
@@ -455,17 +457,17 @@ int file_write(ssize_t fd, const char *str)
     return -1;
 }
 
-XCMD_EXPORT_CMD(ls,  cmd_ls, HELP_LS)
-XCMD_EXPORT_CMD(df,  cmd_df, HELP_DF)
-XCMD_EXPORT_CMD(cd,  cmd_cd, HELP_CD)
-XCMD_EXPORT_CMD(cat,  cmd_cat, HELP_CAT)
-XCMD_EXPORT_CMD(rm,  cmd_rm, HELP_RM)
-XCMD_EXPORT_CMD(mv,  cmd_mv, HELP_MV)
-XCMD_EXPORT_CMD(sync,  cmd_sync, HELP_SYNC)
-XCMD_EXPORT_CMD(mkdir,  cmd_mkdir, HELP_MKDIR)
-XCMD_EXPORT_CMD(touch,  cmd_touch, HELP_TOUCH)
+XCMD_EXPORT_CMD(ls,  cmd_ls, HELP_LS, NULL)
+XCMD_EXPORT_CMD(df,  cmd_df, HELP_DF, NULL)
+XCMD_EXPORT_CMD(cd,  cmd_cd, HELP_CD, NULL)
+XCMD_EXPORT_CMD(cat,  cmd_cat, HELP_CAT, NULL)
+XCMD_EXPORT_CMD(rm,  cmd_rm, HELP_RM, NULL)
+XCMD_EXPORT_CMD(mv,  cmd_mv, HELP_MV, NULL)
+XCMD_EXPORT_CMD(sync,  cmd_sync, HELP_SYNC, NULL)
+XCMD_EXPORT_CMD(mkdir,  cmd_mkdir, HELP_MKDIR, NULL)
+XCMD_EXPORT_CMD(touch,  cmd_touch, HELP_TOUCH, NULL)
 
-static xcmd_t cmds[] =
+static xcmd_cmd_t cmds[] =
 {
 #ifndef ENABLE_XCMD_EXPORT
     {"ls", cmd_ls, HELP_LS, NULL},
@@ -482,6 +484,6 @@ static xcmd_t cmds[] =
 
 void fs_cmds_init(void)
 {
-    xcmd_cmd_register(cmds, sizeof(cmds) / sizeof(xcmd_t));
+    xcmd_cmd_register(cmds, sizeof(cmds) / sizeof(xcmd_cmd_t));
     xcmd_session_exec(xcmd_session_get_current(), "cd 1:");
 }

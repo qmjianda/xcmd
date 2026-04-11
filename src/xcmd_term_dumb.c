@@ -1,8 +1,6 @@
 #include "xcmd_term.h"
 
-/* Dumb terminal operations - all NULL
- * Line editor will fall back to refresh_line() for all operations
- */
+
 static const xcmd_term_ops_t dumb_ops = {
     .clear_line = NULL,
     .clear_to_eol = NULL,

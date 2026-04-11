@@ -1,6 +1,8 @@
 #include "xcmd_vfs.h"
 #include "xcmd_vfs_cmds.h"
-#include "xcmd.h"
+#include "xcmd_cmd.h"
+#include "xcmd_session.h"
+#include "xcmd_define.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -207,7 +209,7 @@ static int cmd_touch(int argc, char* argv[]) {
     return 0;
 }
 
-static xcmd_t vfs_cmds[] = {
+static xcmd_cmd_t vfs_cmds[] = {
     {"ls", cmd_ls, "list directory contents", NULL},
     {"cd", cmd_cd, "change directory", NULL},
     {"pwd", cmd_pwd, "print working directory", NULL},
@@ -222,5 +224,5 @@ static xcmd_t vfs_cmds[] = {
 
 void xcmd_vfs_register_cmds(void) {
     xcmd_vfs_cmds_init();
-    xcmd_cmd_register(vfs_cmds, sizeof(vfs_cmds) / sizeof(xcmd_t));
+    xcmd_cmd_register(vfs_cmds, sizeof(vfs_cmds) / sizeof(xcmd_cmd_t));
 }

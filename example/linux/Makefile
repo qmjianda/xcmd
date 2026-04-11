@@ -12,6 +12,7 @@ SRC = $(SRC_DIR)/xcmd_io.c \
        $(SRC_DIR)/xcmd_term.c \
        $(SRC_DIR)/xcmd_term_ansi.c \
        $(SRC_DIR)/xcmd_term_dumb.c \
+       $(SRC_DIR)/xcmd_cmd.c \
        $(SRC_DIR)/xcmd_default_cmds.c
 
 EXT_SRC = $(EXT_DIR)/test/test.c \
