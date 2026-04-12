@@ -75,8 +75,6 @@ typedef struct {
     void *fs_data;
     void *handle;
     struct xcmd_vfs *vfs;
-    uint8_t at_root;
-    uint8_t root_mnt_index;
 } xcmd_vfs_dir_t;
 
 /* Backend operations */

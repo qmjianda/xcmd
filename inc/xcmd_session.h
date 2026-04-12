@@ -93,8 +93,6 @@ xcmd_io_t* xcmd_session_get_stdin(xcmd_session_t *sess);
 xcmd_io_t* xcmd_session_get_stdout(xcmd_session_t *sess);
 
 int xcmd_session_redirect(xcmd_session_t *sess, xcmd_io_t *new_stdout);
-int xcmd_session_redirect_restore(xcmd_session_t *sess);
-
 void xcmd_io_redirect_guard_enter(xcmd_io_redirect_guard_t *guard,
                                   xcmd_session_t *sess,
                                   xcmd_io_t *new_stdout);

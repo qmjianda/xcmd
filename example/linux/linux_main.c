@@ -102,10 +102,10 @@ int main(void)
         return -1;
     }
 
-    if (mmc_disk_init() != 0) {
-        printf("Failed to initialize MMC disk\r\n");
-        return -1;
-    }
+    // if (mmc_disk_init() != 0) {
+    //     printf("Failed to initialize MMC disk\r\n");
+    //     return -1;
+    // }
 
     xcmd_vfs_cmds_init();
     
@@ -134,7 +134,7 @@ int main(void)
     xcmd_vfs_dev_register((xcmd_dev_t *)&xcmd_dev_null);
     xcmd_vfs_dev_register((xcmd_dev_t *)&xcmd_dev_zero);
     
-    xcmd_term_ops_t *term_ops = xcmd_term_get_ansi_ops();
+    const xcmd_term_ops_t *term_ops = xcmd_term_get_ansi_ops();
     if (!term_ops) {
         printf("Failed to get terminal operations\r\n");
         return -1;
@@ -161,6 +161,7 @@ int main(void)
     printf("\r\nVFS initialized. Try 'ls', 'mkdir test', 'touch file.txt' commands.\r\n");
     printf("Redirect test: 'redirect_test > /test.txt' or 'redirect_test > /dev/null'\r\n\r\n");
     
+    xcmd_session_exec(sess, "logo");
     while (!g_exit_requested)
     {
         xcmd_session_task(sess);

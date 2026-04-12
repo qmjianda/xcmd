@@ -52,8 +52,8 @@ extern "C" {
 struct xcmd_line_editor;
 
 typedef int (*xcmd_le_complete_cb)(struct xcmd_line_editor *le, 
-                                    const char *line, 
-                                    uint16_t cursor,
+                                    const char *partial,
+                                    uint16_t partial_start,
                                     char *matches[],
                                     uint16_t max_matches);
 
@@ -103,8 +103,6 @@ typedef struct xcmd_line_editor {
     xcmd_le_completion_t completion;
     
     void *user_data;
-    
-    char submitted[XCMD_LE_LINE_MAX_LEN + 1];
 } xcmd_line_editor_t;
 
 /*============================================================================
@@ -156,6 +154,7 @@ void xcmd_le_delete_to_start(xcmd_line_editor_t *le);
 void xcmd_le_delete_to_end(xcmd_line_editor_t *le);
 
 void xcmd_le_clear_line(xcmd_line_editor_t *le);
+void xcmd_le_reset_line(xcmd_line_editor_t *le);
 void xcmd_le_set_line(xcmd_line_editor_t *le, const char *str);
 
 /*============================================================================

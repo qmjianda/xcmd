@@ -369,9 +369,6 @@ int xcmd_vfs_opendir(xcmd_vfs_dir_t *dir, xcmd_vfs_t *vfs, const char *path) {
     strncpy(dir->path, abs_path, XCMD_VFS_PATH_MAX - 1);
     dir->path[XCMD_VFS_PATH_MAX - 1] = '\0';
 
-    dir->at_root = (strcmp(abs_path, "/") == 0);
-    dir->root_mnt_index = 0;
-
     if (mnt->ops->opendir(dir, rel_path) != 0) {
         mnt->ops->free_dir_handle(mnt->fs_data, dir->handle);
         dir->handle = NULL;
@@ -386,29 +383,6 @@ int xcmd_vfs_readdir(xcmd_vfs_dir_t *dir, xcmd_vfs_stat_t *st) {
     
     xcmd_vfs_mount_t *mnt = vfs_find_mount(dir->vfs, dir->path);
     if (!mnt || !mnt->ops->readdir) return -1;
-    
-    if (dir->at_root) {
-        int ret = mnt->ops->readdir(dir, st);
-        if (ret == 0) {
-            return 0;
-        }
-        
-        xcmd_vfs_t *vfs = dir->vfs;
-        for (int i = dir->root_mnt_index + 1; i < vfs->mount_count; i++) {
-            xcmd_vfs_mount_t *m = &vfs->mounts[i];
-            if (m->mounted && strcmp(m->mount_point, "/") != 0) {
-                const char *name = m->mount_point;
-                while (*name == '/') name++;
-                strncpy(st->name, name, XCMD_VFS_NAME_MAX - 1);
-                st->name[XCMD_VFS_NAME_MAX - 1] = '\0';
-                st->size = 0;
-                st->attr = XCMD_VFS_ATTR_DIRECTORY;
-                dir->root_mnt_index = i;
-                return 0;
-            }
-        }
-        return -1;
-    }
     
     return mnt->ops->readdir(dir, st);
 }

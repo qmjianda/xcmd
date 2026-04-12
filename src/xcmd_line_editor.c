@@ -112,7 +112,6 @@ int xcmd_le_init(xcmd_line_editor_t *le, xcmd_term_t *term) {
     
     memset(le, 0, sizeof(xcmd_line_editor_t));
     le->term = term;
-    le->submitted[0] = '\0';
     
     return 0;
 }
@@ -123,13 +122,84 @@ void xcmd_le_set_complete_cb(xcmd_line_editor_t *le, xcmd_le_complete_cb cb) {
     }
 }
 
+static int le_get_word_at_cursor(xcmd_line_editor_t *le, uint16_t *word_start, uint16_t *word_end) {
+    if (!le || !word_start || !word_end) return -1;
+    
+    uint16_t cursor = le->cursor;
+    
+    *word_end = cursor;
+    while (*word_end < le->length && le->buffer[*word_end] != ' ') {
+        (*word_end)++;
+    }
+    
+    *word_start = cursor;
+    if (*word_start > 0 && le->buffer[*word_start - 1] == ' ') {
+        return -1;
+    }
+    
+    while (*word_start > 0 && le->buffer[*word_start - 1] != ' ') {
+        (*word_start)--;
+    }
+    
+    if (*word_start == *word_end) {
+        return -1;
+    }
+    
+    return 0;
+}
+
+static void le_delete_word_at_cursor(xcmd_line_editor_t *le, uint16_t start, uint16_t end) {
+    if (!le || start >= end) return;
+    
+    uint16_t len = le->length;
+    uint16_t count = end - start;
+    
+    for (uint16_t i = end; i < len; i++) {
+        le->buffer[start + (i - end)] = le->buffer[i];
+    }
+    le->buffer[start + (len - end)] = '\0';
+    le->length = start + (len - end);
+    
+    if (le->cursor > end) {
+        le->cursor -= count;
+    } else if (le->cursor > start) {
+        le->cursor = start;
+    }
+    
+    for (uint16_t i = 0; i < count; i++) {
+        le_putc(le, '\b');
+        le_putc(le, ' ');
+        le_putc(le, '\b');
+    }
+}
+
+static void le_refresh_line(xcmd_line_editor_t *le) {
+    if (!le) return;
+    le_write(le, le->prompt);
+    le_write(le, le->buffer);
+    for (uint16_t i = le->cursor; i < le->length; i++) {
+        le_putc(le, '\b');
+    }
+}
+
 static void le_complete(xcmd_line_editor_t *le) {
     if (!le || !le->complete_cb) return;
     
     le->completion.count = 0;
     le->completion.current = 0;
     
-    int n = le->complete_cb(le, le->buffer, le->cursor,
+    uint16_t word_start, word_end;
+    int has_word = (le_get_word_at_cursor(le, &word_start, &word_end) == 0);
+    uint16_t complete_from = has_word ? word_start : le->cursor;
+    
+    char partial[64] = {0};
+    if (has_word && word_end > word_start) {
+        size_t len = word_end - word_start;
+        if (len >= sizeof(partial)) len = sizeof(partial) - 1;
+        memcpy(partial, le->buffer + word_start, len);
+    }
+    
+    int n = le->complete_cb(le, partial, complete_from,
                             le->completion.candidates,
                             XCMD_LE_COMPLETION_MAX_NUM);
     if (n <= 0) return;
@@ -138,9 +208,13 @@ static void le_complete(xcmd_line_editor_t *le) {
     
     if (n == 1) {
         const char *match = le->completion.candidates[0];
-        xcmd_le_clear_line(le);
-        while (*match) {
-            xcmd_le_insert_char(le, *match++);
+        
+        if (has_word) {
+            le_delete_word_at_cursor(le, word_start, word_end);
+        }
+        
+        for (int i = 0; match[i]; i++) {
+            xcmd_le_insert_char(le, match[i]);
         }
     } else if (n > 1) {
         le_write(le, "\r\n");
@@ -149,11 +223,7 @@ static void le_complete(xcmd_line_editor_t *le) {
             le_write(le, "  ");
         }
         le_write(le, "\r\n");
-        le_write(le, le->prompt);
-        le_write(le, le->buffer);
-        for (uint16_t i = le->cursor; i < le->length; i++) {
-            le_putc(le, '\b');
-        }
+        le_refresh_line(le);
     }
 }
 
@@ -337,6 +407,21 @@ void xcmd_le_clear_line(xcmd_line_editor_t *le) {
     xcmd_le_refresh(le);
 }
 
+/**
+ * @brief Reset line state and output prompt
+ * @param le Line editor
+ * 
+ * Clears: buffer, cursor, length
+ * Then outputs the prompt
+ */
+void xcmd_le_reset_line(xcmd_line_editor_t *le) {
+    if (!le) return;
+    
+    le->history.current = NULL;
+    xcmd_le_clear_line(le);
+    
+}
+
 void xcmd_le_set_line(xcmd_line_editor_t *le, const char *str) {
     if (!le || !str) return;
     
@@ -349,9 +434,8 @@ void xcmd_le_set_line(xcmd_line_editor_t *le, const char *str) {
 }
 
 const char* xcmd_le_get_submitted_line(xcmd_line_editor_t *le) {
-    if (!le) return NULL;
-    if (le->submitted[0] == '\0') return NULL;
-    return le->submitted;
+    if (!le || le->length == 0) return NULL;
+    return le->buffer;
 }
 
 static bool is_escape_end(uint8_t c) {
@@ -428,26 +512,14 @@ const char* xcmd_le_readline(xcmd_line_editor_t *le, xcmd_io_t *in, xcmd_io_t *o
         le_putc(le, '\r');
         le_putc(le, '\n');
         if (le->length > 0) {
-            strncpy(le->submitted, le->buffer, XCMD_LE_LINE_MAX_LEN);
-            le->submitted[XCMD_LE_LINE_MAX_LEN] = '\0';
 #if XCMD_LE_HISTORY_MAX_NUM > 0
             xcmd_le_history_append(le, le->buffer);
 #endif
+            const char *line = le->buffer;
+            return line;
         }
-        else {
-            le->submitted[0] = '\0';
-        }
-        le->length = 0;
-        le->cursor = 0;
-        le->buffer[0] = '\0';
-#if XCMD_LE_HISTORY_MAX_NUM > 0
-        le->history.current = NULL;
-#endif
         xcmd_le_refresh(le);
-        if (le->submitted[0] == '\0') {
-            return NULL;
-        }
-        return le->submitted;
+        return NULL;
     }
     
     for (int i = 0; i < BYTE_TABLE_SIZE; i++) {

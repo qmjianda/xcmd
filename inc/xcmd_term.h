@@ -32,7 +32,6 @@ struct xcmd_term {
 };
 
 int xcmd_term_init(xcmd_term_t *term, const xcmd_term_ops_t *ops);
-
 const xcmd_term_ops_t* xcmd_term_get_ansi_ops(void);
 const xcmd_term_ops_t* xcmd_term_get_dumb_ops(void);
 

@@ -29,7 +29,8 @@ EXT_SRC = $(EXT_DIR)/test/test.c \
           $(EXT_DIR)/vfs/xcmd_vfs_proc.c \
           $(EXT_DIR)/vfs/xcmd_vfs_redirect.c \
           $(EXT_DIR)/vfs/xcmd_vfs_fatfs.c \
-          $(EXT_DIR)/vfs/xcmd_vfs_cmds.c
+          $(EXT_DIR)/vfs/xcmd_vfs_cmds.c \
+          $(EXT_DIR)/vfs/xcmd_vfs_complete.c
 
 EXT_INC = -I$(EXT_DIR)/test \
           -I$(EXT_DIR)/ex_list \
