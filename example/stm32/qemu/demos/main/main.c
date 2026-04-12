@@ -37,10 +37,9 @@ int main(void)
     
     xcmd_session_init(&session, io, xcmd_term_get_ansi_ops());
     
-#ifndef ENABLE_XCMD_EXPORT
     test_cmd_init();
     test_keys_init();
-#endif
+    
     while(1) {
         xcmd_session_task(&session);
     }

@@ -11,25 +11,11 @@ SECTIONS
 	.text :
 	{
 		KEEP(*(.isr_vector))
- 		*(.text)
- 		*(.text.*)
-		*(.rodata)
-		*(.rodata.*)
+  		*(.text)
+  		*(.text.*)
+ 		*(.rodata)
+ 		*(.rodata.*)
 	} >FLASH
-
-	.xcmd_cmd :
-	{
-		_xcmd_cmd_list_start = .;
-		KEEP(*(_xcmd_cmd_list))
-		_xcmd_cmd_list_end = .;
-	} > FLASH
-
-	.xcmd_key : 
-	{
-		_xcmd_key_list_start = .;
-		KEEP(*(_xcmd_key_list))
-		_xcmd_key_list_end = .;
-	} > FLASH
 
 	_sidata = .;
 

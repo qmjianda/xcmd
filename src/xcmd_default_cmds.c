@@ -41,17 +41,11 @@ static int cmd_logo(int argc, char* argv[])
     return 0;
 }
 
-XCMD_EXPORT_CMD(clear, cmd_clear, "clear screen")
-XCMD_EXPORT_CMD(help, cmd_help, "show this list")
-XCMD_EXPORT_CMD(logo, cmd_logo, "show logo")
-
-#ifndef ENABLE_XCMD_EXPORT
 static xcmd_cmd_t cmds[] = {
     {"clear", cmd_clear, "clear screen", NULL},
     {"help", cmd_help, "show this list", NULL},
     {"logo", cmd_logo, "show logo", NULL},
 };
-#endif
 
 void default_cmds_init(void)
 {

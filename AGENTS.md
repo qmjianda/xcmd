@@ -40,19 +40,11 @@ void main(void) {
 
 ## Command Registration
 
-Two methods:
-
-**Runtime Registration (simpler):**
+Register commands at runtime:
 ```c
 static xcmd_cmd_t cmds[] = {{"echo", cmd_echo, "description", NULL}};
 xcmd_cmd_register(cmds, sizeof(cmds)/sizeof(xcmd_cmd_t));
 ```
-
-**Static Export (requires linker script):**
-```c
-XCMD_EXPORT_CMD(echo, cmd_echo, "description", NULL)
-```
-Enable `ENABLE_XCMD_EXPORT` and add sections to linker script (see `example/stm32/qemu/demos/main.ld`).
 
 ## Build Commands
 
@@ -72,7 +64,6 @@ Key macros:
 - `XCMD_LINE_MAX_LENGTH` - Max command line chars (default 64)
 - `XCMD_HISTORY_MAX_NUM` - History entries (0=disabled, default 8)
 - `XCMD_PARAM_MAX_NUM` - Max parameters (default 8)
-- `ENABLE_XCMD_EXPORT` - Enable static export (requires linker script mods)
 
 Platform recommendations:
 - Arduino: `XCMD_HISTORY_MAX_NUM=0`, `XCMD_LINE_MAX_LENGTH=32` (RAM limited)

@@ -59,9 +59,6 @@ extern   "C" {
 #define XCMD_SESSION_UNLOCK(sess) ((void)0)
 #endif
 
-#ifndef ENABLE_XCMD_EXPORT
-#endif
-
 #ifndef XCMD_IO_MAX_DEVICES
 #define XCMD_IO_MAX_DEVICES     (8)
 #endif

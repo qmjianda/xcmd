@@ -25,13 +25,9 @@ static int cmd_run(int argc, char* argv[])
     return 0;
 }
 
-XCMD_EXPORT_CMD(run, cmd_run, HELP_RUN)
-
-#ifndef ENABLE_XCMD_EXPORT
 static xcmd_cmd_t cmds[] = {
     {"run", cmd_run, HELP_RUN, NULL},
 };
-#endif
 
 void ex_cmds_init(void)
 {

@@ -20,7 +20,6 @@ extern   "C" {
 #define XCMD_PARAM_MAX_NUM            (8)             /* 支持输入的参数个数 */
 // #define XCMD_DEFAULT_PROMPT           "->"            /* 提示符 */
 // #define XCMD_DEFAULT_PROMPT_COLOR     TX_GREEN        /* 提示符颜色 */
-// #define ENABLE_XCMD_EXPORT                            /* 需要修改lds，启用后支持XCMD_EXPORT_CMD和XCMD_EXPORT_KEY方法导出命令 */
 
 #ifdef __cplusplus
         }

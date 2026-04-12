@@ -268,14 +268,6 @@ static int List_traverse(int argc, char* argv[])
     return 0; 
 }
 
-XCMD_EXPORT_CMD(list,   list_test, "list test demo")
-XCMD_EXPORT_CMD(list1,   list_note_del, "list note del demo")
-XCMD_EXPORT_CMD(list2,   list_note_rep, "list note replace demo")
-XCMD_EXPORT_CMD(list3,   list_note_del_insert, "list note del and insert demo")
-XCMD_EXPORT_CMD(list4,   List_to_merge, "List to merge")
-XCMD_EXPORT_CMD(list5,   List_traverse, "List to merge")
-
-#ifndef ENABLE_XCMD_EXPORT
 static xcmd_cmd_t cmds[] = {
     {"list",   list_test, "list test demo", NULL},
     {"list1",   list_note_del, "list note del demo", NULL},
@@ -284,7 +276,6 @@ static xcmd_cmd_t cmds[] = {
     {"list4",   List_to_merge, "List to merge", NULL},
     {"list5",   List_traverse, "List to merge", NULL},
 };
-#endif
 
 void ex_list_init(void)
 {

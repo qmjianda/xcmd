@@ -96,15 +96,10 @@ static int xcmd_udp_service(int argc, char** argv)
     return 0;
 }
 
-XCMD_EXPORT_CMD(udp_client, xcmd_udp_client, "Usage: udp_client ip port msg")
-XCMD_EXPORT_CMD(udp_service, xcmd_udp_service, "Usage: udp_service [ip] [port:default(8080)]")
-
-#ifndef ENABLE_XCMD_EXPORT
 static xcmd_cmd_t cmds[] = {
     {"udp_client", xcmd_udp_client, "Usage: udp_client ip port msg", NULL},
     {"udp_service", xcmd_udp_service, "Usage: udp_service [ip] [port:default(8080)]", NULL},
 };
-#endif
 
 void socket_cmds_init(void)
 {
