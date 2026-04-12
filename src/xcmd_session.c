@@ -58,25 +58,33 @@ xcmd_vfs_t* xcmd_session_get_vfs(xcmd_session_t *sess) {
 }
 #endif
 
-static char *session_strpbrk(char *s, const char *delim) {
+static char *session_strpbrk(char *s, size_t len, const char *delim) {
     uint8_t flag = 0;
-    for (uint16_t i = 0; s[i]; i++) {
-        for (uint16_t j = 0; delim[j]; j++) {
+    for (size_t i = 0; i < len && s[i] != '\0'; i++) {
+        for (size_t j = 0; delim[j] != '\0'; j++) {
             if (flag == 0) {
                 if (s[i] == '\"') {
-                    for (uint16_t k = i; s[k]; k++) {
+                    /* Shift string left to remove quote, check boundary */
+                    for (size_t k = i; k < len - 1 && s[k] != '\0'; k++) {
                         s[k] = s[k + 1];
                     }
+                    /* Ensure null termination after shift */
+                    s[len - 1] = '\0';
                     flag = 1;
+                    i--; /* Re-check current position */
                     continue;
                 }
             }
             if (flag) {
                 if (s[i] == '\"') {
-                    for (uint16_t k = i; s[k]; k++) {
+                    /* Shift string left to remove quote, check boundary */
+                    for (size_t k = i; k < len - 1 && s[k] != '\0'; k++) {
                         s[k] = s[k + 1];
                     }
+                    /* Ensure null termination after shift */
+                    s[len - 1] = '\0';
                     flag = 0;
+                    i--; /* Re-check current position */
                 } else {
                     continue;
                 }
@@ -95,7 +103,7 @@ static char *session_strtok(char *s, const char *delim, char **save_ptr) {
     s += strspn(s, delim);
     if (*s == '\0') return NULL;
     token = s;
-    s = session_strpbrk(token, delim);
+    s = session_strpbrk(token, strlen(token) + 1, delim);
     if (s == NULL) {
         *save_ptr = strchr(token, '\0');
     } else {
@@ -278,17 +286,21 @@ int xcmd_session_exec(xcmd_session_t *sess, char *str) {
     char *cmd_param_buff[XCMD_PARAM_MAX_NUM];
     char temp[XCMD_LINE_MAX_LENGTH];
     
+    XCMD_SESSION_LOCK(sess);
     g_current_session = sess;
     strncpy(temp, str, XCMD_LINE_MAX_LENGTH);
+    temp[XCMD_LINE_MAX_LENGTH - 1] = '\0';
     param_num = session_get_param(temp, " ", cmd_param_buff, XCMD_PARAM_MAX_NUM);
     
     if (param_num > 0) {
         int ret = session_cmd_match(sess, param_num, cmd_param_buff);
         g_current_session = NULL;
+        XCMD_SESSION_UNLOCK(sess);
         return ret;
     }
     
     g_current_session = NULL;
+    XCMD_SESSION_UNLOCK(sess);
     return -1;
 }
 
