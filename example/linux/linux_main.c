@@ -70,6 +70,7 @@ int linux_write(xcmd_io_t *io, const void *buf, size_t len)
     while (len--) {
         putchar(*char_buf++);
     }
+    fflush(stdout);
     return len; 
 }
 

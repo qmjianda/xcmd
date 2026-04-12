@@ -12,6 +12,55 @@
 #define ESC_STATE_BRACKET  2
 #define ESC_STATE_END      3
 
+/*============================================================================
+ * Key Handler Types and Tables (Table-Driven)
+ *============================================================================*/
+
+typedef void (*xcmd_le_void_handler_t)(xcmd_line_editor_t *le);
+
+#define VOID_HANDLER(func) ((xcmd_le_void_handler_t)(func))
+
+/* ESC sequence handlers - indexed by escape length and last byte for O(1) lookup */
+typedef struct {
+    const char             *seq;
+    uint8_t               len;
+    xcmd_le_void_handler_t handler;
+} xcmd_escape_entry_t;
+
+static const xcmd_escape_entry_t escape_table[] = {
+#if XCMD_LE_HISTORY_MAX_NUM > 0
+    { XCMD_KEY_UP,        3, VOID_HANDLER(xcmd_le_key_up) },
+    { XCMD_KEY_DW,        3, VOID_HANDLER(xcmd_le_key_down) },
+#endif
+    { XCMD_KEY_RIGHT,     3, VOID_HANDLER(xcmd_le_cursor_right) },
+    { XCMD_KEY_LEFT,      3, VOID_HANDLER(xcmd_le_cursor_left) },
+    { XCMD_KEY_HOME,      3, VOID_HANDLER(xcmd_le_cursor_home) },
+    { XCMD_KEY_HOME2,     4, VOID_HANDLER(xcmd_le_cursor_home) },
+    { XCMD_KEY_END,       3, VOID_HANDLER(xcmd_le_cursor_end) },
+    { XCMD_KEY_END2,      4, VOID_HANDLER(xcmd_le_cursor_end) },
+    { XCMD_KEY_DELETE,    4, VOID_HANDLER(xcmd_le_delete_char_forward) },
+    { XCMD_KEY_CTR_RIGHT, 6, VOID_HANDLER(xcmd_le_word_right) },
+    { XCMD_KEY_CTR_LEFT,  6, VOID_HANDLER(xcmd_le_word_left) },
+};
+#define ESC_TABLE_SIZE (sizeof(escape_table) / sizeof(escape_table[0]))
+
+/* Single-byte key handlers - indexed by byte value for O(1) lookup */
+typedef struct {
+    uint8_t               byte;
+    xcmd_le_void_handler_t handler;
+} xcmd_byte_entry_t;
+
+static const xcmd_byte_entry_t byte_table[] = {
+    { XCMD_KEY_BACKSPACE[0], VOID_HANDLER(xcmd_le_delete_char) },
+    { XCMD_KEY_CTR_H[0],     VOID_HANDLER(xcmd_le_delete_char) },
+    { XCMD_KEY_CTR_A[0],     VOID_HANDLER(xcmd_le_cursor_home) },
+    { XCMD_KEY_CTR_E[0],     VOID_HANDLER(xcmd_le_cursor_end) },
+    { XCMD_KEY_CTR_K[0],     VOID_HANDLER(xcmd_le_delete_to_end) },
+    { XCMD_KEY_CTR_U[0],     VOID_HANDLER(xcmd_le_delete_to_start) },
+    { XCMD_KEY_CTR_C[0],     VOID_HANDLER(xcmd_le_key_ctrl_c) },
+};
+#define BYTE_TABLE_SIZE (sizeof(byte_table) / sizeof(byte_table[0]))
+
 static void le_putc(xcmd_line_editor_t *le, uint8_t c) {
     if (le->io) {
         xcmd_io_putc(le->io, c);
@@ -26,25 +75,14 @@ static void le_write(xcmd_line_editor_t *le, const char *str) {
 
 static void term_clear_line(xcmd_line_editor_t *le) {
     if (le->term->ops && le->term->ops->clear_line) {
-        const char *seq = le->term->ops->clear_line(le->term);
-        le_write(le, seq);
+        le_write(le, le->term->ops->clear_line(le->term));
+        le_putc(le, '\r');
     } else {
         le_putc(le, '\r');
         for (int i = 0; i < 256; i++) {
             le_putc(le, ' ');
         }
         le_putc(le, '\r');
-    }
-}
-
-static void term_cursor_set(xcmd_line_editor_t *le, uint16_t pos) {
-    if (le->term->ops && le->term->ops->cursor_set) {
-        const char *seq = le->term->ops->cursor_set(le->term, pos);
-        le_write(le, seq);
-    } else {
-        for (uint16_t i = 0; i < pos; i++) {
-            le_putc(le, '\b');
-        }
     }
 }
 
@@ -210,7 +248,7 @@ void xcmd_le_cursor_home(xcmd_line_editor_t *le) {
 
     le->cursor = 0;
     if (le->term && le->term->ops && le->term->ops->cursor_left) {
-        le_write(le, le->term->ops->cursor_left(le->term, le->cursor));
+        le_write(le, le->term->ops->cursor_left(le->term, le->length));
     } else {
         xcmd_le_refresh(le);
     }
@@ -218,10 +256,10 @@ void xcmd_le_cursor_home(xcmd_line_editor_t *le) {
 
 void xcmd_le_cursor_end(xcmd_line_editor_t *le) {
     if (!le || le->cursor >= le->length) return;
-
+    uint16_t n = le->length - le->cursor;
     le->cursor = le->length;
     if (le->term && le->term->ops && le->term->ops->cursor_right) {
-        le_write(le, le->term->ops->cursor_right(le->term, le->length - le->cursor));
+        le_write(le, le->term->ops->cursor_right(le->term, n));
     } else {
         xcmd_le_refresh(le);
     }
@@ -240,7 +278,7 @@ void xcmd_le_word_left(xcmd_line_editor_t *le) {
     }
 
     if (le->term && le->term->ops && le->term->ops->cursor_set) {
-        le_write(le, le->term->ops->cursor_set(le->term, le->cursor));
+        le_write(le, le->term->ops->cursor_set(le->term, le->cursor + le->prompt_len));
     } else {
         xcmd_le_refresh(le);
     }
@@ -259,7 +297,7 @@ void xcmd_le_word_right(xcmd_line_editor_t *le) {
     }
 
     if (le->term && le->term->ops && le->term->ops->cursor_set) {
-        le_write(le, le->term->ops->cursor_set(le->term, le->cursor));
+        le_write(le, le->term->ops->cursor_set(le->term, le->cursor + le->prompt_len));
     } else {
         xcmd_le_refresh(le);
     }
@@ -329,6 +367,7 @@ const char* xcmd_le_readline(xcmd_line_editor_t *le, xcmd_io_t *in, xcmd_io_t *o
     
     le->io = out;
     le->prompt = prompt;
+    le->prompt_len = prompt ? strlen(prompt) : 0;
     
     uint8_t byte;
     if (xcmd_io_read(in, &byte, 1) <= 0) {
@@ -337,7 +376,7 @@ const char* xcmd_le_readline(xcmd_line_editor_t *le, xcmd_io_t *in, xcmd_io_t *o
     
     switch (le->escape_state) {
     case ESC_STATE_IDLE:
-        if (byte == 0x1B) {
+        if (byte == XCMD_KEY_ESC[0]) {
             le->escape_buf[0] = byte;
             le->escape_len = 1;
             le->escape_state = ESC_STATE_ESC;
@@ -361,33 +400,11 @@ const char* xcmd_le_readline(xcmd_line_editor_t *le, xcmd_io_t *in, xcmd_io_t *o
             le->escape_buf[le->escape_len] = '\0';
             le->escape_state = ESC_STATE_END;
             
-            if (memcmp(le->escape_buf, "\x1B[A", 3) == 0 ||
-                memcmp(le->escape_buf, "\x1B[B", 3) == 0) {
-#if XCMD_LE_HISTORY_MAX_NUM > 0
-                if (le->escape_buf[2] == 'A') {
-                    xcmd_le_key_up(le, le->escape_buf);
-                } else {
-                    xcmd_le_key_down(le, le->escape_buf);
-                }
-#endif
-            } else if (memcmp(le->escape_buf, "\x1B[C", 3) == 0) {
-                xcmd_le_cursor_right(le);
-            } else if (memcmp(le->escape_buf, "\x1B[D", 3) == 0) {
-                xcmd_le_cursor_left(le);
-            } else if (memcmp(le->escape_buf, "\x1B[H", 3) == 0 ||
-                       memcmp(le->escape_buf, "\x1B[1~", 4) == 0) {
-                xcmd_le_cursor_home(le);
-            } else if (memcmp(le->escape_buf, "\x1B[F", 3) == 0 ||
-                       memcmp(le->escape_buf, "\x1B[4~", 4) == 0) {
-                xcmd_le_cursor_end(le);
-            } else if (memcmp(le->escape_buf, "\x1B[3~", 4) == 0) {
-                xcmd_le_delete_char_forward(le);
-            } else if (memcmp(le->escape_buf, "\x1B[1;5C", 6) == 0 ||
-                       memcmp(le->escape_buf, "\x1B[1;5D", 6) == 0) {
-                if (le->escape_buf[5] == 'C') {
-                    xcmd_le_word_right(le);
-                } else {
-                    xcmd_le_word_left(le);
+            for (int i = 0; i < ESC_TABLE_SIZE; i++) {
+                if (memcmp(le->escape_buf, escape_table[i].seq, escape_table[i].len) == 0 &&
+                    le->escape_buf[escape_table[i].len] == '\0') {
+                    escape_table[i].handler(le);
+                    break;
                 }
             }
             
@@ -433,42 +450,15 @@ const char* xcmd_le_readline(xcmd_line_editor_t *le, xcmd_io_t *in, xcmd_io_t *o
         return le->submitted;
     }
     
-    if (byte == 0x7F || byte == 0x08) {
-        xcmd_le_delete_char(le);
-        return NULL;
-    }
-    
-    if (byte == 0x01) {
-        xcmd_le_cursor_home(le);
-        return NULL;
-    }
-    
-    if (byte == 0x05) {
-        xcmd_le_cursor_end(le);
-        return NULL;
-    }
-    
-    if (byte == 0x0B) {
-        xcmd_le_delete_to_end(le);
-        return NULL;
-    }
-    
-    if (byte == 0x15) {
-        xcmd_le_delete_to_start(le);
-        return NULL;
+    for (int i = 0; i < BYTE_TABLE_SIZE; i++) {
+        if (byte == byte_table[i].byte) {
+            byte_table[i].handler(le);
+            return NULL;
+        }
     }
     
     if (byte == '\t') {
         le_complete(le);
-        return NULL;
-    }
-    
-    if (byte == 0x03) {
-        le->length = 0;
-        le->cursor = 0;
-        le->buffer[0] = '\0';
-        le_write(le, "^C\r\n");
-        xcmd_le_refresh(le);
         return NULL;
     }
     
@@ -643,5 +633,15 @@ int xcmd_le_key_ctrl_k(xcmd_line_editor_t *le, const char *key) {
 int xcmd_le_key_ctrl_l(xcmd_line_editor_t *le, const char *key) {
     (void)key;
     xcmd_le_clear_line(le);
+    return 0;
+}
+
+int xcmd_le_key_ctrl_c(xcmd_line_editor_t *le, const char *key) {
+    (void)key;
+    le->length = 0;
+    le->cursor = 0;
+    le->buffer[0] = '\0';
+    le_write(le, "^C\r\n");
+    xcmd_le_refresh(le);
     return 0;
 }

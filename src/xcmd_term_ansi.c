@@ -1,15 +1,16 @@
 #include "xcmd_term.h"
+#include "xcmd_term_ansi.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
 static const char* ansi_clear_line(xcmd_term_t *term) {
-    snprintf(term->buff, sizeof(term->buff), "\x1B[2K\r");
+    snprintf(term->buff, sizeof(term->buff), EL_ALL);
     return term->buff;
 }
 
 static const char* ansi_clear_to_eol(xcmd_term_t *term) {
-    snprintf(term->buff, sizeof(term->buff), "\x1B[K");
+    snprintf(term->buff, sizeof(term->buff), EL_EOL);
     return term->buff;
 }
 
@@ -18,12 +19,7 @@ static const char* ansi_cursor_left(xcmd_term_t *term, uint16_t n) {
         term->buff[0] = '\0';
         return term->buff;
     }
-    if (n == 1) {
-        term->buff[0] = '\b';
-        term->buff[1] = '\0';
-        return term->buff;
-    }
-    snprintf(term->buff, sizeof(term->buff), "\x1B[%dD", n);
+    snprintf(term->buff, sizeof(term->buff), CUB(n));
     return term->buff;
 }
 
@@ -32,12 +28,12 @@ static const char* ansi_cursor_right(xcmd_term_t *term, uint16_t n) {
         term->buff[0] = '\0';
         return term->buff;
     }
-    snprintf(term->buff, sizeof(term->buff), "\x1B[%dC", n);
+    snprintf(term->buff, sizeof(term->buff), CUF(n));
     return term->buff;
 }
 
 static const char* ansi_cursor_set(xcmd_term_t *term, uint16_t pos) {
-    snprintf(term->buff, sizeof(term->buff), "\x1B[%dG", pos + 1);
+    snprintf(term->buff, sizeof(term->buff), CHA(pos + 1));
     return term->buff;
 }
 
@@ -46,7 +42,7 @@ static const char* ansi_insert_chars(xcmd_term_t *term, uint16_t n) {
         term->buff[0] = '\0';
         return term->buff;
     }
-    snprintf(term->buff, sizeof(term->buff), "\x1B[%d@", n);
+    snprintf(term->buff, sizeof(term->buff), ICH(n));
     return term->buff;
 }
 
@@ -55,7 +51,7 @@ static const char* ansi_delete_chars(xcmd_term_t *term, uint16_t n) {
         term->buff[0] = '\0';
         return term->buff;
     }
-    snprintf(term->buff, sizeof(term->buff), "\x1B[%dP", n);
+    snprintf(term->buff, sizeof(term->buff), DCH(n));
     return term->buff;
 }
 

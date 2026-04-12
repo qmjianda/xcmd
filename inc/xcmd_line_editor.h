@@ -93,6 +93,7 @@ typedef struct xcmd_line_editor {
     xcmd_io_t *io;
     xcmd_term_t *term;
     const char *prompt;
+    uint16_t prompt_len;
     
 #if XCMD_LE_HISTORY_MAX_NUM > 0
     xcmd_le_history_t history;
@@ -187,11 +188,75 @@ int xcmd_le_key_ctrl_e(xcmd_line_editor_t *le, const char *key);
 int xcmd_le_key_ctrl_u(xcmd_line_editor_t *le, const char *key);
 int xcmd_le_key_ctrl_k(xcmd_line_editor_t *le, const char *key);
 int xcmd_le_key_ctrl_l(xcmd_line_editor_t *le, const char *key);
+int xcmd_le_key_ctrl_c(xcmd_line_editor_t *le, const char *key);
 
 #if XCMD_LE_HISTORY_MAX_NUM > 0
 int xcmd_le_key_up(xcmd_line_editor_t *le, const char *key);
 int xcmd_le_key_down(xcmd_line_editor_t *le, const char *key);
 #endif
+
+/*============================================================================
+ * Key Definitions
+ *============================================================================*/
+
+#define XCMD_KEY_CTR_A       "\x01"
+#define XCMD_KEY_CTR_B       "\x02"
+#define XCMD_KEY_CTR_C       "\x03"
+#define XCMD_KEY_CTR_D       "\x04"
+#define XCMD_KEY_CTR_E       "\x05"
+#define XCMD_KEY_CTR_F       "\x06"
+#define XCMD_KEY_CTR_G       "\x07"
+#define XCMD_KEY_CTR_H       "\x08"
+#define XCMD_KEY_CTR_I       "\x09"
+#define XCMD_KEY_TAB         "\x09"
+#define XCMD_KEY_CTR_J       "\x0A"
+#define XCMD_KEY_CTR_K       "\x0B"
+#define XCMD_KEY_CTR_L       "\x0C"
+#define XCMD_KEY_CTR_M       "\x0D"
+#define XCMD_KEY_CTR_N       "\x0E"
+#define XCMD_KEY_CTR_O       "\x0F"
+#define XCMD_KEY_CTR_P       "\x10"
+#define XCMD_KEY_CTR_Q       "\x11"
+#define XCMD_KEY_CTR_R       "\x12"
+#define XCMD_KEY_CTR_S       "\x13"
+#define XCMD_KEY_CTR_T       "\x14"
+#define XCMD_KEY_CTR_U       "\x15"
+#define XCMD_KEY_CTR_V       "\x16"
+#define XCMD_KEY_CTR_W       "\x17"
+#define XCMD_KEY_CTR_X       "\x18"
+#define XCMD_KEY_CTR_Y       "\x19"
+#define XCMD_KEY_CTR_Z       "\x1A"
+#define XCMD_KEY_PAUSE       "\x1A"
+#define XCMD_KEY_ESC         "\x1B"
+#define XCMD_KEY_BACKSPACE   "\x7F"
+#define XCMD_KEY_UP          "\x1B[A"
+#define XCMD_KEY_DW          "\x1B[B"
+#define XCMD_KEY_RIGHT       "\x1B[C"
+#define XCMD_KEY_LEFT        "\x1B[D"
+#define XCMD_KEY_HOME        "\x1B[H"
+#define XCMD_KEY_HOME2       "\x1B[1~"
+#define XCMD_KEY_END         "\x1B[F"
+#define XCMD_KEY_END2        "\x1B[4~"
+#define XCMD_KEY_CTR_UP      "\x1B[1;5A"
+#define XCMD_KEY_CTR_DW      "\x1B[1;5B"
+#define XCMD_KEY_CTR_RIGHT   "\x1B[1;5C"
+#define XCMD_KEY_CTR_LEFT    "\x1B[1;5D"
+#define XCMD_KEY_INSERT      "\x1B[2~"
+#define XCMD_KEY_DELETE      "\x1B[3~"
+#define XCMD_KEY_PAGE_UP     "\x1B[5~"
+#define XCMD_KEY_PAGE_DOWN   "\x1B[6~"
+#define XCMD_KEY_F1          "\x1BOP"
+#define XCMD_KEY_F2          "\x1BOQ"
+#define XCMD_KEY_F3          "\x1BOR"
+#define XCMD_KEY_F4          "\x1BOS"
+#define XCMD_KEY_F5          "\x1B[15~"
+#define XCMD_KEY_F6          "\x1B[17~"
+#define XCMD_KEY_F7          "\x1B[18~"
+#define XCMD_KEY_F8          "\x1B[19~"
+#define XCMD_KEY_F9          "\x1B[20~"
+#define XCMD_KEY_F10         "\x1B[21~"
+#define XCMD_KEY_F11         "\x1B[23~"
+#define XCMD_KEY_F12         "\x1B[24~"
 
 #ifdef __cplusplus
 }
