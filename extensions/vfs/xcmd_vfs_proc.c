@@ -16,6 +16,7 @@ static int proc_count = 0;
 typedef struct {
     xcmd_proc_entry_t *entry;
     uint8_t used;
+    uint32_t offset;  /* 当前读取位置 */
 } proc_file_handle_t;
 
 typedef struct {
@@ -70,6 +71,7 @@ static int proc_open(xcmd_vfs_file_t *file, const char *path, uint8_t mode) {
             proc_file_handle_t *h = (proc_file_handle_t *)file->handle;
             if (h != NULL) {
                 h->entry = proc_table[i];
+                h->offset = 0;
             }
             return 0;
         }
@@ -87,7 +89,27 @@ static int proc_read(xcmd_vfs_file_t *file, void *buf, uint32_t len) {
     if (h == NULL || h->entry == NULL || h->entry->ops == NULL || h->entry->ops->read == NULL) {
         return -1;
     }
-    return h->entry->ops->read(h->entry->user_data, buf, len);
+    
+    uint32_t file_size = 0;
+    if (h->entry->ops->size != NULL) {
+        file_size = h->entry->ops->size(h->entry->user_data);
+    }
+    
+    if (h->offset >= file_size) {
+        return 0;
+    }
+    
+    uint32_t remaining = file_size - h->offset;
+    if (len > remaining) {
+        len = remaining;
+    }
+    
+    int read_len = h->entry->ops->read(h->entry->user_data, buf, len);
+    if (read_len > 0) {
+        h->offset += read_len;
+    }
+    
+    return read_len;
 }
 
 static int proc_write(xcmd_vfs_file_t *file, const void *buf, uint32_t len) {
