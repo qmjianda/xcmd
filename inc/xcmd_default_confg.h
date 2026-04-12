@@ -44,8 +44,19 @@ extern   "C" {
 #define XCMD_DEFAULT_PROMPT     "-> "
 #endif
 
-#ifndef XCMD_DEFAULT_PROMPT_CLOLR
-#define XCMD_DEFAULT_PROMPT_CLOLR   TX_GREEN
+#ifndef XCMD_DEFAULT_PROMPT_COLOR
+#define XCMD_DEFAULT_PROMPT_COLOR   TX_GREEN
+#endif
+
+/* Session lock macros for thread safety
+ * User can override these to implement actual locking
+ * Default is no-op (single-threaded environments)
+ */
+#ifndef XCMD_SESSION_LOCK
+#define XCMD_SESSION_LOCK(sess)   ((void)0)
+#endif
+#ifndef XCMD_SESSION_UNLOCK
+#define XCMD_SESSION_UNLOCK(sess) ((void)0)
 #endif
 
 #ifndef ENABLE_XCMD_EXPORT

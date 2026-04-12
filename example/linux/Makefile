@@ -19,11 +19,15 @@ EXT_SRC = $(EXT_DIR)/test/test.c \
           $(EXT_DIR)/ex_list/ex_list.c \
           $(EXT_DIR)/ex_cmds/ex_cmds.c \
           $(EXT_DIR)/net_cmds/socket_cmds.c \
-          $(EXT_DIR)/fs_cmds/FatFs/source/diskio.c \
-          $(EXT_DIR)/fs_cmds/FatFs/source/ff.c \
-          $(EXT_DIR)/fs_cmds/FatFs/source/ffunicode.c \
-          $(EXT_DIR)/fs_cmds/fatfs_port.c \
+          $(EXT_DIR)/vfs/diskio.c \
+          $(EXT_DIR)/vfs/ff.c \
+          $(EXT_DIR)/vfs/ffunicode.c \
+          $(EXT_DIR)/vfs/fatfs_port.c \
           $(EXT_DIR)/vfs/xcmd_vfs.c \
+          $(EXT_DIR)/vfs/xcmd_vfs_dev.c \
+          $(EXT_DIR)/vfs/xcmd_vfs_uart.c \
+          $(EXT_DIR)/vfs/xcmd_vfs_proc.c \
+          $(EXT_DIR)/vfs/xcmd_vfs_redirect.c \
           $(EXT_DIR)/vfs/xcmd_vfs_fatfs.c \
           $(EXT_DIR)/vfs/xcmd_vfs_cmds.c
 
@@ -31,14 +35,14 @@ EXT_INC = -I$(EXT_DIR)/test \
           -I$(EXT_DIR)/ex_list \
           -I$(EXT_DIR)/ex_cmds \
           -I$(EXT_DIR)/net_cmds \
-          -I$(EXT_DIR)/fs_cmds/FatFs/source \
-          -I$(EXT_DIR)/fs_cmds \
           -I$(EXT_DIR)/vfs
 
 # Generate object file paths in build directory
 OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC)) \
       $(patsubst $(EXT_DIR)/%.c,$(BUILD_DIR)/ext/%.o,$(EXT_SRC)) \
       $(BUILD_DIR)/linux_main.o \
+      $(BUILD_DIR)/xcmd_proc_confg.o \
+      $(BUILD_DIR)/ex_redirect.o \
       $(BUILD_DIR)/fatfs_disk_mmc.o \
       $(BUILD_DIR)/fatfs_disk_ram.o
 
@@ -49,7 +53,6 @@ $(BUILD_DIR):
 		$(BUILD_DIR)/ext/ex_list \
 		$(BUILD_DIR)/ext/ex_cmds \
 		$(BUILD_DIR)/ext/net_cmds \
-		$(BUILD_DIR)/ext/fs_cmds/FatFs/source \
 		$(BUILD_DIR)/ext/vfs
 
 $(BIN): $(OBJ)
@@ -62,12 +65,18 @@ $(BUILD_DIR)/ext/%.o: $(EXT_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
 
 $(BUILD_DIR)/linux_main.o: linux_main.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(EXT_INC) -I$(EXT_DIR)/fs_cmds -c $< -o $@
+	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
+
+$(BUILD_DIR)/xcmd_proc_confg.o: xcmd_proc_confg.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
 
 $(BUILD_DIR)/fatfs_disk_mmc.o: fatfs_disk_mmc.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
 
 $(BUILD_DIR)/fatfs_disk_ram.o: fatfs_disk_ram.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
+
+$(BUILD_DIR)/ex_redirect.o: ex_redirect.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(EXT_INC) -c $< -o $@
 
 clean:

@@ -15,7 +15,11 @@
 #include "xcmd_vfs.h"
 #include "xcmd_vfs_cmds.h"
 #include "xcmd_vfs_fatfs.h"
+#include "xcmd_vfs_proc.h"
 #include "fatfs_disk_ram.h"
+#include "xcmd_proc_confg.h"
+#include "xcmd_vfs_dev.h"
+#include "ex_redirect.h"
 
 static volatile int g_exit_requested = 0;
 
@@ -113,6 +117,22 @@ int main(void)
         return -1;
     }
     
+    if (xcmd_vfs_proc_mount(vfs, "/proc") != 0) {
+        printf("Failed to mount proc to VFS\r\n");
+        return -1;
+    }
+    
+    xcmd_proc_confg_init();
+    
+    /* Mount /dev for device access (null, zero, etc.) */
+    if (xcmd_vfs_dev_mount(vfs, "/dev") != 0) {
+        printf("Failed to mount dev to VFS\r\n");
+        return -1;
+    }
+    
+    /* Register built-in devices */
+    xcmd_vfs_dev_register((xcmd_dev_t *)&xcmd_dev_null);
+    xcmd_vfs_dev_register((xcmd_dev_t *)&xcmd_dev_zero);
     
     xcmd_term_ops_t *term_ops = xcmd_term_get_ansi_ops();
     if (!term_ops) {
@@ -135,9 +155,11 @@ int main(void)
     socket_cmds_init();
     ex_list_init();
     xcmd_vfs_register_cmds();
+    ex_redirect_init();
     xcmd_cmd_register(linux_cmds, sizeof(linux_cmds)/sizeof(xcmd_cmd_t));
     
-    printf("\r\nVFS and FatFS initialized. Try 'ls', 'mkdir test', 'touch file.txt' commands.\r\n\r\n");
+    printf("\r\nVFS initialized. Try 'ls', 'mkdir test', 'touch file.txt' commands.\r\n");
+    printf("Redirect test: 'redirect_test > /test.txt' or 'redirect_test > /dev/null'\r\n\r\n");
     
     while (!g_exit_requested)
     {

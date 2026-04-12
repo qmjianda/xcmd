@@ -4,6 +4,7 @@
 
 #ifdef XCMD_USE_VFS
 #include "xcmd_vfs.h"
+#include "xcmd_vfs_redirect.h"
 #endif
 
 #include <stdlib.h>
@@ -125,11 +126,20 @@ static int session_get_param(char *msg, char *delim, char *get[], int max_num) {
     return i;
 }
 
+#ifdef XCMD_USE_VFS
+static xcmd_io_t* parse_redirect_target(xcmd_session_t *sess, const char *target) {
+    if (!sess || !target) return NULL;
+    if (!sess->vfs) return NULL;
+    
+    return xcmd_vfs_redirect_open(sess->vfs, target);
+}
+#else
 static xcmd_io_t* parse_redirect_target(xcmd_session_t *sess, const char *target) {
     (void)sess;
     (void)target;
     return NULL;
 }
+#endif
 
 static int session_redirected(xcmd_session_t *sess, int argc, char *argv[]) {
     for (int i = 1; i < (argc - 1); i++) {
