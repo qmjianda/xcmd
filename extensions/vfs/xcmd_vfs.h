@@ -51,6 +51,11 @@ typedef struct xcmd_vfs_ops xcmd_vfs_ops_t;
 #define XCMD_VFS_MODE_APPEND      (1 << 2)
 #define XCMD_VFS_MODE_CREATE      (1 << 3)
 
+/* Mount flags */
+#define XCMD_MOUNT_FLAG_RDONLY    (1 << 0)
+#define XCMD_MOUNT_FLAG_REMOUNT   (1 << 1)
+#define XCMD_MOUNT_FLAG_NOATIME   (1 << 2)
+
 /* File attributes */
 #define XCMD_VFS_ATTR_DIRECTORY   (1 << 0)
 #define XCMD_VFS_ATTR_READONLY   (1 << 1)
@@ -120,6 +125,7 @@ typedef struct {
     const xcmd_vfs_ops_t *ops;
     void *fs_data;
     uint8_t mounted;
+    uint8_t flags;
 } xcmd_vfs_mount_t;
 
 /* VFS core */
@@ -138,8 +144,8 @@ struct xcmd_vfs {
 
 void xcmd_vfs_init(xcmd_vfs_t *vfs);
 int xcmd_vfs_mount(xcmd_vfs_t *vfs, const char *mount_point, 
-                   const xcmd_vfs_ops_t *ops, void *backend_data);
-int xcmd_vfs_umount(xcmd_vfs_t *vfs, const char *mount_point);
+                   const xcmd_vfs_ops_t *ops, void *backend_data, uint8_t flags);
+int xcmd_vfs_umount(xcmd_vfs_t *vfs, const char *mount_point, uint8_t flags);
 
 /* File operations */
 xcmd_vfs_file_t* xcmd_vfs_open(xcmd_vfs_t *vfs, const char *path, uint8_t mode);

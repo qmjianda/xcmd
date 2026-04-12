@@ -112,7 +112,7 @@ int main(void)
     static xcmd_vfs_fatfs_t fatfs_backend;
     xcmd_vfs_fatfs_init(&fatfs_backend, ram_disk_get_path());
     xcmd_vfs_t *vfs = xcmd_vfs_get_global();
-    if (xcmd_vfs_mount(vfs, "/", &xcmd_vfs_fatfs_ops, &fatfs_backend) != 0) {
+    if (xcmd_vfs_mount(vfs, "/", &xcmd_vfs_fatfs_ops, &fatfs_backend, 0) != 0) {
         printf("Failed to mount FatFS to VFS\r\n");
         return -1;
     }

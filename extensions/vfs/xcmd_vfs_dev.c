@@ -229,7 +229,7 @@ static const xcmd_vfs_ops_t dev_ops = {
 };
 
 int xcmd_vfs_dev_mount(xcmd_vfs_t *vfs, const char *mount_point) {
-    return xcmd_vfs_mount(vfs, mount_point, &dev_ops, NULL);
+    return xcmd_vfs_mount(vfs, mount_point, &dev_ops, NULL, 0);
 }
 
 int xcmd_vfs_dev_register(xcmd_dev_t *dev) {

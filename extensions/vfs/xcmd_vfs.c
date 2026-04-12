@@ -9,30 +9,53 @@ void xcmd_vfs_init(xcmd_vfs_t *vfs) {
 }
 
 int xcmd_vfs_mount(xcmd_vfs_t *vfs, const char *mount_point,
-                   const xcmd_vfs_ops_t *ops, void *fs_data) {
+                   const xcmd_vfs_ops_t *ops, void *fs_data, uint8_t flags) {
     if (!vfs || !mount_point || !ops) {
         return -1;
     }
 
-    /* Check if mount point already exists */
+    xcmd_vfs_mount_t *existing = NULL;
     for (int i = 0; i < XCMD_VFS_MAX_MOUNTS; i++) {
         if (vfs->mounts[i].mounted &&
             strcmp(vfs->mounts[i].mount_point, mount_point) == 0) {
-            return -1;  /* Mount point already exists */
-        }
-    }
-
-    /* Find an empty slot */
-    xcmd_vfs_mount_t *mnt = NULL;
-    for (int i = 0; i < XCMD_VFS_MAX_MOUNTS; i++) {
-        if (!vfs->mounts[i].mounted) {
-            mnt = &vfs->mounts[i];
+            existing = &vfs->mounts[i];
             break;
         }
     }
 
+    if (existing) {
+        if (flags & XCMD_MOUNT_FLAG_REMOUNT) {
+            if (existing->ops->unmount) {
+                existing->ops->unmount(existing->fs_data);
+            }
+        } else {
+            return -1;
+        }
+    } else {
+        if (strcmp(mount_point, "/") != 0) {
+            xcmd_vfs_stat_t st;
+            if (xcmd_vfs_stat(vfs, mount_point, &st) != 0) {
+                if (xcmd_vfs_mkdir(vfs, mount_point) != 0) {
+                    return -1;
+                }
+            }
+        }
+    }
+
+    xcmd_vfs_mount_t *mnt = NULL;
+    if (existing) {
+        mnt = existing;
+    } else {
+        for (int i = 0; i < XCMD_VFS_MAX_MOUNTS; i++) {
+            if (!vfs->mounts[i].mounted) {
+                mnt = &vfs->mounts[i];
+                break;
+            }
+        }
+    }
+
     if (!mnt) {
-        return -1;  /* No empty slot available */
+        return -1;
     }
 
     strncpy(mnt->mount_point, mount_point, XCMD_VFS_NAME_MAX - 1);
@@ -40,17 +63,21 @@ int xcmd_vfs_mount(xcmd_vfs_t *vfs, const char *mount_point,
     mnt->ops = ops;
     mnt->fs_data = fs_data;
     mnt->mounted = 1;
+    mnt->flags = flags;
 
     if (ops->mount && ops->mount(fs_data) != 0) {
         mnt->mounted = 0;
         return -1;
     }
 
-    vfs->mount_count++;
+    if (!existing) {
+        vfs->mount_count++;
+    }
     return 0;
 }
 
-int xcmd_vfs_umount(xcmd_vfs_t *vfs, const char *mount_point) {
+int xcmd_vfs_umount(xcmd_vfs_t *vfs, const char *mount_point, uint8_t flags) {
+    (void)flags;
     if (!vfs || !mount_point) return -1;
 
     for (int i = 0; i < XCMD_VFS_MAX_MOUNTS; i++) {
@@ -60,6 +87,7 @@ int xcmd_vfs_umount(xcmd_vfs_t *vfs, const char *mount_point) {
                 vfs->mounts[i].ops->unmount(vfs->mounts[i].fs_data);
             }
             vfs->mounts[i].mounted = 0;
+            vfs->mounts[i].flags = 0;
             vfs->mount_count--;
             return 0;
         }

@@ -222,7 +222,7 @@ static const xcmd_vfs_ops_t proc_ops = {
 
 /* 公开 API */
 int xcmd_vfs_proc_mount(xcmd_vfs_t *vfs, const char *mount_point) {
-    return xcmd_vfs_mount(vfs, mount_point, &proc_ops, NULL);
+    return xcmd_vfs_mount(vfs, mount_point, &proc_ops, NULL, 0);
 }
 
 int xcmd_vfs_proc_register(xcmd_proc_entry_t *entry) {
