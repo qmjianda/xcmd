@@ -5,6 +5,7 @@
 #include "xcmd_io.h"
 #include "xcmd_term.h"
 #include "xcmd_line_editor.h"
+#include "xcmd_ext.h"
 #include <stdint.h>
 #include <stddef.h>
 
@@ -17,7 +18,6 @@ extern "C" {
  *============================================================================*/
 
 typedef struct xcmd_session xcmd_session_t;
-typedef struct xcmd_vfs xcmd_vfs_t;
 
 struct xcmd_session {
     xcmd_term_t term;
@@ -25,15 +25,8 @@ struct xcmd_session {
     
     xcmd_io_t *stdin_io;
     xcmd_io_t *stdout_io;
+    xcmd_io_t *saved_stdout;
     
-#ifdef XCMD_USE_VFS
-    xcmd_vfs_t *vfs;
-#endif
-    
-    xcmd_io_t *redirect_orig_stdout;
-    uint8_t redirect_active;
-    
-    uint8_t (*recv_hook_func)(char *);
     int (*complete_hook_func)(xcmd_line_editor_t *le,
                               const char *line,
                               uint16_t cursor,
@@ -45,23 +38,6 @@ struct xcmd_session {
     
     void *user_data;
 };
-
-/**
- * @brief RAII guard for IO redirection
- * 
- * Automatically restores stdout on scope exit, ensuring no resource leaks.
- * 
- * Usage:
- *   xcmd_io_redirect_guard_t guard = {0};
- *   xcmd_io_redirect_guard_enter(&guard, sess, new_stdout);
- *   // ... do work ...
- *   xcmd_io_redirect_guard_exit(&guard);  // or just let guard go out of scope
- */
-typedef struct {
-    xcmd_session_t *sess;
-    xcmd_io_t *orig_stdout;
-    uint8_t active;
-} xcmd_io_redirect_guard_t;
 
 /*============================================================================
  * Instance Management
@@ -76,11 +52,6 @@ int xcmd_session_init_full(xcmd_session_t *sess,
                            xcmd_io_t *stdout_io,
                            const xcmd_term_ops_t *ops);
 
-#ifdef XCMD_USE_VFS
-void xcmd_session_set_vfs(xcmd_session_t *sess, xcmd_vfs_t *vfs);
-xcmd_vfs_t* xcmd_session_get_vfs(xcmd_session_t *sess);
-#endif
-
 uint8_t xcmd_session_get_id(xcmd_session_t *sess);
 void* xcmd_session_get_user_data(xcmd_session_t *sess);
 void xcmd_session_set_user_data(xcmd_session_t *sess, void *data);
@@ -91,16 +62,6 @@ void xcmd_session_set_user_data(xcmd_session_t *sess, void *data);
 
 xcmd_io_t* xcmd_session_get_stdin(xcmd_session_t *sess);
 xcmd_io_t* xcmd_session_get_stdout(xcmd_session_t *sess);
-
-int xcmd_session_redirect(xcmd_session_t *sess, xcmd_io_t *new_stdout);
-void xcmd_io_redirect_guard_enter(xcmd_io_redirect_guard_t *guard,
-                                  xcmd_session_t *sess,
-                                  xcmd_io_t *new_stdout);
-
-/**
- * @brief Exit redirect guard (restore original stdout, close redirected IO)
- */
-void xcmd_io_redirect_guard_exit(xcmd_io_redirect_guard_t *guard);
 
 /*============================================================================
  * Instance Operations
@@ -117,9 +78,6 @@ const char* xcmd_session_get_line(xcmd_session_t *sess);
 void xcmd_session_set_line(xcmd_session_t *sess, const char *str);
 void xcmd_session_set_prompt(xcmd_session_t *sess, const char *prompt);
 const char* xcmd_session_get_prompt(xcmd_session_t *sess);
-
-void xcmd_session_set_recv_hook(xcmd_session_t *sess, 
-                                  uint8_t (*func)(char *));
 
 void xcmd_session_set_complete_hook(xcmd_session_t *sess,
                                     int (*func)(xcmd_line_editor_t *le,

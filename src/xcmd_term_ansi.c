@@ -1,4 +1,5 @@
 #include "xcmd_term.h"
+#include "xcmd_io.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -34,55 +35,52 @@
 #define EL_ALL      "\x1B[2K"    /* 清除整行 */
 
 
-static const char* ansi_clear_line(xcmd_term_t *term) {
-    snprintf(term->buff, sizeof(term->buff), EL_ALL);
-    return term->buff;
-}
-
-static const char* ansi_clear_to_eol(xcmd_term_t *term) {
-    snprintf(term->buff, sizeof(term->buff), EL_EOL);
-    return term->buff;
-}
-
-static const char* ansi_cursor_left(xcmd_term_t *term, uint16_t n) {
-    if (n == 0) {
-        term->buff[0] = '\0';
-        return term->buff;
+static void ansi_clear_line(xcmd_term_t *term) {
+    if (term->io) {
+        xcmd_io_puts(term->io, EL_ALL);
+        xcmd_io_putc(term->io, '\r');
     }
-    snprintf(term->buff, sizeof(term->buff), CUB(n));
-    return term->buff;
 }
 
-static const char* ansi_cursor_right(xcmd_term_t *term, uint16_t n) {
-    if (n == 0) {
-        term->buff[0] = '\0';
-        return term->buff;
+static void ansi_clear_to_eol(xcmd_term_t *term) {
+    if (term->io) {
+        xcmd_io_puts(term->io, EL_EOL);
     }
-    snprintf(term->buff, sizeof(term->buff), CUF(n));
-    return term->buff;
 }
 
-static const char* ansi_cursor_set(xcmd_term_t *term, uint16_t pos) {
-    snprintf(term->buff, sizeof(term->buff), CHA(pos + 1));
-    return term->buff;
-}
-
-static const char* ansi_insert_chars(xcmd_term_t *term, uint16_t n) {
-    if (n == 0) {
-        term->buff[0] = '\0';
-        return term->buff;
+static void ansi_cursor_left(xcmd_term_t *term, uint16_t n) {
+    if (term->io && n > 0) {
+        snprintf(term->buff, sizeof(term->buff), CUB(n));
+        xcmd_io_puts(term->io, term->buff);
     }
-    snprintf(term->buff, sizeof(term->buff), ICH(n));
-    return term->buff;
 }
 
-static const char* ansi_delete_chars(xcmd_term_t *term, uint16_t n) {
-    if (n == 0) {
-        term->buff[0] = '\0';
-        return term->buff;
+static void ansi_cursor_right(xcmd_term_t *term, uint16_t n) {
+    if (term->io && n > 0) {
+        snprintf(term->buff, sizeof(term->buff), CUF(n));
+        xcmd_io_puts(term->io, term->buff);
     }
-    snprintf(term->buff, sizeof(term->buff), DCH(n));
-    return term->buff;
+}
+
+static void ansi_cursor_set(xcmd_term_t *term, uint16_t pos) {
+    if (term->io) {
+        snprintf(term->buff, sizeof(term->buff), CHA(pos + 1));
+        xcmd_io_puts(term->io, term->buff);
+    }
+}
+
+static void ansi_insert_chars(xcmd_term_t *term, uint16_t n) {
+    if (term->io && n > 0) {
+        snprintf(term->buff, sizeof(term->buff), ICH(n));
+        xcmd_io_puts(term->io, term->buff);
+    }
+}
+
+static void ansi_delete_chars(xcmd_term_t *term, uint16_t n) {
+    if (term->io && n > 0) {
+        snprintf(term->buff, sizeof(term->buff), DCH(n));
+        xcmd_io_puts(term->io, term->buff);
+    }
 }
 
 static const xcmd_term_ops_t ansi_ops = {

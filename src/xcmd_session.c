@@ -1,12 +1,6 @@
 #include "xcmd_session.h"
 #include "xcmd_cmd.h"
-#include "xcmd_complete.h"
 #include "xcmd_default_cmds.h"
-
-#ifdef XCMD_USE_VFS
-#include "xcmd_vfs.h"
-#include "xcmd_vfs_redirect.h"
-#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,104 +10,24 @@
 static xcmd_session_t *g_current_session = NULL;
 
 static int session_complete_hook(xcmd_line_editor_t *le, 
-                                const char *partial,
-                                uint16_t partial_start,
+                                const char *word,
+                                int word_id,
                                 char *matches[],
-                                uint16_t max_matches) {
-    xcmd_complete_result_t result;
-    result.count = 0;
-    
-    const char *line = le->buffer;
-    
-    int word_count = 0;
-    uint16_t word_starts[8] = {0};
-    uint16_t word_ends[8] = {0};
-    
-    for (uint16_t i = 0; i <= partial_start && word_count < 8; i++) {
-        if (i == 0 || (i > 0 && line[i-1] == ' ')) {
-            word_starts[word_count] = i;
-            while (i < le->length && line[i] != ' ') i++;
-            word_ends[word_count] = i;
-            word_count++;
-        }
+                                int max) {
+    if (word_id == 0) {
+        return xcmd_complete_default(word, matches, max);
     }
     
-    if (word_count == 0 || partial_start < word_starts[0]) {
-        return xcmd_complete_cmd(partial, &result);
+    const char *cmd_word = xcmd_le_get_word(le, 0);
+    xcmd_cmd_t *cmd = xcmd_cmd_find(cmd_word);
+    
+    if (cmd && cmd->complete) {
+        return cmd->complete(le, word, word_id, matches, max);
     }
     
-    const char *cmd_name = line + word_starts[0];
-    size_t cmd_len = word_ends[0] - word_starts[0];
-    char cmd[64] = {0};
-    if (cmd_len >= sizeof(cmd)) cmd_len = sizeof(cmd) - 1;
-    memcpy(cmd, cmd_name, cmd_len);
-    
-    const xcmd_cmd_tree_t *tree = xcmd_cmd_tree_find(cmd);
-    
-    if (tree && tree->subcmds && tree->subcmd_count > 0) {
-        if (word_count == 1 || (word_count == 2 && partial_start >= word_starts[1])) {
-            const char *subcmd_partial = "";
-            size_t subcmd_len = 0;
-            
-            if (word_count >= 2 && partial_start >= word_starts[1]) {
-                subcmd_partial = line + word_starts[1];
-                subcmd_len = word_ends[1] - word_starts[1];
-                char tmp[64] = {0};
-                if (subcmd_len >= sizeof(tmp)) subcmd_len = sizeof(tmp) - 1;
-                memcpy(tmp, subcmd_partial, subcmd_len);
-                subcmd_partial = tmp;
-            }
-            
-            if (xcmd_complete_subcmd(subcmd_partial, tree->subcmds, tree->subcmd_count, &result) > 0) {
-                int n = result.count < max_matches ? result.count : max_matches;
-                for (int i = 0; i < n; i++) {
-                    matches[i] = result.candidates[i];
-                }
-                return n;
-            }
-        }
-        
-        if (word_count >= 2) {
-            char subcmd_name[64] = {0};
-            size_t subcmd_len = word_ends[1] - word_starts[1];
-            if (subcmd_len >= sizeof(subcmd_name)) subcmd_len = sizeof(subcmd_name) - 1;
-            memcpy(subcmd_name, line + word_starts[1], subcmd_len);
-            
-            for (int i = 0; i < tree->subcmd_count; i++) {
-                if (strcmp(tree->subcmds[i].name, subcmd_name) == 0) {
-                    if (word_count == 2 || (word_count == 3 && partial_start >= word_starts[2])) {
-                        const xcmd_subcmd_def_t *subcmd = &tree->subcmds[i];
-                        
-                        if (subcmd->params && subcmd->param_count > 0) {
-                            int param_idx = (word_count >= 3) ? (word_count - 3) : 0;
-                            
-                            if (param_idx < subcmd->param_count) {
-                                const char *param_partial = "";
-                                if (word_count >= 3 && partial_start >= word_starts[2]) {
-                                    param_partial = line + word_starts[2];
-                                }
-                                
-                                if (xcmd_complete_param(param_partial, 
-                                                       subcmd->params[param_idx].type,
-                                                       subcmd->params[param_idx].enum_vals,
-                                                       &result) > 0) {
-                                    int n = result.count < max_matches ? result.count : max_matches;
-                                    for (int j = 0; j < n; j++) {
-                                        matches[j] = result.candidates[j];
-                                    }
-                                    return n;
-                                }
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    }
-    
-    if (word_count == 1) {
-        return xcmd_complete_cmd(partial, &result);
+    xcmd_complete_cb path_cb = xcmd_get_path_complete();
+    if (path_cb) {
+        return path_cb(le, word, word_id, matches, max);
     }
     
     return 0;
@@ -132,18 +46,6 @@ void xcmd_session_set_user_data(xcmd_session_t *sess, void *data) {
         sess->user_data = data;
     }
 }
-
-#ifdef XCMD_USE_VFS
-void xcmd_session_set_vfs(xcmd_session_t *sess, xcmd_vfs_t *vfs) {
-    if (sess) {
-        sess->vfs = vfs;
-    }
-}
-
-xcmd_vfs_t* xcmd_session_get_vfs(xcmd_session_t *sess) {
-    return sess ? sess->vfs : NULL;
-}
-#endif
 
 static char *session_strpbrk(char *s, size_t len, const char *delim) {
     uint8_t flag = 0;
@@ -212,67 +114,10 @@ static int session_get_param(char *msg, char *delim, char *get[], int max_num) {
     return i;
 }
 
-#ifdef XCMD_USE_VFS
-static xcmd_io_t* parse_redirect_target(xcmd_session_t *sess, const char *target) {
-    if (!sess || !target) return NULL;
-    if (!sess->vfs) return NULL;
-    
-    return xcmd_vfs_redirect_open(sess->vfs, target);
-}
-#else
-static xcmd_io_t* parse_redirect_target(xcmd_session_t *sess, const char *target) {
-    (void)sess;
-    (void)target;
-    return NULL;
-}
-#endif
-
-static int session_redirected(xcmd_session_t *sess, int argc, char *argv[]) {
-    for (int i = 1; i < (argc - 1); i++) {
-        if (argv[i][0] == '>') {
-            const char *target = argv[i + 1];
-            xcmd_io_t *io = parse_redirect_target(sess, target);
-            
-            if (!io) {
-                xcmd_session_print(sess, "Cannot open: %s\r\n", target);
-                return argc;
-            }
-            
-            sess->redirect_orig_stdout = sess->stdout_io;
-            sess->stdout_io = io;
-            sess->redirect_active = 1;
-            
-            return i;
-        }
-    }
-    return argc;
-}
-
-
-void xcmd_io_redirect_guard_enter(xcmd_io_redirect_guard_t *guard,
-                                  xcmd_session_t *sess,
-                                  xcmd_io_t *new_stdout) {
-    guard->sess = sess;
-    guard->orig_stdout = sess->stdout_io;
-    guard->active = 1;
-    sess->stdout_io = new_stdout;
-}
-
-void xcmd_io_redirect_guard_exit(xcmd_io_redirect_guard_t *guard) {
-    if (!guard->active || !guard->sess) return;
-    
-    if (guard->sess->stdout_io) {
-        xcmd_io_close(guard->sess->stdout_io);
-    }
-    guard->sess->stdout_io = guard->orig_stdout;
-    guard->active = 0;
-}
-
-static int session_cmd_match(xcmd_session_t *sess, int argc, char *argv[]) {
+static int session_cmd_match(xcmd_session_t *sess, int argc, char **argv) {
     uint8_t flag = 0;
     int ret = -1;
     xcmd_cmd_t *p = NULL;
-    xcmd_io_redirect_guard_t guard = {0};
     
     for (p = xcmd_cmd_first(); p; p = p->next) {
         if (strcmp(p->name, argv[0]) == 0) {
@@ -283,14 +128,7 @@ static int session_cmd_match(xcmd_session_t *sess, int argc, char *argv[]) {
                     break;
                 }
             }
-            
-            int new_argc = session_redirected(sess, argc, argv);
-            if (new_argc != argc && sess->redirect_active) {
-                xcmd_io_redirect_guard_enter(&guard, sess, sess->stdout_io);
-            }
-            
-            ret = p->func(new_argc, argv);
-            xcmd_io_redirect_guard_exit(&guard);
+            ret = p->func(argc, argv);
             break;
         }
     }
@@ -324,11 +162,10 @@ int xcmd_session_init_full(xcmd_session_t *sess,
     
     sess->stdin_io = stdin_io;
     sess->stdout_io = stdout_io;
-    
-    sess->redirect_orig_stdout = NULL;
-    sess->redirect_active = 0;
+    sess->saved_stdout = NULL;
     
     xcmd_term_init(&sess->term, ops);
+    xcmd_term_set_io(&sess->term, stdout_io);
     
     xcmd_le_init(&sess->editor, &sess->term);
     sess->editor.user_data = sess;
@@ -349,18 +186,41 @@ int xcmd_session_task(xcmd_session_t *sess) {
         return -1;
     }
     
+    g_current_session = sess;
+    
     const char *line = xcmd_le_readline(&sess->editor, sess->stdin_io, sess->stdout_io, XCMD_DEFAULT_PROMPT);
     
     if (line) {
-        if (sess->recv_hook_func) {
-            if (!sess->recv_hook_func((char *)line)) {
-                return 0;
+        char temp[XCMD_LINE_MAX_LENGTH];
+        strncpy(temp, line, sizeof(temp));
+        temp[XCMD_LINE_MAX_LENGTH - 1] = '\0';
+        
+        char *argv[XCMD_PARAM_MAX_NUM];
+        int argc = session_get_param(temp, " ", argv, XCMD_PARAM_MAX_NUM);
+        int new_argc = argc;
+        
+        xcmd_evt_t evt = {
+            .type = XCMD_EVT_PRE_EXEC,
+            .data.pre_exec = { argc, argv, &new_argc }
+        };
+        xcmd_ext_emit(sess, &evt);
+        
+        int ret = session_cmd_match(sess, new_argc, argv);
+        
+        if (sess->saved_stdout) {
+            if (sess->stdout_io && sess->stdout_io->close) {
+                sess->stdout_io->close(sess->stdout_io);
             }
+            sess->stdout_io = sess->saved_stdout;
+            sess->saved_stdout = NULL;
         }
-        xcmd_session_exec(sess, (char *)line);
+        
         xcmd_le_reset_line(&sess->editor);
+        g_current_session = NULL;
+        return ret;
     }
     
+    g_current_session = NULL;
     return 0;
 }
 
@@ -369,26 +229,18 @@ int xcmd_session_exec(xcmd_session_t *sess, char *str) {
         return -1;
     }
     
-    int param_num = 0;
-    char *cmd_param_buff[XCMD_PARAM_MAX_NUM];
     char temp[XCMD_LINE_MAX_LENGTH];
-    
-    XCMD_SESSION_LOCK(sess);
-    g_current_session = sess;
     strncpy(temp, str, XCMD_LINE_MAX_LENGTH);
     temp[XCMD_LINE_MAX_LENGTH - 1] = '\0';
-    param_num = session_get_param(temp, " ", cmd_param_buff, XCMD_PARAM_MAX_NUM);
     
-    if (param_num > 0) {
-        int ret = session_cmd_match(sess, param_num, cmd_param_buff);
-        g_current_session = NULL;
-        XCMD_SESSION_UNLOCK(sess);
-        return ret;
+    char *argv[XCMD_PARAM_MAX_NUM];
+    int argc = session_get_param(temp, " ", argv, XCMD_PARAM_MAX_NUM);
+    
+    if (argc <= 0) {
+        return -1;
     }
     
-    g_current_session = NULL;
-    XCMD_SESSION_UNLOCK(sess);
-    return -1;
+    return session_cmd_match(sess, argc, argv);
 }
 
 xcmd_io_t* xcmd_session_get_stdin(xcmd_session_t *sess) {
@@ -397,16 +249,6 @@ xcmd_io_t* xcmd_session_get_stdin(xcmd_session_t *sess) {
 
 xcmd_io_t* xcmd_session_get_stdout(xcmd_session_t *sess) {
     return sess ? sess->stdout_io : NULL;
-}
-
-int xcmd_session_redirect(xcmd_session_t *sess, xcmd_io_t *new_stdout) {
-    if (!sess || !new_stdout) return -1;
-    
-    sess->redirect_orig_stdout = sess->stdout_io;
-    sess->stdout_io = new_stdout;
-    sess->redirect_active = 1;
-    
-    return 0;
 }
 
 void xcmd_session_print(xcmd_session_t *sess, const char *fmt, ...) {
@@ -446,14 +288,6 @@ const char* xcmd_session_get_prompt(xcmd_session_t *sess) {
     return sess ? sess->editor.prompt : NULL;
 }
 
-void xcmd_session_set_recv_hook(xcmd_session_t *sess, uint8_t (*func)(char *)) {
-    if (sess) {
-        sess->recv_hook_func = func;
-    }
-}
-
-
-
 void xcmd_session_clear(xcmd_session_t *sess) {
     if (sess) {
         xcmd_le_clear_line(&sess->editor);
@@ -465,8 +299,7 @@ void xcmd_session_reset(xcmd_session_t *sess) {
         sess->editor.length = 0;
         sess->editor.cursor = 0;
         sess->editor.buffer[0] = '\0';
-        sess->redirect_active = 0;
-        sess->redirect_orig_stdout = NULL;
+        sess->saved_stdout = NULL;
     }
 }
 

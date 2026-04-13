@@ -148,8 +148,6 @@ int main(void)
         return -1;
     }
     
-    xcmd_session_set_vfs(sess, vfs);
-    
     test_cmd_init();
     ex_cmds_init();
     socket_cmds_init();

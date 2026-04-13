@@ -73,10 +73,11 @@ static void le_write(xcmd_line_editor_t *le, const char *str) {
     }
 }
 
-static void term_clear_line(xcmd_line_editor_t *le) {
+void xcmd_le_refresh(xcmd_line_editor_t *le) {
+    if (!le || !le->term) return;
+    
     if (le->term->ops && le->term->ops->clear_line) {
-        le_write(le, le->term->ops->clear_line(le->term));
-        le_putc(le, '\r');
+        le->term->ops->clear_line(le->term);
     } else {
         le_putc(le, '\r');
         for (int i = 0; i < 256; i++) {
@@ -84,12 +85,6 @@ static void term_clear_line(xcmd_line_editor_t *le) {
         }
         le_putc(le, '\r');
     }
-}
-
-void xcmd_le_refresh(xcmd_line_editor_t *le) {
-    if (!le || !le->term) return;
-    
-    term_clear_line(le);
     
     if (le->prompt) {
         le_write(le, le->prompt);
@@ -192,14 +187,22 @@ static void le_complete(xcmd_line_editor_t *le) {
     int has_word = (le_get_word_at_cursor(le, &word_start, &word_end) == 0);
     uint16_t complete_from = has_word ? word_start : le->cursor;
     
-    char partial[64] = {0};
+    char word[64] = {0};
     if (has_word && word_end > word_start) {
         size_t len = word_end - word_start;
-        if (len >= sizeof(partial)) len = sizeof(partial) - 1;
-        memcpy(partial, le->buffer + word_start, len);
+        if (len >= sizeof(word)) len = sizeof(word) - 1;
+        memcpy(word, le->buffer + word_start, len);
     }
     
-    int n = le->complete_cb(le, partial, complete_from,
+    // 计算 word_id（第几个单词）
+    int word_id = 0;
+    for (uint16_t i = 0; i < complete_from; i++) {
+        if (le->buffer[i] != ' ' && (i == 0 || le->buffer[i-1] == ' ')) {
+            word_id++;
+        }
+    }
+    
+    int n = le->complete_cb(le, word, word_id,
                             le->completion.candidates,
                             XCMD_LE_COMPLETION_MAX_NUM);
     if (n <= 0) return;
@@ -247,8 +250,7 @@ void xcmd_le_insert_char(xcmd_line_editor_t *le, char c) {
         le->cursor++;
         
         if (le->term && le->term->ops && le->term->ops->insert_chars) {
-            const char *seq = le->term->ops->insert_chars(le->term, 1);
-            le_write(le, seq);
+            le->term->ops->insert_chars(le->term, 1);
             le_putc(le, c);
         } else {
             xcmd_le_refresh(le);
@@ -268,8 +270,8 @@ void xcmd_le_delete_char(xcmd_line_editor_t *le) {
     le->length--;
     
     if (le->term && le->term->ops && le->term->ops->delete_chars && le->term->ops->cursor_left) {
-        le_write(le, le->term->ops->cursor_left(le->term, 1));
-        le_write(le, le->term->ops->delete_chars(le->term, 1));
+        le->term->ops->cursor_left(le->term, 1);
+        le->term->ops->delete_chars(le->term, 1);
     } else {
         xcmd_le_refresh(le);
     }
@@ -285,7 +287,7 @@ void xcmd_le_delete_char_forward(xcmd_line_editor_t *le) {
     le->buffer[le->length] = '\0';
     
     if (le->term && le->term->ops && le->term->ops->delete_chars) {
-        le_write(le, le->term->ops->delete_chars(le->term, 1));
+        le->term->ops->delete_chars(le->term, 1);
     } else {
         xcmd_le_refresh(le);
     }
@@ -296,7 +298,7 @@ void xcmd_le_cursor_left(xcmd_line_editor_t *le) {
 
     le->cursor--;
     if (le->term && le->term->ops && le->term->ops->cursor_left) {
-        le_write(le, le->term->ops->cursor_left(le->term, 1));
+        le->term->ops->cursor_left(le->term, 1);
     } else {
         xcmd_le_refresh(le);
     }
@@ -307,7 +309,7 @@ void xcmd_le_cursor_right(xcmd_line_editor_t *le) {
     
     le->cursor++;
     if (le->term && le->term->ops && le->term->ops->cursor_right) {
-        le_write(le, le->term->ops->cursor_right(le->term, 1));
+        le->term->ops->cursor_right(le->term, 1);
     } else {
         xcmd_le_refresh(le);
     }
@@ -318,7 +320,7 @@ void xcmd_le_cursor_home(xcmd_line_editor_t *le) {
 
     le->cursor = 0;
     if (le->term && le->term->ops && le->term->ops->cursor_left) {
-        le_write(le, le->term->ops->cursor_left(le->term, le->length));
+        le->term->ops->cursor_left(le->term, le->length);
     } else {
         xcmd_le_refresh(le);
     }
@@ -329,7 +331,7 @@ void xcmd_le_cursor_end(xcmd_line_editor_t *le) {
     uint16_t n = le->length - le->cursor;
     le->cursor = le->length;
     if (le->term && le->term->ops && le->term->ops->cursor_right) {
-        le_write(le, le->term->ops->cursor_right(le->term, n));
+        le->term->ops->cursor_right(le->term, n);
     } else {
         xcmd_le_refresh(le);
     }
@@ -348,7 +350,7 @@ void xcmd_le_word_left(xcmd_line_editor_t *le) {
     }
 
     if (le->term && le->term->ops && le->term->ops->cursor_set) {
-        le_write(le, le->term->ops->cursor_set(le->term, le->cursor + le->prompt_len));
+        le->term->ops->cursor_set(le->term, le->cursor + le->prompt_len);
     } else {
         xcmd_le_refresh(le);
     }
@@ -367,7 +369,7 @@ void xcmd_le_word_right(xcmd_line_editor_t *le) {
     }
 
     if (le->term && le->term->ops && le->term->ops->cursor_set) {
-        le_write(le, le->term->ops->cursor_set(le->term, le->cursor + le->prompt_len));
+        le->term->ops->cursor_set(le->term, le->cursor + le->prompt_len);
     } else {
         xcmd_le_refresh(le);
     }
@@ -391,7 +393,7 @@ void xcmd_le_delete_to_end(xcmd_line_editor_t *le) {
     le->buffer[le->length] = '\0';
     
     if (le->term && le->term->ops && le->term->ops->clear_to_eol) {
-        le_write(le, le->term->ops->clear_to_eol(le->term));
+        le->term->ops->clear_to_eol(le->term);
     }
     else {
         xcmd_le_refresh(le);
@@ -452,6 +454,7 @@ const char* xcmd_le_readline(xcmd_line_editor_t *le, xcmd_io_t *in, xcmd_io_t *o
     le->io = out;
     le->prompt = prompt;
     le->prompt_len = prompt ? strlen(prompt) : 0;
+    xcmd_term_set_io(le->term, out);
     
     uint8_t byte;
     if (xcmd_io_read(in, &byte, 1) <= 0) {
@@ -716,4 +719,35 @@ int xcmd_le_key_ctrl_c(xcmd_line_editor_t *le, const char *key) {
     le_write(le, "^C\r\n");
     xcmd_le_refresh(le);
     return 0;
+}
+
+const char* xcmd_le_get_word(xcmd_line_editor_t *le, int word_id) {
+    static char result[64] = {0};
+    result[0] = '\0';
+    
+    if (!le || word_id < 0) return result;
+    
+    int current_id = 0;
+    uint16_t i = 0;
+    
+    while (i < le->length && current_id < word_id) {
+        while (i < le->length && le->buffer[i] == ' ') i++;
+        if (i >= le->length) break;
+        current_id++;
+        if (current_id == word_id) break;
+        while (i < le->length && le->buffer[i] != ' ') i++;
+    }
+    
+    if (current_id != word_id) return result;
+    
+    uint16_t start = i;
+    while (i < le->length && le->buffer[i] != ' ') i++;
+    uint16_t end = i;
+    
+    size_t len = end - start;
+    if (len >= sizeof(result)) len = sizeof(result) - 1;
+    memcpy(result, le->buffer + start, len);
+    result[len] = '\0';
+    
+    return result;
 }

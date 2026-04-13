@@ -1,0 +1,12 @@
+{
+  "active_plan": "/media/hqm/660A6E450A6E127B/Project/xcmd/.sisyphus/plans/complete-event-migration.md",
+  "started_at": "2026-04-13T04:14:50.024Z",
+  "session_ids": [
+    "ses_27e4a4ff3ffePqyE4aex24PbpL"
+  ],
+  "session_origins": {
+    "ses_27e4a4ff3ffePqyE4aex24PbpL": "direct"
+  },
+  "plan_name": "complete-event-migration",
+  "agent": "atlas"
+}

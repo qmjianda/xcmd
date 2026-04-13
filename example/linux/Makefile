@@ -7,6 +7,7 @@ EXT_DIR = ../../extensions
 BUILD_DIR = build
 
 SRC = $(SRC_DIR)/xcmd_io.c \
+       $(SRC_DIR)/xcmd_ext.c \
        $(SRC_DIR)/xcmd_session.c \
        $(SRC_DIR)/xcmd_line_editor.c \
        $(SRC_DIR)/xcmd_term.c \
@@ -19,18 +20,19 @@ EXT_SRC = $(EXT_DIR)/test/test.c \
           $(EXT_DIR)/ex_list/ex_list.c \
           $(EXT_DIR)/ex_cmds/ex_cmds.c \
           $(EXT_DIR)/net_cmds/socket_cmds.c \
-          $(EXT_DIR)/vfs/diskio.c \
-          $(EXT_DIR)/vfs/ff.c \
-          $(EXT_DIR)/vfs/ffunicode.c \
-          $(EXT_DIR)/vfs/fatfs_port.c \
-          $(EXT_DIR)/vfs/xcmd_vfs.c \
-          $(EXT_DIR)/vfs/xcmd_vfs_dev.c \
-          $(EXT_DIR)/vfs/xcmd_vfs_uart.c \
-          $(EXT_DIR)/vfs/xcmd_vfs_proc.c \
-          $(EXT_DIR)/vfs/xcmd_vfs_redirect.c \
-          $(EXT_DIR)/vfs/xcmd_vfs_fatfs.c \
-          $(EXT_DIR)/vfs/xcmd_vfs_cmds.c \
-          $(EXT_DIR)/vfs/xcmd_vfs_complete.c
+           $(EXT_DIR)/vfs/diskio.c \
+           $(EXT_DIR)/vfs/ff.c \
+           $(EXT_DIR)/vfs/ffunicode.c \
+           $(EXT_DIR)/vfs/fatfs_port.c \
+           $(EXT_DIR)/vfs/xcmd_vfs.c \
+           $(EXT_DIR)/vfs/xcmd_vfs_dev.c \
+           $(EXT_DIR)/vfs/xcmd_vfs_uart.c \
+           $(EXT_DIR)/vfs/xcmd_vfs_proc.c \
+           $(EXT_DIR)/vfs/xcmd_vfs_redirect.c \
+           $(EXT_DIR)/vfs/xcmd_vfs_io.c \
+           $(EXT_DIR)/vfs/xcmd_vfs_fatfs.c \
+           $(EXT_DIR)/vfs/xcmd_vfs_cmds.c \
+           $(EXT_DIR)/vfs/xcmd_vfs_complete.c
 
 EXT_INC = -I$(EXT_DIR)/test \
           -I$(EXT_DIR)/ex_list \

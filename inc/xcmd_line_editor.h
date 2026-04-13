@@ -52,10 +52,10 @@ extern "C" {
 struct xcmd_line_editor;
 
 typedef int (*xcmd_le_complete_cb)(struct xcmd_line_editor *le, 
-                                    const char *partial,
-                                    uint16_t partial_start,
+                                    const char *text,
+                                    int word_id,
                                     char *matches[],
-                                    uint16_t max_matches);
+                                    int max);
 
 typedef struct {
     char *candidates[XCMD_LE_COMPLETION_MAX_NUM];
@@ -131,6 +131,7 @@ void xcmd_le_refresh(xcmd_line_editor_t *le);
 
 const char* xcmd_le_get_line(xcmd_line_editor_t *le);
 const char* xcmd_le_get_submitted_line(xcmd_line_editor_t *le);
+const char* xcmd_le_get_word(xcmd_line_editor_t *le, int word_id);
 uint16_t xcmd_le_get_cursor(xcmd_line_editor_t *le);
 uint16_t xcmd_le_get_length(xcmd_line_editor_t *le);
 

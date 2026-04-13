@@ -75,12 +75,6 @@ static inline int xcmd_io_puts(xcmd_io_t *io, const char *str) {
 
 int xcmd_io_copy(xcmd_io_t *src, xcmd_io_t *dst, void *buf, size_t buf_size);
 
-#ifdef XCMD_USE_VFS
-#include "xcmd_vfs.h"
-xcmd_io_t* xcmd_io_file_create(xcmd_vfs_file_t *file);
-xcmd_io_t* xcmd_io_file_open(xcmd_vfs_t *vfs, const char *path, uint8_t mode);
-#endif
-
 #ifdef __cplusplus
 }
 #endif

@@ -13,8 +13,19 @@ extern "C" {
 #define XCMD_REDIRECT_UART      2
 #define XCMD_REDIRECT_SOCKET    3
 
+struct xcmd_session;
+typedef struct xcmd_session xcmd_session_t;
+
 /* 仅当 VFS 可用时编译 */
 #ifdef XCMD_USE_VFS
+
+/**
+ * @brief Initialize VFS redirect extension for a session
+ * 
+ * @param sess Session to register with
+ * @param vfs VFS instance for file operations
+ */
+void vfs_redirect_init(xcmd_session_t *sess, xcmd_vfs_t *vfs);
 
 /**
  * @brief 打开重定向目标
@@ -38,8 +49,9 @@ int xcmd_vfs_redirect_close(xcmd_io_t *io);
 #else
 
 /* 无 VFS 时，空实现 */
+#define vfs_redirect_init(sess, vfs)         ((void)(sess), (void)(vfs))
 #define xcmd_vfs_redirect_open(vfs, target)  ((void)(vfs), (void)(target), NULL)
-#define xcmd_vfs_redirect_close(io)           ((void)(io), 0)
+#define xcmd_vfs_redirect_close(io)          ((void)(io), 0)
 
 #endif /* XCMD_USE_VFS */
 

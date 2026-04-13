@@ -1,8 +1,8 @@
 #include "xcmd_vfs.h"
 #include "xcmd_vfs_cmds.h"
 #include "xcmd_vfs_complete.h"
+#include "xcmd_vfs_redirect.h"
 #include "xcmd_cmd.h"
-#include "xcmd_complete.h"
 #include "xcmd_session.h"
 #include "xcmd_define.h"
 #include <string.h>
@@ -226,6 +226,11 @@ static xcmd_cmd_t vfs_cmds[] = {
 
 void xcmd_vfs_register_cmds(void) {
     xcmd_vfs_cmds_init();
-    xcmd_register_path_complete_cb(xcmd_vfs_complete_path);
+    xcmd_register_path_complete(xcmd_vfs_complete_path);
     xcmd_cmd_register(vfs_cmds, sizeof(vfs_cmds) / sizeof(xcmd_cmd_t));
+    
+    xcmd_session_t *sess = xcmd_session_get_current();
+    if (sess) {
+        vfs_redirect_init(sess, &g_vfs);
+    }
 }
