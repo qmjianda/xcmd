@@ -109,6 +109,7 @@ int main(void)
     socket_cmds_init();
     fs_cmds_init();
     ex_list_init();
+    xcmd_display_redraw(); /* 所有初始化输出结束后重绘命令行, 提示符回到行首 */
     while (1)
     {
         xcmd_task();

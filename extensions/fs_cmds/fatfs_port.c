@@ -7,40 +7,33 @@
  * @FilePath: /xcmd/example/linux/fatfs_port.c
  */
 #include "fatfs_port.h"
+
 #include <stdio.h>
 
-static DiskIo_t * g_Disks[FF_VOLUMES] = {0};
+static DiskIo_t* g_Disks[FF_VOLUMES] = {0};
 
 #if FF_STR_VOLUME_ID >= 1
 #ifndef FF_VOLUME_STRS
 const char* VolumeStr[FF_VOLUMES] = {0};
 #else
-static char * VolumeStr[FF_VOLUMES] = {FF_VOLUME_STRS};
+static char* VolumeStr[FF_VOLUMES] = {FF_VOLUME_STRS};
 #endif
 #endif
 
-int f_disk_regist(DiskIo_t * disk, const char* volume_name, int id)
-{
-    if(!disk || !volume_name)
-    {
+int f_disk_regist(DiskIo_t* disk, const char* volume_name, int id) {
+    if (!disk || !volume_name) {
         return -1;
     }
-    if(id<0)
-    {
-        for(int i=0; i<FF_VOLUMES; i++)
-        {
-            if(!g_Disks[i])
-            {
+    if (id < 0) {
+        for (int i = 0; i < FF_VOLUMES; i++) {
+            if (!g_Disks[i]) {
                 g_Disks[i] = disk;
                 id = i;
                 goto ok;
             }
         }
-    }
-    else
-    {
-        if((id < FF_VOLUMES) && !g_Disks[id])
-        {
+    } else {
+        if ((id < FF_VOLUMES) && !g_Disks[id]) {
             g_Disks[id] = disk;
             goto ok;
         }
@@ -59,7 +52,7 @@ ok:
     snprintf(disk->disk_path, MAX_VOL_NAME_LEN, "/%s/", volume_name);
 #endif
     VolumeStr[id] = volume_name;
-    
+
 #else
 
 #if FF_STR_VOLUME_ID == 1
@@ -77,19 +70,15 @@ ok:
     return id;
 }
 
-DiskIo_t * f_disk_get(int id)
-{
-    if(id < FF_VOLUMES)
-    {
+DiskIo_t* f_disk_get(int id) {
+    if (id < FF_VOLUMES) {
         return g_Disks[id];
     }
     return NULL;
 }
 
-char * f_disk_path(int id)
-{
-    if(id < FF_VOLUMES)
-    {
+char* f_disk_path(int id) {
+    if (id < FF_VOLUMES) {
         return g_Disks[id]->disk_path;
     }
     return NULL;
